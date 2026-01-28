@@ -1,0 +1,12 @@
+/* Example: Place your font files (woff2, woff, ttf, etc.) in this folder. */
+/* For demonstration, here's a sample @font-face for Avenir-LT. Replace the src URLs with your actual font files. */
+
+@font-face {
+  font-family: 'Avenir-LT';
+  src: url('./AvenirLTProLight.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  color: var(--Footer-text-color);
+
+}

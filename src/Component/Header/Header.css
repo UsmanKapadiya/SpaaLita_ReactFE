@@ -1,0 +1,124 @@
+@import '../../assets/colors.css';
+
+.menu-toggle:focus,
+.menu-toggle:active {
+    outline: none;
+    box-shadow: none;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+}
+.header-row .menu-toggle {
+    margin-right: 1rem;
+}
+.header-row .logo {
+    flex: 1;
+    /* text-align: center;
+    margin: 0 auto 10px; */
+}
+
+.header {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+}
+
+.logo {
+    text-align: center;
+    margin: 0 auto 10px;
+    letter-spacing: 2px;
+    color: var(--primary-color);
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding: 0 1rem 0;
+}
+
+
+.header nav ul {
+    display: flex;
+    justify-content: center;
+    gap: 2.3rem !important;
+    list-style: none;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    font-size: 1.1rem;
+    border-top: 2px solid var(--light-gray);
+    margin-top: 10px;
+
+}
+
+.header nav ul li a {
+    color: var(--light-gray);
+    text-decoration: none;
+    font-size: 13pt;
+    transition: color 0.2s;
+    font-weight: 400;
+}
+
+
+
+@media (max-width: 991px) {
+    .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        position: absolute;
+        left: -0.5rem;
+        top: 0.8rem;
+        z-index: 200;
+        cursor: pointer;
+    }
+    .menu-icon {
+        color: var(--black-color);
+    }
+    nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--header-bg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        z-index: 150;
+    }
+    nav.open {
+        display: block;
+    }
+    .header nav ul {
+        flex-direction: column;
+        gap: 0.5rem; 
+        align-items: center;
+    }
+    .header nav ul li {
+        width: 100%;
+        text-align: left;
+    }
+}
+
+@media (min-width: 992px) {
+    .menu-toggle {
+        display: none;
+    }
+    nav {
+        display: block !important;
+        position: static;
+        box-shadow: none;
+    }
+    .header nav ul {
+        flex-direction: row;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .header nav ul li {
+        border-bottom: none;
+        padding: 0;
+    }
+}
