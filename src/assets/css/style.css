@@ -1,0 +1,60 @@
+.img-class img{
+    height:auto
+}
+.img-class{
+    margin-bottom: 0rem !important;
+}
+.background-skyblue{
+    background-color: #e1eff1;
+    margin-top: 5rem;
+}
+.background-darkgrey {
+    background-color: #323232;
+    margin-top: 5rem;
+}
+.background-grey {
+    background-color: #aabbbe;
+    margin-top: 5rem;
+}
+.background-light{
+    background-color: #ffffff;
+    margin-top: 5rem;
+}
+.slick-active{
+    text-align: center;
+}
+.navbar-nav a {
+    color: rgb(64, 64, 64);
+    font-size: 13pt;
+}
+.socialmedia-icon {
+    background-color: black;
+    padding: 10px;
+    border-radius: 50%;
+    color: white;
+}
+.socialmedia-icon .fa{
+    vertical-align: middle;
+}
+.TG-Zk._1UnNA {
+    text-align: center;
+    position: relative;
+    height: 100px;
+}
+.TG-Zk._1UnNA svg {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%) rotate(150deg);
+}
+#home_modal .modal-footer{
+    border: none;
+    padding: 0;
+}
+.price-table{
+    width:50%;
+}
+.price-table td{
+    padding: 10px;
+    padding-left: 0;
+}

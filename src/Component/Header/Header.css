@@ -37,7 +37,8 @@
     padding-top: 0;
     margin-bottom: 0;
     padding-bottom: 0;
-    padding: 0 1rem 0;
+    padding: 2em 0 1rem 0;
+    border-bottom: 2px solid var(--light-gray);
 }
 
 
@@ -49,9 +50,6 @@
     padding: 0.5rem 1rem;
     margin: 0;
     font-size: 1.1rem;
-    border-top: 2px solid var(--light-gray);
-    margin-top: 10px;
-
 }
 
 .header nav ul li a {

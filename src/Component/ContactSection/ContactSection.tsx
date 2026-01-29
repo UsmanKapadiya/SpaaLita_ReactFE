@@ -117,31 +117,35 @@ const ContactSection: React.FC = () => {
                             </div>
 
                             <div className="row">
-                                <div className="form-group mb-3">
-                                    <input
-                                        type="text"
-                                        className="form-control rounded-0"
-                                        id="subject"
-                                        name="subject"
-                                        placeholder="Subject"
-                                        value={formData.subject}
-                                        onChange={handleInputChange}
-                                    />
+                                <div className="col-12">
+                                    <div className="form-group mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control rounded-0"
+                                            id="subject"
+                                            name="subject"
+                                            placeholder="Subject"
+                                            value={formData.subject}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="form-group mb-3">
-                                    <textarea
-                                        className="form-control rounded-0"
-                                        id="message"
-                                        name="message"
-                                        rows={5}
-                                        placeholder="Type your message here"
-                                        value={formData.message}
-                                        onChange={handleInputChange}
-                                        required
-                                        maxLength={500}
-                                    />
+                                <div className="col-12">
+                                    <div className="form-group mb-3">
+                                        <textarea
+                                            className="form-control rounded-0"
+                                            id="message"
+                                            name="message"
+                                            rows={5}
+                                            placeholder="Type your message here"
+                                            value={formData.message}
+                                            onChange={handleInputChange}
+                                            required
+                                            maxLength={500}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="row">

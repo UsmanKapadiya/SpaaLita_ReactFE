@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 import logo from '../../assets/SpaAlita_logo.png';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -23,16 +24,16 @@ const Header: React.FC = () => {
         </div>
         <nav className={menuOpen ? 'open' : ''}>
           <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/book">BookNow!</a></li>
-            <li><a href="/services">Services</a></li>
-            <li><a href="/giftcard">GiftCard</a></li>
-            <li><a href="/shop">Shop</a></li>
-            <li><a href="/specials">Monthly Specials</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/policy">Booking Policy</a></li>
-            <li><a href="/gallery">Gallery</a></li>
-            <li><a href="/cart">Cart </a></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/book">Book NOW!</Link></li>
+            <li><Link to="/services">Services</Link></li>
+            <li><Link to="/giftcard">Gift Card</Link></li>
+            <li><Link to="/shop">Shop</Link></li>
+            <li><Link to="/specials">Monthly Specials</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+            <li><Link to="/policy">Booking Policy</Link></li>
+            <li><Link to="/gallery">Gallery</Link></li>
+            <li><Link to="/cart">Cart</Link></li>
           </ul>
         </nav>
       </header>

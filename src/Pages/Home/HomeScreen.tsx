@@ -85,6 +85,44 @@ const HomeScreen: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className="my-5" id="business-hours">
+        <div className="col-lg-3 col-sm-6 m-auto text-center">
+          <h5 className="text-center mt-2 mb-4">REGULAR BUSINESS HOURS:</h5>
+          <table>
+            <tbody>
+              <tr>
+                <td>Monday</td>
+                <td>9:00 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Tuesday</td>
+                <td>9:00 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Wednesday</td>
+                <td>9:00 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Thursday</td>
+                <td>9:00 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Friday</td>
+                <td>9:00 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Saturday</td>
+                <td>9:30 AM - 7:30 PM</td>
+              </tr>
+              <tr>
+                <td>Sunday</td>
+                <td>9:30 AM - 7:30 PM</td>
+              </tr>
+            </tbody>
+          </table>
+          <h6 className="text-center my-4">Please call us to inquire if you would like to schedule an appointment outside of our opening hours or on a statutory holiday.</h6>
+        </div>
+      </div>
     </div>
 
   );
