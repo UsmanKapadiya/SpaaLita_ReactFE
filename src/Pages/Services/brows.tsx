@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import FacialServices from '../../assets/facial_services.jpg';
-import FacialsMockData from '../../mockData/facialsMockData'
+import React from 'react';
+import BrowsBanner from '../../assets/browsBanner.jpg';
+import BrowsMockData from '../../mockData/browsMockData';
 import './globalServices.css';
 
-const Facials: React.FC = () => {
-    console.log("FacialsMockData",FacialsMockData)
+const Brows: React.FC = () => {
+    console.log("BrowsMockData", BrowsMockData)
     return (
-        <div className="facials-page">
+       <div className="massage-page">
             {/* Services Section */}
-            <div className="facials-services">
+            <div className="massage-services">
                 <div className="container">
                     <p></p>
                     <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
@@ -20,25 +20,26 @@ const Facials: React.FC = () => {
                         </div>
                     </div>
                     <div>
+                        <p></p>
                         <figure
-                            className="wp-block-image size-large is-resized is-style-rounded text-center mt-5">
+                            className="wp-block-image size-large is-resized is-style-rounded text-center">
                             <img
                                 decoding="async"
                                 width="800"
                                 height="800"
-                                src={FacialServices}
-                                alt="Facials "
-                                className="wp-image-104 facials-banner"
-                                style={{ width: 400, height: 400 }}
+                                src={BrowsBanner}
+                                alt="Massage Services"
+                                className="wp-image-104 massage-banner"
+                                style={{ width: 373, height: 373 }}
                             />
                         </figure>
                     </div>
-                    <h1 className="wp-block-heading text-center my-5" id="facials">FACIALS</h1>
+                    <h1 className="wp-block-heading text-center my-5" id="massage">Brows & Lashes</h1>
 
-                    <div className="page-description  my-4">
-                        {FacialsMockData?.pageContent?.description && (
+                    <div className="page-description my-4">
+                        {BrowsMockData?.pageContent?.description && (
                             <div                
-                                dangerouslySetInnerHTML={{ __html: FacialsMockData?.pageContent?.description }} 
+                                dangerouslySetInnerHTML={{ __html: BrowsMockData?.pageContent?.description }} 
                                 className="spa-description"                    
                             />
                         )}
@@ -49,4 +50,4 @@ const Facials: React.FC = () => {
     );
 };
 
-export default Facials;
+export default Brows;

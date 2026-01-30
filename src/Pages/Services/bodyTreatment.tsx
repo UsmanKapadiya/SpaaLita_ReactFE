@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import FacialServices from '../../assets/facial_services.jpg';
-import FacialsMockData from '../../mockData/facialsMockData'
+import React from 'react';
+import BodyTreatmentBanner from '../../assets/bodyTreatmentBanner.jpg';
+import BodyTreatmentMockData from '../../mockData/bodyTreatmentMockData';
 import './globalServices.css';
 
-const Facials: React.FC = () => {
-    console.log("FacialsMockData",FacialsMockData)
+const BodyTreatment: React.FC = () => {
+    console.log("BodyTreatmentMockData", BodyTreatmentMockData)
     return (
-        <div className="facials-page">
+        <div className="massage-page">
             {/* Services Section */}
-            <div className="facials-services">
+            <div className="massage-services">
                 <div className="container">
                     <p></p>
                     <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
@@ -26,19 +26,19 @@ const Facials: React.FC = () => {
                                 decoding="async"
                                 width="800"
                                 height="800"
-                                src={FacialServices}
-                                alt="Facials "
-                                className="wp-image-104 facials-banner"
-                                style={{ width: 400, height: 400 }}
+                                src={BodyTreatmentBanner}
+                                alt="Massage Services"
+                                className="wp-image-104 massage-banner"
+                                style={{ width: 485, height: 323 }}
                             />
                         </figure>
                     </div>
-                    <h1 className="wp-block-heading text-center my-5" id="facials">FACIALS</h1>
+                    <h1 className="wp-block-heading text-center my-5" id="massage">BODY TREATMENTS</h1>
 
-                    <div className="page-description  my-4">
-                        {FacialsMockData?.pageContent?.description && (
+                    <div className="page-description my-4">
+                        {BodyTreatmentMockData?.pageContent?.description && (
                             <div                
-                                dangerouslySetInnerHTML={{ __html: FacialsMockData?.pageContent?.description }} 
+                                dangerouslySetInnerHTML={{ __html: BodyTreatmentMockData?.pageContent?.description }} 
                                 className="spa-description"                    
                             />
                         )}
@@ -49,4 +49,4 @@ const Facials: React.FC = () => {
     );
 };
 
-export default Facials;
+export default BodyTreatment;

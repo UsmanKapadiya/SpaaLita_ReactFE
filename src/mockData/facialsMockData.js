@@ -1,5 +1,5 @@
 // Mock data representing API response for facials page
-export const facialsMockData = {
+export const FacialsMockData = {
     pageContent: {
         title: "Facial Treatments",
         description: `<p>Spa A'lita provides&nbsp;Comfort Zone, an exclusive Italian Spa Skincare Line, designed by advanced research laboratories&nbsp;to offer extraordinary results. Combining the balance of physiotherapy,&nbsp;aromatherapy and biochemical ingredients,&nbsp;we can deliver a truly encompassing experience with the care and attention of each guest. With each specific facial treatment, your Esthetician will assess&nbsp;and design a specific treatment plan for you and home care instructions will&nbsp;be given to ensure enhanced, maximum results!</p>
@@ -10,4 +10,4 @@ export const facialsMockData = {
 };
 
 
-export default facialsMockData;
+export default FacialsMockData;

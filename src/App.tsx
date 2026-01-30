@@ -7,6 +7,14 @@ import Facials from './Pages/Services/facials';
 import BookPage from './Pages/Book/BookPage';
 import ContactPage from './Pages/Contact/ContactPage';
 import FontTest from './FontTest'; // Temporary for font testing
+import Massage from './Pages/Services/massage';
+import AcuPressure from './Pages/Services/acupressure';
+import Manicure from './Pages/Services/manicure';
+import BodyTreatment from './Pages/Services/bodyTreatment';
+import Waxing from './Pages/Services/waxing';
+import Spaa from './Pages/Services/spaa';
+import Brows from './Pages/Services/brows';
+import Laser from './Pages/Services/laser';
 
 // Placeholder components for other routes
 const GiftCardPage = () => (
@@ -64,6 +72,14 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/services/facials" element={<Facials />} />
             <Route path="/facials" element={<Facials />} />
+            <Route path="/massages" element={<Massage />} />
+            <Route path="/acupressure" element={<AcuPressure />} />
+            <Route path="/manicures-and-pedicures" element={<Manicure />} />
+            <Route path="/body-treatments" element={<BodyTreatment />} />
+            <Route path="/waxing" element={<Waxing />} />
+            <Route path="/laser-hair-removal" element={<Laser />} />
+            <Route path="/brows-and-lashes" element={<Brows />} />
+            <Route path="/spa-packages" element={<Spaa/>} />
             <Route path="/giftcard" element={<GiftCardPage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/specials" element={<SpecialsPage />} />
@@ -81,7 +97,6 @@ function App() {
             } />
           </Routes>
         </main>
-        
       </div>
     </Router>
   );
