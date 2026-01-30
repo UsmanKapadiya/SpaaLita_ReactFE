@@ -1,7 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Component/Header/Header';
-import Footer from './Component/Footer/Footer';
 import HomeScreen from './Pages/Home/HomeScreen';
 import ServicesPage from './Pages/Services/ServicesPage';
 import Facials from './Pages/Services/facials';
@@ -82,7 +81,7 @@ function App() {
             } />
           </Routes>
         </main>
-        <Footer />
+        
       </div>
     </Router>
   );
