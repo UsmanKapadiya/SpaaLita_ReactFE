@@ -3,6 +3,8 @@ import HomeAboutBanner from '../../assets/home-about.jpg';
 import ServicBanner from '../../assets/our_service.jpg';
 import Gift_card from '../../assets/gift_card.jpg';
 import ContactSection from '../../Component/ContactSection/ContactSection';
+import Footer from '../../Component/Footer/Footer';
+
 import './HomeScreen.css';
 
 const HomeScreen: React.FC = () => {
@@ -123,6 +125,7 @@ const HomeScreen: React.FC = () => {
           <h6 className="text-center my-4">Please call us to inquire if you would like to schedule an appointment outside of our opening hours or on a statutory holiday.</h6>
         </div>
       </div>
+      <Footer />
     </div>
 
   );
