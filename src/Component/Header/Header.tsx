@@ -1,50 +1,72 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/SpaAlita_logo.png';
+import './Header.css'
 
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   return (
-      <header id="nav-header">
-        <div className="container">
-          <div className="logo-outer">
-            <Link to="/" className="d-inline-block">
-              <img src={logo} alt="Logo" width="210" />
-            </Link>
-          </div>
-          <nav className="navbar navbar-expand-lg navbar-light pb-4">
-            <a className="navbar-toggler" data-toggle="collapse" data-target="#menubar" aria-controls="menubar" aria-expanded="false" aria-label="Toggle navigation">
-              <div className="animated-icon3"><span></span><span></span><span></span></div>
-            </a>
-
-            <div className="collapse navbar-collapse" id="menubar">
-              <ul id="menu-desktop-menu" className="navbar-nav w-100 justify-content-center"><li id="menu-item-17492" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-17492"><a href="/">Home</a></li>
-                <li id="menu-item-14584" className="menu-item menu-item-type-custom menu-item-object-custom menu-item-14584"><a href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567">Book NOW!</a></li>
-                <li id="menu-item-1929" className="menu-item menu-item-type-post_type menu-item-object-page current-menu-item page_item page-item-209 current_page_item menu-item-has-children menu-item-1929"><a href="/services/" aria-current="page">Services</a>
-                  <ul className="sub-menu">
-                    <li id="menu-item-208" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-208"><a href="/facials/">Facials</a></li>
-                    <li id="menu-item-207" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-207"><a href="/massages/">Massages</a></li>
-                    <li id="menu-item-206" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-206"><a href="/acupressure/">Acupressure</a></li>
-                    <li id="menu-item-201" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-201"><a href="/manicures-and-pedicures/">Manicures and Pedicures</a></li>
-                    <li id="menu-item-205" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-205"><a href="/body-treatments/">Body Treatments</a></li>
-                    <li id="menu-item-203" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-203"><a href="/waxing/">Waxing</a></li>
-                    <li id="menu-item-11766" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-11766"><a href="/laser-hair-removal/">Laser Hair Removal</a></li>
-                    <li id="menu-item-200" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-200"><a href="/brows-and-lashes/">Brows and Lashes</a></li>
-                    <li id="menu-item-199" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-199"><a href="/spa-packages/">Spa Packages</a></li>
-                  </ul>
-                </li>
-                <li id="menu-item-2497" className="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-2497"><a href="/product-category/gift-card/">Gift Card</a></li>
-                <li id="menu-item-24" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-24"><a href="/shop/">Shop</a></li>
-                <li id="menu-item-2026" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-2026"><a href="/monthly-specials/">Monthly Specials</a></li>
-                <li id="menu-item-396" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-396"><a href="/contact/">Contact</a></li>
-                <li id="menu-item-1925" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-1925"><a href="/spa-policy/">Booking Policy</a></li>
-                <li id="menu-item-472" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-472"><a href="/gallery/">Gallery</a></li>
-                <li className="menu-item d-flex"><a href="/cart/" className="mr-2">Cart</a><a className="cart-contents" href="/cart/" title="My cart">
-                </a></li>
-              </ul>              </div>
-          </nav>
+    <header id="nav-header">
+      <div className="container">
+        <div className="logo-outer">
+          <Link to="/" className="d-inline-block">
+            <img src={logo} alt="Logo" width="210" />
+          </Link>
         </div>
-      </header>
+        <nav className="navbar navbar-expand-lg navbar-light pb-4">
+          <a className="navbar-toggler" data-toggle="collapse" data-target="#menubar" aria-controls="menubar" aria-expanded="false" aria-label="Toggle navigation">
+            <div className="animated-icon3"><span></span><span></span><span></span></div>
+          </a>
+
+          <div className="collapse navbar-collapse" id="menubar">
+            <ul id="menu-desktop-menu" className="navbar-nav w-100 justify-content-center">
+              <li id="menu-item-17492" className="button-padding">
+                <button className="custom-btn" type="button" onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+                  Home
+                </button>
+              </li>
+              <li id="menu-item-14584" className="button-padding">
+                <button className="custom-btn" type="button" onClick={() => navigate('https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+                  Book NOW!
+                </button>
+              </li>
+              <li id="menu-item-1929" className="button-padding">
+                <button className="custom-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+                  Services
+                </button>
+                {/* <ul className="sub-menu">
+                  <li id="menu-item-208" className="nav-li">
+                    <button className="custom-btn" type="button" onClick={() => navigate('/facials/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+                      Facials
+                    </button>
+                  </li>
+                  <li id="menu-item-207" className="">
+                    <button type="button" onClick={() => navigate('/massages/')} style={{ background: 'none', margin: 2, border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+                    Massages
+                    </button>
+                  </li>
+                  <li id="menu-item-206" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-206"><button type="button" onClick={() => navigate('/acupressure/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Acupressure</button></li>
+                  <li id="menu-item-201" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-201"><button type="button" onClick={() => navigate('/manicures-and-pedicures/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Manicures and Pedicures</button></li>
+                  <li id="menu-item-205" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-205"><button type="button" onClick={() => navigate('/body-treatments/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Body Treatments</button></li>
+                  <li id="menu-item-203" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-203"><button type="button" onClick={() => navigate('/waxing/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Waxing</button></li>
+                  <li id="menu-item-11766" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-11766"><button type="button" onClick={() => navigate('/laser-hair-removal/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Laser Hair Removal</button></li>
+                  <li id="menu-item-200" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-200"><button type="button" onClick={() => navigate('/brows-and-lashes/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Brows and Lashes</button></li>
+                  <li id="menu-item-199" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-199"><button type="button" onClick={() => navigate('/spa-packages/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Spa Packages</button></li>
+                </ul> */}
+              </li>
+              <li id="menu-item-2497" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/product-category/gift-card/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Gift Card</button></li>
+              <li id="menu-item-24" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/shop/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Shop</button></li>
+              <li id="menu-item-2026" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/monthly-specials/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Monthly Specials</button></li>
+              <li id="menu-item-396" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/contact/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Contact</button></li>
+              <li id="menu-item-1925" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/spa-policy/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Booking Policy</button></li>
+              <li id="menu-item-472" className="button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/gallery/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Gallery</button></li>
+              <li className="menu-item d-flex button-padding"><button className="custom-btn" type="button" onClick={() => navigate('/cart/')} className="mr-2" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>Cart</button><button type="button" onClick={() => navigate('/cart/')} className="cart-contents" title="My cart" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
+              </button></li>
+            </ul>              </div>
+        </nav>
+      </div>
+    </header>
   );
 };
 

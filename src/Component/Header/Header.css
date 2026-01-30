@@ -1,0 +1,11 @@
+.button-padding{
+    padding: 0;
+}
+.navbar-nav li{
+    margin: 0 !important;
+    cursor: pointer;
+}
+.custom-btn{
+    padding: 0 13px !important;
+    font-size: 13pt !important;
+}

@@ -1,0 +1,27 @@
+{
+  "default_branch": "master",
+  "branches": [
+    "CleanCode_InProgress",
+    "Header",
+    "Products",
+    "master",
+    "mitesh_changes",
+    "origin"
+  ],
+  "parent": {
+    "CleanCode_InProgress": "master",
+    "Header": "master",
+    "Products": "master",
+    "master": null,
+    "mitesh_changes": "master",
+    "origin": "master"
+  },
+  "order": [
+    "master",
+    "CleanCode_InProgress",
+    "Header",
+    "Products",
+    "mitesh_changes",
+    "origin"
+  ]
+}
