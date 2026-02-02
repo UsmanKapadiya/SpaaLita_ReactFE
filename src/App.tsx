@@ -16,14 +16,9 @@ import Spaa from './Pages/Services/spaa';
 import Brows from './Pages/Services/brows';
 import Laser from './Pages/Services/laser';
 import GiftCard from './Pages/GiftCard/giftCard';
+import GiftCardDetails from './Pages/GiftCard/GiftCardDetails';
 
 // Placeholder components for other routes
-const GiftCardPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Gift Cards</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Gift card page coming soon!</p>
-  </div>
-);
 
 const ShopPage = () => (
   <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
@@ -82,6 +77,7 @@ function App() {
             <Route path="/brows-and-lashes" element={<Brows />} />
             <Route path="/spa-packages" element={<Spaa/>} />
             <Route path="/giftcard" element={<GiftCard />} />
+            <Route path="/product/:itemName" element={<GiftCardDetails />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/specials" element={<SpecialsPage />} />
             <Route path="/contact" element={<ContactPage />} />
