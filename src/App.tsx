@@ -15,6 +15,7 @@ import Waxing from './Pages/Services/waxing';
 import Spaa from './Pages/Services/spaa';
 import Brows from './Pages/Services/brows';
 import Laser from './Pages/Services/laser';
+import GiftCard from './Pages/GiftCard/giftCard';
 
 // Placeholder components for other routes
 const GiftCardPage = () => (
@@ -80,7 +81,7 @@ function App() {
             <Route path="/laser-hair-removal" element={<Laser />} />
             <Route path="/brows-and-lashes" element={<Brows />} />
             <Route path="/spa-packages" element={<Spaa/>} />
-            <Route path="/giftcard" element={<GiftCardPage />} />
+            <Route path="/giftcard" element={<GiftCard />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/specials" element={<SpecialsPage />} />
             <Route path="/contact" element={<ContactPage />} />

@@ -33,7 +33,7 @@ const Header: React.FC = () => {
                     <li id="menu-item-199" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-199"><a href="/spa-packages/">Spa Packages</a></li>
                   </ul>
                 </li>
-                <li id="menu-item-2497" className="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-2497"><a href="/product-category/gift-card/">Gift Card</a></li>
+                <li id="menu-item-2497" className="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-2497"><a href="/giftcard">Gift Card</a></li>
                 <li id="menu-item-24" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-24"><a href="/shop/">Shop</a></li>
                 <li id="menu-item-2026" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-2026"><a href="/monthly-specials/">Monthly Specials</a></li>
                 <li id="menu-item-396" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-396"><a href="/contact/">Contact</a></li>
