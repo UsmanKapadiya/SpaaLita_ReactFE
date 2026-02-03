@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 
-interface ContactFormData {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    subject: string;
-    message: string;
-}
-
-const ContactSection: React.FC = () => {
-    const [formData, setFormData] = useState<ContactFormData>({
+const ContactSection = ({ topPadding, normalFont }) => {
+    const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
@@ -19,7 +10,7 @@ const ContactSection: React.FC = () => {
         message: ''
     });
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -27,7 +18,7 @@ const ContactSection: React.FC = () => {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         // Handle form submission here
         console.log('Form submitted:', formData);
@@ -37,11 +28,15 @@ const ContactSection: React.FC = () => {
         <div className="container my-5">
             <div className="row">
                 <div className="col-md-6 d-flex align-items-center justify-content-center">
-                    <div className="text-center">
+                    <div className={`text-center ${topPadding}`}>
                         <h1 className="text-uppercase">Contact US</h1>
                         <h6 className="mt-4">101-745 Goldstream Ave,Victoria,BC,V9B 2X4</h6>
                         <h5 className="my-4">spaalitaoffice@shaw.ca</h5>
-                        <h3 className="font-weight-bold">(250) 478-2252</h3>
+                        {normalFont ? (
+                            <h6 className="">(250) 478-2252</h6>
+                        ) : (
+                            <h3 className="font-weight-bold">(250) 478-2252</h3>
+                        )}
                     </div>
                 </div>
                 <div className="col-md-6">
@@ -50,9 +45,6 @@ const ContactSection: React.FC = () => {
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="form-group mb-3">
-                                        {/* <label htmlFor="name" className="form-label">
-                      Name<span className="text-danger">*</span>
-                    </label> */}
                                         <input
                                             type="text"
                                             className="form-control rounded-0"
@@ -68,9 +60,6 @@ const ContactSection: React.FC = () => {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="form-group mb-3">
-                                        {/* <label htmlFor="email" className="form-label">
-                      Email<span className="text-danger">*</span>
-                    </label> */}
                                         <input
                                             type="email"
                                             className="form-control rounded-0"
@@ -88,7 +77,6 @@ const ContactSection: React.FC = () => {
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="form-group mb-3">
-                                        {/* <label htmlFor="phone" className="form-label">Phone</label> */}
                                         <input
                                             type="text"
                                             className="form-control rounded-0"
@@ -102,7 +90,6 @@ const ContactSection: React.FC = () => {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="form-group mb-3">
-                                        {/* <label htmlFor="address" className="form-label">Address</label> */}
                                         <input
                                             type="text"
                                             className="form-control rounded-0"
