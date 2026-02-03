@@ -1,4 +1,3 @@
-import React from 'react';
 import ContactSection from '../../Component/ContactSection/ContactSection';
 
 const ContactPage = () => {
