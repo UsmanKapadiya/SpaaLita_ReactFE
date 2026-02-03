@@ -19,6 +19,7 @@ import GiftCard from './Pages/GiftCard/giftCard';
 import GiftCardDetails from './Pages/GiftCard/GiftCardDetails';
 import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 import BookingPolicy from './Pages/BookingPolicy/BookingPolicy';
+import Gallery from './Pages/Gallery/Gallery';
 
 // Placeholder components for other routes
 
@@ -84,7 +85,7 @@ function App() {
             <Route path="/monthly-specials" element={<MonthlySpecial />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/spa-policy/" element={<BookingPolicy />} />
-            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/font-test" element={<FontTest />} /> {/* Temporary for font testing */}
             {/* Catch all route for 404 */}
