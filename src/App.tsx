@@ -17,6 +17,7 @@ import Brows from './Pages/Services/brows';
 import Laser from './Pages/Services/laser';
 import GiftCard from './Pages/GiftCard/giftCard';
 import GiftCardDetails from './Pages/GiftCard/GiftCardDetails';
+import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 
 // Placeholder components for other routes
 
@@ -79,7 +80,7 @@ function App() {
             <Route path="/giftcard" element={<GiftCard />} />
             <Route path="/product/:itemName" element={<GiftCardDetails />} />
             <Route path="/shop" element={<ShopPage />} />
-            <Route path="/specials" element={<SpecialsPage />} />
+            <Route path="/monthly-specials" element={<MonthlySpecial />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/policy" element={<PolicyPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
