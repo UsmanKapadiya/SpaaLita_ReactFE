@@ -1,0 +1,8 @@
+.cartIconColor{
+    color: var(--light-gray) !important;
+    font-size: 15px;
+}
+
+.badge{
+    background-color: aqua !important;
+}

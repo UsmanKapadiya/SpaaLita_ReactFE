@@ -116,6 +116,9 @@
     border: 1px solid #200707cc !important;
     border-radius: 5px !important;
 }
+.woocommerce-checkIcon {
+    color: #8fae1b;
+}
 /*  */
 
 .woocommerce form .form-row {
@@ -2194,10 +2197,11 @@
     border-top-color: #8fae1b
 }
 
-.woocommerce-message::before {
+
+/* .woocommerce-message::before {
     content: "\e015";
     color: #8fae1b
-}
+} */
 
 .woocommerce-info {
     border-top-color: #1e85be
