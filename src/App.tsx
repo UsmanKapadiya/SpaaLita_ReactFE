@@ -20,6 +20,8 @@ import GiftCardDetails from './Pages/GiftCard/GiftCardDetails';
 import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 import BookingPolicy from './Pages/BookingPolicy/BookingPolicy';
 import Gallery from './Pages/Gallery/Gallery';
+import Cart from './Pages/CartAndCheckout/Cart';
+import Checkout from './Pages/CartAndCheckout/Checkout'
 
 // Placeholder components for other routes
 
@@ -27,34 +29,6 @@ const ShopPage = () => (
   <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
     <h1 style={{ color: '#667eea' }}>Shop</h1>
     <p style={{ fontSize: '1.2rem', color: '#666' }}>Online shop coming soon!</p>
-  </div>
-);
-
-const SpecialsPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Monthly Specials</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Current specials and promotions coming soon!</p>
-  </div>
-);
-
-const PolicyPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Booking Policy</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Booking policies and terms coming soon!</p>
-  </div>
-);
-
-const GalleryPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Gallery</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Photo gallery coming soon!</p>
-  </div>
-);
-
-const CartPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Shopping Cart</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Your cart is empty. Shop our services and products!</p>
   </div>
 );
 
@@ -86,7 +60,8 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/spa-policy/" element={<BookingPolicy />} />
             <Route path="/gallery" element={<Gallery />} />
-            <Route path="/cart" element={<CartPage />} />
+            <Route path="/cart" element={<Cart/>} />
+             <Route path="/checkout" element={<Checkout/>} />
             <Route path="/font-test" element={<FontTest />} /> {/* Temporary for font testing */}
             {/* Catch all route for 404 */}
             <Route path="*" element={
