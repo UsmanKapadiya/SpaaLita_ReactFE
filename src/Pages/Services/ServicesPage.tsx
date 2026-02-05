@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Facials from '../../assets/Facial.jpg';
-import Massage from '../../assets/massage.jpg';
-import Acupressure from '../../assets/accupressure.jpg';
-import Manicure from '../../assets/manicure.jpg';
-import BodyTreatment from '../../assets/bodyTreatment.jpg';
-import Waxing from '../../assets/waxing.jpg';
-import Laser from '../../assets/Laser.jpg';
-import Brow from '../../assets/browes.jpeg';
-import Spa from '../../assets/spaa.jpg';
+import Facials from '../../assets/images/Facial.jpg';
+import Massage from '../../assets/images/massage.jpg';
+import Acupressure from '../../assets/images/accupressure.jpg';
+import Manicure from '../../assets/images/manicure.jpg';
+import BodyTreatment from '../../assets/images/bodyTreatment.jpg';
+import Waxing from '../../assets/images/waxing.jpg';
+import Laser from '../../assets/images/Laser.jpg';
+import Brow from '../../assets/images/browes.jpeg';
+import Spa from '../../assets/images/spaa.jpg';
 import './ServicesPage.css';
 
 const ServicesPage: React.FC = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import LaserBanner from '../../assets/Laser-HairBanner.jpg';
+import LaserBanner from '../../assets/images/Laser-HairBanner.jpg';
 import LaserMockData from '../../mockData/laserMockData';
 import './globalServices.css';
 

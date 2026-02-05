@@ -8,16 +8,16 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import './Gallery.css';
 
 // Import all gallery images
-import Gallery1 from '../../assets/gallery1.jpg';
-import Gallery2 from '../../assets/gallery2.jpg';
-import Gallery3 from '../../assets/gallery3.jpeg';
-import Gallery4 from '../../assets/gallery4.jpeg';
-import Gallery5 from '../../assets/gallery5.jpeg';
-import Gallery6 from '../../assets/gallery6.jpg';
-import Gallery7 from '../../assets/gallery7.jpeg';
-import Gallery8 from '../../assets/gallery8.jpeg';
-import Gallery9 from '../../assets/gallery9.jpeg';
-import Gallery10 from '../../assets/gallery10.jpeg';
+import Gallery1 from '../../assets/images/gallery1.jpg';
+import Gallery2 from '../../assets/images/gallery2.jpg';
+import Gallery3 from '../../assets/images/gallery3.jpeg';
+import Gallery4 from '../../assets/images/gallery4.jpeg';
+import Gallery5 from '../../assets/images/gallery5.jpeg';
+import Gallery6 from '../../assets/images/gallery6.jpg';
+import Gallery7 from '../../assets/images/gallery7.jpeg';
+import Gallery8 from '../../assets/images/gallery8.jpeg';
+import Gallery9 from '../../assets/images/gallery9.jpeg';
+import Gallery10 from '../../assets/images/gallery10.jpeg';
 
 
 const Gallery = () => {

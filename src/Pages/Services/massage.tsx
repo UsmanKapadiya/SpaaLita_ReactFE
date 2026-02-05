@@ -1,5 +1,5 @@
 import React from 'react';
-import MassageBanner from '../../assets/massage_banner.jpg';
+import MassageBanner from '../../assets/images/massage_banner.jpg';
 import MassageMockData from '../../mockData/massageMockData';
 import './globalServices.css';
 

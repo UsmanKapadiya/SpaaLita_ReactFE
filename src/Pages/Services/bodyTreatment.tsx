@@ -1,5 +1,5 @@
 import React from 'react';
-import BodyTreatmentBanner from '../../assets/bodyTreatmentBanner.jpg';
+import BodyTreatmentBanner from '../../assets/images/bodyTreatmentBanner.jpg';
 import BodyTreatmentMockData from '../../mockData/bodyTreatmentMockData';
 import './globalServices.css';
 

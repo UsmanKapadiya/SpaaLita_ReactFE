@@ -1,7 +1,7 @@
 import React from 'react';
-import HomeAboutBanner from '../../assets/home-about.jpg';
-import ServicBanner from '../../assets/our_service.jpg';
-import Gift_card from '../../assets/gift_card.jpg';
+import HomeAboutBanner from '../../assets/images/home-about.jpg';
+import ServicBanner from '../../assets/images/our_service.jpg';
+import Gift_card from '../../assets/images/gift_card.jpg';
 import ContactSection from '../../Component/ContactSection/ContactSection';
 import Footer from '../../Component/Footer/Footer';
 

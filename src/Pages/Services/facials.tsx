@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import FacialServices from '../../assets/facial_services.jpg';
+import FacialServices from '../../assets/images/facial_services.jpg';
 import FacialsMockData from '../../mockData/facialsMockData'
 import './globalServices.css';
 

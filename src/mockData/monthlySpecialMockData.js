@@ -1,4 +1,4 @@
-import MonthlySpecialImage from '../assets/2026-FebSpecials.png'
+import MonthlySpecialImage from '../assets/images/2026-FebSpecials.png'
 export const monthlySpecialMockData = {
     id: 1,
     month: 'february',

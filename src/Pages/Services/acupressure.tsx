@@ -1,5 +1,5 @@
 import React from 'react';
-import AcuPressureBanner from '../../assets/accupressureBanner.jpg';
+import AcuPressureBanner from '../../assets/images/accupressureBanner.jpg';
 import AcuPressureMockData from '../../mockData/AcuPressureMockData';
 import './globalServices.css';
 

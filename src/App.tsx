@@ -4,7 +4,6 @@ import Header from './Component/Header/Header';
 import HomeScreen from './Pages/Home/HomeScreen';
 import ServicesPage from './Pages/Services/ServicesPage';
 import Facials from './Pages/Services/facials';
-import BookPage from './Pages/Book/BookPage';
 import ContactPage from './Pages/Contact/ContactPage';
 import FontTest from './FontTest'; // Temporary for font testing
 import Massage from './Pages/Services/massage';
@@ -36,7 +35,6 @@ function App() {
           <Routes>
             <Route path="/" element={<HomeScreen />} />
             <Route path="/home" element={<HomeScreen />} />
-            <Route path="/book" element={<BookPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/services/facials" element={<Facials />} />
             <Route path="/facials" element={<Facials />} />

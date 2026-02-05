@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import Badge from '@mui/material/Badge';
 import { useAppSelector } from '../../store/hooks';
-import logo from '../../assets/SpaAlita_logo.png';
+import logo from '../../assets/images/SpaAlita_logo.png';
 import './Header.css'
 
 const Header: React.FC = () => {

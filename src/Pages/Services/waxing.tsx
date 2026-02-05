@@ -1,5 +1,5 @@
 import React from 'react';
-import WaxingBanner from '../../assets/waxingBanner.jpg';
+import WaxingBanner from '../../assets/images/waxingBanner.jpg';
 import WaxingMockData from '../../mockData/waxingMockData';
 import './globalServices.css';
 

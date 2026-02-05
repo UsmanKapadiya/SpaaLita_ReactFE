@@ -1,5 +1,5 @@
 import React from 'react';
-import SpaBanner from '../../assets/SpaaBanner.jpg';
+import SpaBanner from '../../assets/images/SpaaBanner.jpg';
 import SpaaMockData from '../../mockData/SpaaMockData';
 import './globalServices.css';
 

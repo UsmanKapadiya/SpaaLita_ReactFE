@@ -1,5 +1,5 @@
 import React from 'react';
-import ManicureBanner from '../../assets/manicureBanner.jpg';
+import ManicureBanner from '../../assets/images/manicureBanner.jpg';
 import ManicureMockData from '../../mockData/manicureMockData';
 import './globalServices.css';
 

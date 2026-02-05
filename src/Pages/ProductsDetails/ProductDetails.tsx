@@ -2,7 +2,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import ImageNotFound from '../../assets/productImageNotFound.png';
+import ImageNotFound from '../../assets/images/productImageNotFound.png';
 import { shopMockData } from '../../mockData/shopMockData';
 import { giftCardMockData } from '../../mockData/giftCardMockData';
 
