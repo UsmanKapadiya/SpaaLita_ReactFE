@@ -1,26 +1,29 @@
 // @ts-nocheck
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { giftCardMockData, giftCardSortOptions } from '../../mockData/giftCardMockData';
+import { shopMockData, shopSortOptions } from '../../mockData/shopMockData';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
 
-// Component for individual gift card item
-const GiftCardItem = ({ giftCard, onAddToCart }) => {
+// Component for individual shop item
+const ShopItem = ({ shop, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { title, price, currency, image, slug } = giftCard;
+    const { title, price, currency, images, slug } = shop;
+    
+    // Use the first image from the images array
+    const mainImage = images && images.length > 0 ? images[0] : null;
 
     const handleAddToCart = (e) => {
         e.preventDefault();
 
         // Dispatch Redux action to add to cart
         dispatch(addToCart({
-            id: giftCard.id,
+            id: shop.id,
             name: title,
             price: price,
-            image: image.src
+            image: mainImage?.src || ''
         }));
 
         // Trigger success message in parent component
@@ -30,8 +33,8 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
     const handleProductClick = () => {
         navigate(`/product/${slug}`, { 
             state: { 
-                id: giftCard.id, 
-                source: 'giftCard' 
+                id: shop.id, 
+                source: 'shop' 
             } 
         });
     };
@@ -39,16 +42,16 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
             <div onClick={handleProductClick} style={{ cursor: 'pointer' }} className="woocommerce-LoopProduct-link woocommerce-loop-product__link">
-                <img
-                    width={image.width}
-                    height={image.height}
-                    src={image.src}
-                    className={image.className || "attachment-woocommerce_thumbnail size-woocommerce_thumbnail"}
-                    alt={image.alt}
-                    srcSet={image.srcSet}
-                    sizes={image.sizes}
-                    loading={image.loading}
-                />
+                {mainImage && (
+                    <img
+                        width={mainImage.width}
+                        height={mainImage.height}
+                        src={mainImage.src}
+                        className={mainImage.className || "attachment-woocommerce_thumbnail size-woocommerce_thumbnail"}
+                        alt={mainImage.alt}
+                        loading={mainImage.loading}
+                    />
+                )}
             </div>
             <div className="product-title" onClick={handleProductClick} style={{ cursor: 'pointer' }}>
                 {title}
@@ -81,14 +84,15 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
     );
 };
 
-const GiftCard = () => {
+const Shop = () => {
     const navigate = useNavigate();
     const [sortBy, setSortBy] = useState('menu_order');
     const [showMessage, setShowMessage] = useState(false);
     const [addedItem, setAddedItem] = useState(null);
 
-    const getTotalCount = () => giftCardMockData.filter(card => card.isAvailable).length;
+    const getTotalCount = () => shopMockData.filter(item => item.isAvailable).length;
 
+    // Handle add to cart callback
     const handleAddToCart = (item) => {
         setAddedItem(item);
         setShowMessage(true);
@@ -98,8 +102,8 @@ const GiftCard = () => {
         }, 5000);
     };
 
-    const sortGiftCards = (sortBy) => {
-        const sortedData = [...giftCardMockData];
+    const sortShop = (sortBy) => {
+        const sortedData = [...shopMockData];
 
         switch (sortBy) {
             case 'price':
@@ -116,8 +120,8 @@ const GiftCard = () => {
         }
     };
 
-    const availableGiftCards = useMemo(() => {
-        return sortGiftCards(sortBy).filter(card => card.isAvailable);
+    const availableProducts = useMemo(() => {
+        return sortShop(sortBy).filter(item => item.isAvailable);
     }, [sortBy]);
 
     const totalCount = getTotalCount();
@@ -174,7 +178,7 @@ const GiftCard = () => {
                                 value={sortBy}
                                 onChange={handleSortChange}
                             >
-                                {giftCardSortOptions.map((option) => (
+                                {shopSortOptions.map((option) => (
                                     <option
                                         key={option.value}
                                         title={option.title}
@@ -189,8 +193,8 @@ const GiftCard = () => {
 
                         <div className="clear"></div>
                         <ul className="products columns-3">
-                            {availableGiftCards.map((giftCard) => (
-                                <GiftCardItem key={giftCard.id} giftCard={giftCard} onAddToCart={handleAddToCart} />
+                            {availableProducts.map((product) => (
+                                <ShopItem key={product.id} shop={product} onAddToCart={handleAddToCart} />
                             ))}
                         </ul>
                     </div>
@@ -200,4 +204,4 @@ const GiftCard = () => {
     );
 };
 
-export default GiftCard;
+export default Shop;

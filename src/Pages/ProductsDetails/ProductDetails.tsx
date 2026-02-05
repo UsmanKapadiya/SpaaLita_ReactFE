@@ -1,194 +1,180 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import ImageNotFound from '../../assets/productImageNotFound.png'
-import InnerImageZoom from 'react-inner-image-zoom';
-// import 'react-inner-image-zoom/lib/InnerImageZoom/styles.css';
-
-// @ts-ignore
+import ImageNotFound from '../../assets/productImageNotFound.png';
+import { shopMockData } from '../../mockData/shopMockData';
 import { giftCardMockData } from '../../mockData/giftCardMockData';
 
 
-const GiftCardDetails = () => {
+const ProductDetails = () => {
     const navigate = useNavigate();
-    const { itemName } = useParams<{ itemName: string }>();
+    const location = useLocation();
+    const { itemName } = useParams();
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    // Format the gift card name for display
-    const formatGiftCardName = (name: string | undefined) => {
-        if (!name) return 'Gift Card';
-        // Convert 'gift-card-100-00' to 'Gift Card – $100.00'
-        const price = name.replace('gift-card-', '').replace('-', '.');
-        return `Gift Card – $${price}`;
-    };
+    // Get source from location state, or auto-detect if not provided
+    const sourceFromState = location.state?.source;
 
-    // Extract price from route parameter
-    const getPrice = (name: string | undefined) => {
-        if (!name) return '0.00';
-        return name.replace('gift-card-', '').replace('-', '.');
-    };
-
-    // Get current product data from giftCardMockData
     const getCurrentProduct = () => {
-        return giftCardMockData.find((product: any) => product.slug === itemName);
-    };
-
-    // Check if current product is first or last
-    const getCurrentProductIndex = () => {
-        const index = giftCardMockData.findIndex((product: any) => product.slug === itemName);
-        return index !== -1 ? index : 0; // Return 0 if not found to avoid -1 issues
-    };
-
-    const currentIndex = getCurrentProductIndex();
-    const isFirstProduct = currentIndex === 0;
-    const isLastProduct = currentIndex === giftCardMockData.length - 1;
-    const currentProduct = getCurrentProduct();
-
-    // Related products data
-    const relatedProducts = [
-        {
-            id: 1,
-            slug: 'gift-card-400-00',
-            title: 'Gift Card – $400.00',
-            price: '400.00',
-            image: 'https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-180x180.png',
-            srcSet: 'https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-180x180.png 180w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-100x100.png 100w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-600x600.png 600w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-300x300.png 300w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-1024x1024.png 1024w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-150x150.png 150w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-768x768.png 768w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder.png 1200w',
-            alt: 'Placeholder'
-        },
-        {
-            id: 2,
-            slug: 'gift-card-300-00',
-            title: 'Gift Card – $300.00',
-            price: '300.00',
-            image: 'https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-180x180.png',
-            srcSet: 'https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-180x180.png 180w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-100x100.png 100w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-600x600.png 600w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-300x300.png 300w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-1024x1024.png 1024w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-150x150.png 150w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder-768x768.png 768w, https://spaalita.ca/wp-content/uploads/woocommerce-placeholder.png 1200w',
-            alt: 'Placeholder'
-        },
-        {
-            id: 3,
-            slug: 'gift-card-150-00',
-            title: 'Gift Card – $150.00',
-            price: '150.00',
-            image: 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-2-180x180.jpg',
-            srcSet: 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-2-180x180.jpg 180w, https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-2-150x150.jpg 150w, https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-2-100x100.jpg 100w',
-            alt: 'Gift Card - $150.00'
-        },
-        {
-            id: 4,
-            slug: 'gift-card-200-00',
-            title: 'Gift Card – $200.00',
-            price: '200.00',
-            image: 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-3-180x180.jpg',
-            srcSet: 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-3-180x180.jpg 180w, https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-3-150x150.jpg 150w, https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-3-100x100.jpg 100w',
-            alt: 'Gift Card - $200.00'
+        if (sourceFromState === 'shop') {
+            const product = shopMockData.find(product => product.slug === itemName);
+            return { product, source: 'shop' };
+        } else if (sourceFromState === 'giftCard') {
+            const product = giftCardMockData.find(product => product.slug === itemName);
+            return { product, source: 'giftCard' };
         }
-    ];
+        
+        let product = shopMockData.find(product => product.slug === itemName);
+        if (product) return { product, source: 'shop' };
+        
+        product = giftCardMockData.find(product => product.slug === itemName);
+        if (product) return { product, source: 'giftCard' };
+        
+        return { product: null, source: null };
+    };
+
+    const { product: currentProduct, source: productSource } = getCurrentProduct();
+    
+    const currentDataArray = productSource === 'shop' ? shopMockData : giftCardMockData;
+
+    const currentIndex = currentDataArray.findIndex(product => product.slug === itemName);
+    const isFirstProduct = currentIndex === 0;
+    const isLastProduct = currentIndex === currentDataArray.length - 1;
+
+    const relatedProducts = currentDataArray
+        .filter((product) => product.slug !== itemName)
+        .slice(0, 4)
+        .map((product) => ({
+            id: product.id,
+            slug: product.slug,
+            title: product.title,
+            price: product.price?.toFixed(2) || product.price,
+            image: product.images?.[0]?.src || product.image?.src || ImageNotFound,
+            srcSet: product.images?.[0]?.srcSet || product.image?.srcSet || '',
+            alt: product.images?.[0]?.alt || product.image?.alt || product.title
+        }));
 
     const handleShopClick = () => {
-        navigate('/');
+        navigate('/shop');
     };
 
-    const handleGiftCardClick = () => {
-        navigate('/giftcard');
+    const handleProductClick = (productSlug, productId) => {
+        navigate(`/product/${productSlug}`, {
+            state: { id: productId, source: productSource }
+        });
+        setSelectedImageIndex(0);
     };
 
-    const handleProductClick = (productName: string) => {
-        navigate(`/product/${productName}`);
+    const navigateToProduct = (product) => {
+        navigate(`/product/${product.slug}`, {
+            state: { id: product.id, source: productSource }
+        });
+        setSelectedImageIndex(0);
     };
 
-    // Navigate to previous/next product in all gift card products
     const handlePreviousProduct = () => {
-        if (currentIndex > 0) {
-            const previousProduct = giftCardMockData[currentIndex - 1];
-            window.location.href = `/product/${previousProduct.slug}`;
-        } else {
-            // If at first product, go to last product
-            const lastProduct = giftCardMockData[giftCardMockData.length - 1];
-            window.location.href = `/product/${lastProduct.slug}`;
-        }
+        const product = currentIndex > 0 
+            ? currentDataArray[currentIndex - 1] 
+            : currentDataArray[currentDataArray.length - 1];
+        navigateToProduct(product);
     };
 
     const handleNextProduct = () => {
-        if (currentIndex < giftCardMockData.length - 1) {
-            const nextProduct = giftCardMockData[currentIndex + 1];
-            window.location.href = `/product/${nextProduct.slug}`;
-        } else {
-            // If at last product, go to first product
-            const firstProduct = giftCardMockData[0];
-            window.location.href = `/product/${firstProduct.slug}`;
-        }
+        const product = currentIndex < currentDataArray.length - 1 
+            ? currentDataArray[currentIndex + 1] 
+            : currentDataArray[0];
+        navigateToProduct(product);
     };
-    console.log("currentProduct", currentProduct);
+
+    const mainImage = currentProduct?.images?.[selectedImageIndex] || currentProduct?.image || null;
+    const thumbnailImages = currentProduct?.images || [];
+    const isGiftCard = productSource === 'giftCard' || currentProduct?.title?.toLowerCase().includes('gift card');
+
     return (
         <div className="container py-5">
             <nav className="woocommerce-breadcrumb" aria-label="Breadcrumb">
                 <span onClick={handleShopClick} style={{ cursor: 'pointer' }}>Shop</span>&nbsp;/&nbsp;
-                <span onClick={handleGiftCardClick} style={{ cursor: 'pointer',}}>Gift Card</span>&nbsp;/&nbsp;
-                {formatGiftCardName(itemName)}
+                {isGiftCard && (
+                    <>
+                        <span onClick={() => navigate('/giftcard')} style={{ cursor: 'pointer' }}>Gift Card</span>&nbsp;/&nbsp;
+                    </>
+                )}
+                {currentProduct?.title || 'Product'}
             </nav>
 
             <div className="woocommerce-notices-wrapper"></div>
             <div id="product-273" className="product product-detail">
                 <div className="row mt-5">
                     <div className="col-lg-7 col-md-12">
-
                         <div className="woocommerce-product-gallery">
                             <div className="woocommerce-product-gallery__image">
                                 <div className="main-product-image mb-3">
-                                    <img 
-                                  src={currentProduct?.image?.src}
-                                  height={612}
-                                  width={459}
-                                  />
-                                    {/* <InnerImageZoom
-                                        src={currentProduct?.image?.src}
-                                        zoomType="hover"
-                                        zoomPreload={true}
-
-                                        width={459}
-                                        height={612}
-                                    /> */}
-
+                                    {mainImage ? (
+                                        <img
+                                            src={mainImage.src}
+                                            alt={mainImage.alt}
+                                            height={612}
+                                            width={459}
+                                            style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={ImageNotFound}
+                                            alt="Product not found"
+                                            height={612}
+                                            width={459}
+                                        />
+                                    )}
                                 </div>
+                                {/* Thumbnail images */}
+                                {thumbnailImages.length > 1 && (
+                                    <div className="product-thumbnails d-flex gap-2 mt-3" style={{ flexWrap: 'wrap' }}>
+                                        {thumbnailImages.map((image: any, index: number) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => setSelectedImageIndex(index)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: selectedImageIndex === index ? '2px solid #000' : '1px solid #ddd',
+                                                    padding: '5px',
+                                                    width: '100px',
+                                                    height: '100px'
+                                                }}
+                                            >
+                                                <img
+                                                    src={image.src}
+                                                    alt={image.alt}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                     <div className="col-lg-5 col-md-12">
                         <div className="summary entry-summary">
                             <div className="mb-4 previous-next-product" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                {!isFirstProduct ? (
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <KeyboardBackspaceIcon
-                                            onClick={handlePreviousProduct}
-                                            style={{
-                                                fontSize: '18px',
-                                                cursor: 'pointer',
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div></div>
+                                {!isFirstProduct && (
+                                    <KeyboardBackspaceIcon
+                                        onClick={handlePreviousProduct}
+                                        style={{ fontSize: '18px', cursor: 'pointer' }}
+                                    />
                                 )}
-                                {!isLastProduct ? (
-                                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-                                        <ArrowRightAltIcon
-                                            onClick={handleNextProduct}
-                                            style={{
-                                                fontSize: '18px',
-                                                cursor: 'pointer',
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div></div>
+                                {!isLastProduct && (
+                                    <ArrowRightAltIcon
+                                        onClick={handleNextProduct}
+                                        style={{ fontSize: '18px', cursor: 'pointer', marginLeft: 'auto' }}
+                                    />
                                 )}
                             </div>
-                            <h4 className="product_title entry-title">{formatGiftCardName(itemName)}</h4>
-                            <div className="product_meta my-3">
-                            </div>
+                            <h4 className="product_title entry-title">{currentProduct?.title}</h4>
                             <div className="woocommerce-product-details__short-description">
-                                <p>Purchase one of our gift cards securely online and we will send the gift card&nbsp;directly to you or your loved one!</p>
+                                <p>{currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'}</p>
                             </div>
-                            <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">$</span>{getPrice(itemName)}</bdi></span></p>
+                            <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">{currentProduct?.currency || '$'}</span>{currentProduct?.price?.toFixed(2)}</bdi></span></p>
 
 
                             <form className="cart" onSubmit={(e) => { e.preventDefault(); console.log('Add to cart clicked'); }} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
@@ -221,6 +207,21 @@ const GiftCardDetails = () => {
                     </div>
                 </div>
             </div>
+            {currentProduct?.description && (
+                <div className="w-100 my-5 pt-5">
+                    <ul className="nav nav-tabs" role="tablist">
+                        <li className="nav-item">
+                            <a className="nav-link active" id="description-tab" data-toggle="tab" href="#content_description" role="tab" aria-controls="Description" aria-selected="true">Description</a>
+                        </li>
+                    </ul>
+                    <div className="tab-content pt-3 px-3" id="product-tabs">
+                        <div className="tab-pane fade show active" id="content_description" role="tabpanel" aria-labelledby="content_description">
+                            <h2>Description</h2>
+                            <p>{currentProduct.description}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="row mt-5">
                 <div className="col-md-12">
 
@@ -231,7 +232,7 @@ const GiftCardDetails = () => {
                         <ul className="products columns-4">
                             {relatedProducts.map((product) => (
                                 <li key={product.id} className="col-lg-3 col-md-6 col-sm-6 text-center">
-                                    <div style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug)}>
+                                    <div style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug, product.id)}>
                                         <img
                                             width="180"
                                             height="180"
@@ -244,7 +245,7 @@ const GiftCardDetails = () => {
                                             sizes="(max-width: 180px) 100vw, 180px"
                                         />
                                     </div>
-                                    <div className="product-title" style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug)}>
+                                    <div className="product-title" style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug, product.id)}>
                                         {product.title}
                                     </div>
                                     <span className="price">
@@ -272,4 +273,4 @@ const GiftCardDetails = () => {
     );
 };
 
-export default GiftCardDetails;
+export default ProductDetails;

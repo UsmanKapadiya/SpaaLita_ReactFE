@@ -16,21 +16,16 @@ import Spaa from './Pages/Services/spaa';
 import Brows from './Pages/Services/brows';
 import Laser from './Pages/Services/laser';
 import GiftCard from './Pages/GiftCard/giftCard';
-import GiftCardDetails from './Pages/GiftCard/GiftCardDetails';
 import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 import BookingPolicy from './Pages/BookingPolicy/BookingPolicy';
 import Gallery from './Pages/Gallery/Gallery';
 import Cart from './Pages/CartAndCheckout/Cart';
 import Checkout from './Pages/CartAndCheckout/Checkout'
+import Shop from './Pages/Shop/Shop';
+import ProductDetails from './Pages/ProductsDetails/ProductDetails';
 
 // Placeholder components for other routes
 
-const ShopPage = () => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '80vh' }}>
-    <h1 style={{ color: '#667eea' }}>Shop</h1>
-    <p style={{ fontSize: '1.2rem', color: '#666' }}>Online shop coming soon!</p>
-  </div>
-);
 
 function App() {
   return (
@@ -54,8 +49,8 @@ function App() {
             <Route path="/brows-and-lashes" element={<Brows />} />
             <Route path="/spa-packages" element={<Spaa/>} />
             <Route path="/giftcard" element={<GiftCard />} />
-            <Route path="/product/:itemName" element={<GiftCardDetails />} />
-            <Route path="/shop" element={<ShopPage />} />
+             <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:itemName" element={<ProductDetails />} />
             <Route path="/monthly-specials" element={<MonthlySpecial />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/spa-policy/" element={<BookingPolicy />} />
