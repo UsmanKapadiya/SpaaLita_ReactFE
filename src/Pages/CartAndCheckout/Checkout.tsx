@@ -132,19 +132,19 @@ const Checkout = () => {
     const handlePlaceOrder = (e: React.FormEvent) => {
         e.preventDefault();
         // Handle order placement logic here
-        console.log('Order placed', { billingDetails, shippingDetails, paymentMethod });
+        // Order placed successfully
         alert('Order placed successfully!');
     };
 
     const handleApplyCoupon = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Applying coupon:', couponCode);
+        // Applying coupon
         alert('Coupon applied!');
     };
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Login:', loginData);
+        // User login
         alert('Logged in successfully!');
     };
 

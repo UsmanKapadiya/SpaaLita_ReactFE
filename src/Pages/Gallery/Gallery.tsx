@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ImageGallery from 'react-image-gallery';
 // import 'react-image-gallery/styles/css/image-gallery.css';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
@@ -102,8 +102,8 @@ const Gallery = () => {
                         <ArrowForwardIosIcon className="ArrowRightIcon"  onClick={onClick} />
                     )}
 
-                    renderFullscreenButton={(onClick, isFullscreen) => (
-                        <OpenInFullIcon className='fullScreenButton' onClick={onClick} isFullscreen={isFullscreen} />
+                    renderFullscreenButton={(onClick) => (
+                        <OpenInFullIcon className='fullScreenButton' onClick={onClick} />
                     )}
                     // showFullscreenButton={true}
                     useBrowserFullscreen={true}

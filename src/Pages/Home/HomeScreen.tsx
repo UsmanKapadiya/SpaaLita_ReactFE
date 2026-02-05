@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import HomeAboutBanner from '../../assets/images/home-about.jpg';
 import ServicBanner from '../../assets/images/our_service.jpg';
 import Gift_card from '../../assets/images/gift_card.jpg';
@@ -8,6 +9,7 @@ import Footer from '../../Component/Footer/Footer';
 import './HomeScreen.css';
 
 const HomeScreen: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="home-screen ">
       <div>
@@ -47,7 +49,7 @@ const HomeScreen: React.FC = () => {
           className="img-fluid"
         />
         <div className="our-service">
-          <div className="our-service-text"><a href="https://spaalita.ca/services">our services</a></div>
+          <div className="our-service-text" onClick={() => navigate('/services')} style={{ cursor: 'pointer' }}>our services</div>
         </div>
       </div>
       <div className="container my-5">
@@ -65,12 +67,12 @@ const HomeScreen: React.FC = () => {
               <h1 className="font-weight-bold">Spa A'lita Gift Cards</h1>
               <h5 className="gift-card-h5 my-5">Purchase one of our gift cards securely online through Paypal and we
                 will send the gift card directly to you or your loved one!</h5>
-              <button className="round-buttton d-inline-block">Purchase</button>
+              <button className="round-buttton d-inline-block" onClick={() => navigate('/giftcard')}>Purchase</button>
             </div>
           </div>
         </div>
       </div>
-      <ContactSection />
+      <ContactSection topPadding="" normalFont={false} />
       <div className="my-5 py-5">
         <div className="w-100">
           <div className="map-container" style={{ height: '400px', width: '100%', overflow: 'hidden' }}>

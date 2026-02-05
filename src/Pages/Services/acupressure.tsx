@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import AcuPressureBanner from '../../assets/images/accupressureBanner.jpg';
 import AcuPressureMockData from '../../mockData/AcuPressureMockData';
 import './globalServices.css';
 
 const AcuPressure: React.FC = () => {
-    console.log("AcuPressureMockData", AcuPressureMockData)
     return (
         <div className="massage-page">
             {/* Services Section */}

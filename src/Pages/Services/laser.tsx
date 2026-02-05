@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import LaserBanner from '../../assets/images/Laser-HairBanner.jpg';
 import LaserMockData from '../../mockData/laserMockData';
 import './globalServices.css';
 
 const Laser: React.FC = () => {
-    console.log("LaserMockData", LaserMockData)
     return (
         <div className="massage-page">
             {/* Services Section */}

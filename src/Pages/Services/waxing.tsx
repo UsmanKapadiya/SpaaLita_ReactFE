@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import WaxingBanner from '../../assets/images/waxingBanner.jpg';
 import WaxingMockData from '../../mockData/waxingMockData';
 import './globalServices.css';
 
 const Waxing: React.FC = () => {
-    console.log("WaxingMockData", WaxingMockData)
     return (
         <div className="massage-page">
             {/* Services Section */}

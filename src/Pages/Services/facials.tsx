@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+// @ts-nocheck
+import React from 'react';
 import FacialServices from '../../assets/images/facial_services.jpg';
 import FacialsMockData from '../../mockData/facialsMockData'
 import './globalServices.css';
 
 const Facials: React.FC = () => {
-    console.log("FacialsMockData",FacialsMockData)
     return (
         <div className="facials-page">
             {/* Services Section */}

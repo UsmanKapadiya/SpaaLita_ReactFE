@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ContactSection = ({ topPadding, normalFont }) => {
     const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ const ContactSection = ({ topPadding, normalFont }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Handle form submission here
-        console.log('Form submitted:', formData);
+        // Form submitted successfully
     };
 
     return (

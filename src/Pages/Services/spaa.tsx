@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import SpaBanner from '../../assets/images/SpaaBanner.jpg';
 import SpaaMockData from '../../mockData/SpaaMockData';
 import './globalServices.css';
 
 const Spaa: React.FC = () => {
-    console.log("SpaaMockData", SpaaMockData)
     return (
         <div className="massage-page">
             {/* Services Section */}

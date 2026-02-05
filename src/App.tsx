@@ -14,7 +14,7 @@ import Waxing from './Pages/Services/waxing';
 import Spaa from './Pages/Services/spaa';
 import Brows from './Pages/Services/brows';
 import Laser from './Pages/Services/laser';
-import GiftCard from './Pages/GiftCard/giftCard';
+import GiftCard from './Pages/GiftCard/GiftCard';
 import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 import BookingPolicy from './Pages/BookingPolicy/BookingPolicy';
 import Gallery from './Pages/Gallery/Gallery';

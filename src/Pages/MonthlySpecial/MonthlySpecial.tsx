@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './MonthlySpecial.css';
 import { fetchMonthlySpecial } from '../../mockData/monthlySpecialMockData.js';
 
@@ -17,7 +17,6 @@ const MonthlySpecial = () => {
                 setSpecialData(data);
             } catch (err) {
                 setError('Failed to load monthly special data');
-                console.error('Error loading special data:', err);
             } finally {
                 setLoading(false);
             }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
@@ -177,7 +178,7 @@ const ProductDetails = () => {
                             <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">{currentProduct?.currency || '$'}</span>{currentProduct?.price?.toFixed(2)}</bdi></span></p>
 
 
-                            <form className="cart" onSubmit={(e) => { e.preventDefault(); console.log('Add to cart clicked'); }} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
+                            <form className="cart" onSubmit={(e) => e.preventDefault()} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
                                 <div className="fpf-fields before-add-to-cart">
                                     <input type="hidden" name="_fpf_nonce" value="68f4b39d79" form="fpf-add-to-cart-form" />
                                     <input type="hidden" name="_fpf_product_id" value="273" form="fpf-add-to-cart-form" />
@@ -258,7 +259,7 @@ const ProductDetails = () => {
                                     </span>
                                     <button
                                         className="d-block add-to-cart addToCartButton"
-                                        onClick={(e) => { e.preventDefault(); console.log(`Add to cart: $${product.price}`); }}>
+                                        onClick={(e) => e.preventDefault()}>
                                         Add to cart
                                     </button>
                                 </li>

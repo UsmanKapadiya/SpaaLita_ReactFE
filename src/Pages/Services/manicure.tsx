@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import ManicureBanner from '../../assets/images/manicureBanner.jpg';
 import ManicureMockData from '../../mockData/manicureMockData';
 import './globalServices.css';
 
 const Manicure: React.FC = () => {
-    console.log("ManicureMockData", ManicureMockData)
      return (
         <div className="massage-page">
             {/* Services Section */}

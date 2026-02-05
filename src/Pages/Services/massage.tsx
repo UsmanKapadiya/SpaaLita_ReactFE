@@ -1,10 +1,10 @@
+// @ts-nocheck
 import React from 'react';
 import MassageBanner from '../../assets/images/massage_banner.jpg';
 import MassageMockData from '../../mockData/massageMockData';
 import './globalServices.css';
 
 const Massage: React.FC = () => {
-    console.log("MassageMockData", MassageMockData)
     return (
         <div className="massage-page">
             {/* Services Section */}

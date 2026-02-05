@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './BookingPolicy.css'
 import { BookingPolicyMockData } from '../../mockData/BookingPolicyMockData.js';
 
@@ -12,11 +12,9 @@ const BookingPolicy = () => {
             try {
                 setLoading(true);
                 const data = await BookingPolicyMockData;
-                console.log(data)
                 setSpecialData(data);
             } catch (err) {
-                setError('Failed to load monthly special data');
-                console.error('Error loading special data:', err);
+                setError('Failed to load booking policy data');
             } finally {
                 setLoading(false);
             }
@@ -29,7 +27,7 @@ const BookingPolicy = () => {
         return (
             <div className="container">
                 <div className="loading-spinner text-center py-5">
-                    <p>Loading monthly specials...</p>
+                    <p>Loading booking policy...</p>
                 </div>
             </div>
         );
@@ -49,7 +47,7 @@ const BookingPolicy = () => {
         return (
             <div className="container">
                 <div className="no-data text-center py-5">
-                    <p>No special offers available at this time.</p>
+                    <p>Booking policy information not available.</p>
                 </div>
             </div>
         );
