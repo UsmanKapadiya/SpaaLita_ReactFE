@@ -6,3 +6,6 @@
 .badge{
     background-color: aqua !important;
 }
+li span{
+    font-size: 13pt !important;
+}
