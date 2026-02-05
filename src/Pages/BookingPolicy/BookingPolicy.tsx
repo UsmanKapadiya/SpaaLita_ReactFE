@@ -1,6 +1,8 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import './BookingPolicy.css'
 import { BookingPolicyMockData } from '../../mockData/BookingPolicyMockData.js';
+import BookNowButton from '../../Component/BookNowButton/BookNowButton.js';
 
 const BookingPolicy = () => {
     const [specialData, setSpecialData] = useState();
@@ -56,12 +58,7 @@ const BookingPolicy = () => {
     return (
         <div className="container">
             <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
-                <div className="wp-block-button centerAlign mt-0 pb-4">
-                    <a className="wp-block-button__link wp-element-button"
-                        href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567">
-                        <strong>BOOK NOW!</strong>
-                    </a>
-                </div>
+                <BookNowButton />
             </div>
 
             <div className="col-lg-10 m-auto booking-policy-content">

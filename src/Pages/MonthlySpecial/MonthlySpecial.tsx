@@ -1,8 +1,8 @@
-
-
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import './MonthlySpecial.css';
 import { fetchMonthlySpecial } from '../../mockData/monthlySpecialMockData.js';
+import BookNowButton from '../../Component/BookNowButton/BookNowButton.js';
 
 const MonthlySpecial = () => {
     const [specialData, setSpecialData] = useState();
@@ -56,16 +56,8 @@ const MonthlySpecial = () => {
     }
 
     return (
-        <div className="container">           
-            <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
-                <div className="wp-block-button centerAlign mt-0 mb-0">
-                    <a className="wp-block-button__link wp-element-button"
-                        href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567">
-                        <strong>BOOK NOW!</strong>
-                    </a>
-                </div>
-            </div>
-
+        <div className="container">
+            <BookNowButton />
             <div className="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-9d6595d7 wp-block-columns-is-layout-flex">
                 <div className="wp-block-column my-5 is-layout-flow wp-block-column-is-layout-flow">
                     <div className="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-9d6595d7 wp-block-columns-is-layout-flex">
@@ -74,8 +66,8 @@ const MonthlySpecial = () => {
                                 SPECIALS AND FEATURES
                             </h1>
                             <h4 className="wp-block-heading font-weight-bold text-center" id="monthly-specials">
-                               Experience the magic of relaxation at Spa A'lita.
-                            </h4>                        
+                                Experience the magic of relaxation at Spa A'lita.
+                            </h4>
                         </div>
                     </div>
                 </div>
@@ -87,7 +79,7 @@ const MonthlySpecial = () => {
                         decoding="async"
                         src={specialData?.image.url}
                         alt={specialData?.image.alt}
-                        className="wp-image-18083 monthlySpecial-img"        
+                        className="wp-image-18083 monthlySpecial-img"
                         sizes={specialData?.image.sizes}
                     />
                 </figure>

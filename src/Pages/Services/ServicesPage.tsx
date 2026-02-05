@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import Facials from '../../assets/images/Facial.jpg';
 import Massage from '../../assets/images/massage.jpg';
 import Acupressure from '../../assets/images/accupressure.jpg';
@@ -87,16 +88,7 @@ const ServicesPage: React.FC = () => {
     <div className="services-page">
       <div className="container-fluid px-0">
         {/* Book Now Button */}
-        <div className="centerAlign">
-          <div className="wp-block-button">
-            <a 
-              className="wp-block-button__link" 
-              href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&pId=1033567"
-            >
-              BOOK NOW!
-            </a>
-          </div>
-        </div>
+        <BookNowButton className="mb-3" />
 
         {/* Hero Section */}
         <div className="hero-section">
@@ -153,16 +145,7 @@ const ServicesPage: React.FC = () => {
         </div>
 
         {/* Bottom Book Now Button */}
-        <div className="centerAlign">
-          <div className="wp-block-button">
-            <a 
-              className="wp-block-button__link" 
-              href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&pId=1033567"
-            >
-              <strong>BOOK NOW!</strong>
-            </a>
-          </div>
-        </div>
+        <BookNowButton className="mt-4" />
       </div>
     </div>
   );

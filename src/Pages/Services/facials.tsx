@@ -2,6 +2,7 @@
 import React from 'react';
 import FacialServices from '../../assets/images/facial_services.jpg';
 import FacialsMockData from '../../mockData/facialsMockData'
+import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import './globalServices.css';
 
 const Facials: React.FC = () => {
@@ -11,14 +12,7 @@ const Facials: React.FC = () => {
             <div className="facials-services">
                 <div className="container">
                     <p></p>
-                    <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
-                        <div className="wp-block-button centerAlign mt-0 mb-0">
-                            <a className="wp-block-button__link wp-element-button"
-                                href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567">
-                                <strong>BOOK NOW!</strong>
-                            </a>
-                        </div>
-                    </div>
+                    <BookNowButton />
                     <div>
                         <figure
                             className="wp-block-image size-large is-resized is-style-rounded text-center mt-5">
