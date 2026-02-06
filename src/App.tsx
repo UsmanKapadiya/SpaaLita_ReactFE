@@ -22,6 +22,15 @@ import Cart from './Pages/CartAndCheckout/Cart';
 import Checkout from './Pages/CartAndCheckout/Checkout'
 import Shop from './Pages/Shop/Shop';
 import ProductDetails from './Pages/ProductsDetails/ProductDetails';
+import MyAccount from './Pages/MyAccount/MyAccount';
+import Dashboard from './Pages/MyAccount/Dashboard';
+import Orders from './Pages/MyAccount/Orders';
+import Downloads from './Pages/MyAccount/Downloads';
+import Addresses from './Pages/MyAccount/Addresses';
+import PaymentMethods from './Pages/MyAccount/PaymentMethods';
+import AccountDetails from './Pages/MyAccount/AccountDetails';
+import Submissions from './Pages/MyAccount/Submissions';
+import LostPassword from './Pages/MyAccount/LostPassword';
 
 // Placeholder components for other routes
 
@@ -45,16 +54,19 @@ function App() {
             <Route path="/waxing" element={<Waxing />} />
             <Route path="/laser-hair-removal" element={<Laser />} />
             <Route path="/brows-and-lashes" element={<Brows />} />
-            <Route path="/spa-packages" element={<Spaa/>} />
+            <Route path="/spa-packages" element={<Spaa />} />
             <Route path="/giftcard" element={<GiftCard />} />
-             <Route path="/shop" element={<Shop />} />
+            <Route path="/shop" element={<Shop />} />
             <Route path="/product/:itemName" element={<ProductDetails />} />
             <Route path="/monthly-specials" element={<MonthlySpecial />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/spa-policy/" element={<BookingPolicy />} />
             <Route path="/gallery" element={<Gallery />} />
-            <Route path="/cart" element={<Cart/>} />
-             <Route path="/checkout" element={<Checkout/>} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/my-account/*" element={<MyAccount />} />
+            <Route path="/my-account/lost-password" element={<LostPassword />} />
+
             <Route path="/font-test" element={<FontTest />} /> {/* Temporary for font testing */}
             {/* Catch all route for 404 */}
             <Route path="*" element={

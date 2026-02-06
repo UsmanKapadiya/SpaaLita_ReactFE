@@ -1,0 +1,433 @@
+
+.justify-content-start {
+    justify-content: flex-start !important;
+}
+
+
+
+.account-navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.account-navigation li {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.account-navigation li:last-child {
+    border-bottom: none;
+}
+
+.account-navigation li span {
+    display: block;
+    padding: 0.5rem 0.5rem;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+
+.account-navigation li.is-active span {
+    font-weight: 600;
+    font-size: 12pt !important;
+}
+
+/* Password Input with Eye Icon */
+.password-input {
+    position: relative;
+    display: block;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+
+
+.password-input input {
+    padding-right: 45px !important;
+}
+
+.account-content {
+    display: inline-block;
+    margin-left: 4rem;
+    height: 100%;
+    width: 90%;
+    padding-bottom: 2rem;
+    vertical-align: top;
+}
+
+/* Dashboard */
+/* .account-dashboard {
+  padding: 1rem 0;
+} */
+
+.welcome-message {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-info {
+    line-height: 1.8;
+    color: #666;
+}
+
+.link-text {
+    color: #404040;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+
+
+/* Orders */
+.account-orders h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.orders-table {
+    overflow-x: auto;
+}
+
+.orders-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-table th {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.orders-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-processing {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-pending {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.btn-view {
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+
+
+/* No Orders Message */
+/* .woocommerce-MyAccount-content {
+  padding: 1rem 0;
+} */
+
+.woocommerce-notices-wrapper {
+    margin-bottom: 1rem;
+}
+
+.woocommerce-info {
+    background-color: #e7f3ff;
+    /* padding: 1.5rem;
+  margin: 1rem 0; */
+    border-radius: 4px;
+    color: #333;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.woocommerce-info span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.icon-color {
+    font-size: 1.25rem;
+}
+
+.woocommerce-Button {
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+
+/* Addresses */
+.account-addresses h2 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.addresses-intro {
+    /* color: #666; */
+    margin-bottom: 2rem;
+}
+
+.address-box {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.address-box h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.address-box p {
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.btn-edit {
+    background-color: transparent;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+
+/* Address Edit/Add Links */
+.edit-link,
+.add-link {
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.address-form-container h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    border-bottom: 2px solid;
+    padding-bottom: 0.5rem;
+}
+
+.address-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.address-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.address-form .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+
+.address-form select.form-control {
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-save-address {
+    
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-cancel {
+    background-color: transparent;
+    color: #666;
+    border: 2px solid #ccc;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-cancel:hover {
+    background-color: #f8f9fa;
+    border-color: #999;
+    color: #333;
+}
+
+/* Payment Methods */
+.account-payment h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.btn-add-payment {
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+
+/* Account Details */
+.account-details h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.account-details h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: #333;
+    padding-top: 1rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.account-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.account-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.account-form .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.account-form .form-control:focus {
+    outline: none;
+  
+    box-shadow: 0 0 0 3px rgba(160, 130, 109, 0.1);
+}
+
+.btn-save-changes {
+
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+
+
+/* Downloads & Submissions */
+.account-downloads h2,
+.account-submissions h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.account-downloads p,
+.account-submissions p {
+    color: #666;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .account-navigation {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .account-content {
+        padding: 1.5rem;
+    }
+
+    .orders-table {
+        font-size: 0.875rem;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .my-account-page {
+        padding: 1rem 0;
+    }
+}
+
