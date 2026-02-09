@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+//@ts-nocheck
+import { FC, useState, useCallback, FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import './Cart.css';
@@ -35,84 +36,100 @@ interface ShippingDetails {
     giftCard: string;
 }
 
-const Checkout = () => {
+interface LoginData {
+    username: string;
+    password: string;
+}
+
+interface Province {
+    value: string;
+    label: string;
+}
+
+const CANADIAN_PROVINCES: Province[] = [
+    { value: '', label: 'Select an option…' },
+    { value: 'AB', label: 'Alberta' },
+    { value: 'BC', label: 'British Columbia' },
+    { value: 'MB', label: 'Manitoba' },
+    { value: 'NB', label: 'New Brunswick' },
+    { value: 'NL', label: 'Newfoundland and Labrador' },
+    { value: 'NT', label: 'Northwest Territories' },
+    { value: 'NS', label: 'Nova Scotia' },
+    { value: 'NU', label: 'Nunavut' },
+    { value: 'ON', label: 'Ontario' },
+    { value: 'PE', label: 'Prince Edward Island' },
+    { value: 'QC', label: 'Quebec' },
+    { value: 'SK', label: 'Saskatchewan' },
+    { value: 'YT', label: 'Yukon Territory' }
+];
+
+const INITIAL_BILLING_DETAILS: BillingDetails = {
+    firstName: '',
+    lastName: '',
+    address1: '',
+    address2: '',
+    country: 'CA',
+    state: '',
+    city: '',
+    postcode: '',
+    phone: '',
+    email: ''
+};
+
+const INITIAL_SHIPPING_DETAILS: ShippingDetails = {
+    firstName: '',
+    lastName: '',
+    address1: '',
+    address2: '',
+    state: '',
+    city: '',
+    country: 'CA',
+    postcode: '',
+    giftCard: ''
+};
+
+const CART_ITEMS: CartItem[] = [
+    { id: '1', name: 'Active Pureness Corrector', price: 47.00, quantity: 1 },
+    { id: '2', name: 'Gift Card - $100.00', price: 100.00, quantity: 1 },
+    { id: '3', name: 'Amazing Base Loose Mineral Foundation', price: 60.00, quantity: 1 }
+];
+
+type PaymentMethod = 'stripe' | 'stripe_klarna';
+
+const Checkout: FC = () => {
     const navigate = useNavigate();
 
-    const [showLogin, setShowLogin] = useState(false);
-    const [showCoupon, setShowCoupon] = useState(false);
-    const [couponCode, setCouponCode] = useState('');
-    const [createAccount, setCreateAccount] = useState(false);
-    const [copyBillingToShipping, setCopyBillingToShipping] = useState(false);
-    const [newsletter, setNewsletter] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('stripe');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [showLogin, setShowLogin] = useState<boolean>(false);
+    const [showCoupon, setShowCoupon] = useState<boolean>(false);
+    const [couponCode, setCouponCode] = useState<string>('');
+    const [createAccount, setCreateAccount] = useState<boolean>(false);
+    const [copyBillingToShipping, setCopyBillingToShipping] = useState<boolean>(false);
+    const [newsletter, setNewsletter] = useState<boolean>(false);
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+    const [rememberMe, setRememberMe] = useState<boolean>(false);
 
-    const [loginData, setLoginData] = useState({
+    const [loginData, setLoginData] = useState<LoginData>({
         username: '',
         password: ''
     });
 
-    const [billingDetails, setBillingDetails] = useState<BillingDetails>({
-        firstName: '',
-        lastName: '',
-        address1: '',
-        address2: '',
-        country: 'CA',
-        state: '',
-        city: '',
-        postcode: '',
-        phone: '',
-        email: ''
-    });
+    const [billingDetails, setBillingDetails] = useState<BillingDetails>(INITIAL_BILLING_DETAILS);
+    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(INITIAL_SHIPPING_DETAILS);
+    const [cartItems] = useState<CartItem[]>(CART_ITEMS);
 
-    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>({
-        firstName: '',
-        lastName: '',
-        address1: '',
-        address2: '',
-        state: '',
-        city: '',
-        country: 'CA',
-        postcode: '',
-        giftCard: ''
-    });
-
-    const [cartItems] = useState<CartItem[]>([
-        { id: '1', name: 'Active Pureness Corrector', price: 47.00, quantity: 1 },
-        { id: '2', name: 'Gift Card - $100.00', price: 100.00, quantity: 1 },
-        { id: '3', name: 'Amazing Base Loose Mineral Foundation', price: 60.00, quantity: 1 }
-    ]);
-
-    const canadianProvinces = [
-        { value: '', label: 'Select an option…' },
-        { value: 'AB', label: 'Alberta' },
-        { value: 'BC', label: 'British Columbia' },
-        { value: 'MB', label: 'Manitoba' },
-        { value: 'NB', label: 'New Brunswick' },
-        { value: 'NL', label: 'Newfoundland and Labrador' },
-        { value: 'NT', label: 'Northwest Territories' },
-        { value: 'NS', label: 'Nova Scotia' },
-        { value: 'NU', label: 'Nunavut' },
-        { value: 'ON', label: 'Ontario' },
-        { value: 'PE', label: 'Prince Edward Island' },
-        { value: 'QC', label: 'Quebec' },
-        { value: 'SK', label: 'Saskatchewan' },
-        { value: 'YT', label: 'Yukon Territory' }
-    ];
-
-    const calculateTotal = () => {
+    const calculateTotal = useCallback((): number => {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    };
+    }, [cartItems]);
 
-    const handleBillingChange = (field: keyof BillingDetails, value: string) => {
+    const handleBillingChange = useCallback((field: keyof BillingDetails, value: string): void => {
         setBillingDetails(prev => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
-    const handleShippingChange = (field: keyof ShippingDetails, value: string) => {
+    const handleShippingChange = useCallback((field: keyof ShippingDetails, value: string): void => {
         setShippingDetails(prev => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
-    const handleCopyBillingToShipping = (checked: boolean) => {
+    const handleCopyBillingToShipping = useCallback((checked: boolean): void => {
         setCopyBillingToShipping(checked);
         if (checked) {
             setShippingDetails({
@@ -127,86 +144,250 @@ const Checkout = () => {
                 giftCard: ''
             });
         }
-    };
+    }, [billingDetails]);
 
-    const handlePlaceOrder = (e: React.FormEvent) => {
+    const handlePlaceOrder = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        // Handle order placement logic here
-        // Order placed successfully
+        // TODO: Implement order placement logic
+        console.log('Order placed:', { billingDetails, shippingDetails, cartItems, paymentMethod });
         alert('Order placed successfully!');
-    };
+    }, [billingDetails, shippingDetails, cartItems, paymentMethod]);
 
-    const handleApplyCoupon = (e: React.FormEvent) => {
+    const handleApplyCoupon = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        // Applying coupon
+        // TODO: Implement coupon validation logic
+        console.log('Applying coupon:', couponCode);
         alert('Coupon applied!');
-    };
+    }, [couponCode]);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        // User login
+        // TODO: Implement authentication logic
+        console.log('Login attempt:', loginData);
         alert('Logged in successfully!');
-    };
+    }, [loginData]);
+
+    const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
+        <div className="woocommerce-info cart-empty" style={{ justifyContent: 'flex-start' }} role="status">
+            <span>
+                <WebAssetIcon className="icon-color" />
+            </span>
+            {message}
+            {showButton && (
+                <button
+                    type="button"
+                    onClick={onClick}
+                    className="showlogin"
+                    style={{ background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', cursor: 'pointer', padding: '0 5px' }}
+                    aria-label={buttonText}
+                >
+                    {buttonText}
+                </button>
+            )}
+        </div>
+    );
+
+    const renderAddressFields = (
+        type: 'billing' | 'shipping',
+        details: BillingDetails | ShippingDetails,
+        handleChange: (field: string, value: string) => void
+    ) => (
+        <>
+            <div className="row">
+                <div className="col-md-6">
+                    <p className="form-row">
+                        <label htmlFor={`${type}_first_name`}>
+                            First name&nbsp;<span className="required" aria-label="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            className="input-text form-control"
+                            id={`${type}_first_name`}
+                            value={details.firstName}
+                            onChange={(e) => handleChange('firstName', e.target.value)}
+                            autoComplete="given-name"
+                            required
+                            aria-required="true"
+                        />
+                    </p>
+                </div>
+                <div className="col-md-6">
+                    <p className="form-row">
+                        <label htmlFor={`${type}_last_name`}>
+                            Last name&nbsp;<span className="required" aria-label="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            className="input-text form-control"
+                            id={`${type}_last_name`}
+                            value={details.lastName}
+                            onChange={(e) => handleChange('lastName', e.target.value)}
+                            autoComplete="family-name"
+                            required
+                            aria-required="true"
+                        />
+                    </p>
+                </div>
+            </div>
+
+            <p className="form-row form-row-wide">
+                <label htmlFor={`${type}_address_1`}>
+                    Street address&nbsp;<abbr className="required" title="required">*</abbr>
+                </label>
+                <input
+                    type="text"
+                    className="input-text form-control"
+                    id={`${type}_address_1`}
+                    placeholder="House number and street name"
+                    value={details.address1}
+                    onChange={(e) => handleChange('address1', e.target.value)}
+                    autoComplete="address-line1"
+                    required
+                    aria-required="true"
+                />
+            </p>
+
+            <p className="form-row form-row-wide">
+                <label htmlFor={`${type}_address_2`}>
+                    Apartment, suite, unit, etc.&nbsp;<span className="optional">(optional)</span>
+                </label>
+                <input
+                    type="text"
+                    className="input-text form-control"
+                    id={`${type}_address_2`}
+                    placeholder="Apartment, suite, unit, etc."
+                    value={details.address2}
+                    onChange={(e) => handleChange('address2', e.target.value)}
+                    autoComplete="address-line2"
+                />
+            </p>
+
+            <div className="row">
+                <div className="col-md-6">
+                    <p className="form-row">
+                        <label htmlFor={`${type}_state`}>
+                            Province&nbsp;<abbr className="required" title="required">*</abbr>
+                        </label>
+                        <select
+                            id={`${type}_state`}
+                            className="state_select input-text form-control"
+                            value={details.state}
+                            onChange={(e) => handleChange('state', e.target.value)}
+                            autoComplete="address-level1"
+                            required
+                            aria-required="true"
+                        >
+                            {CANADIAN_PROVINCES.map(province => (
+                                <option key={province.value} value={province.value}>
+                                    {province.label}
+                                </option>
+                            ))}
+                        </select>
+                    </p>
+                </div>
+                <div className="col-md-6">
+                    <p className="form-row">
+                        <label htmlFor={`${type}_city`}>
+                            Town / City&nbsp;<abbr className="required" title="required">*</abbr>
+                        </label>
+                        <input
+                            type="text"
+                            className="input-text form-control"
+                            id={`${type}_city`}
+                            value={details.city}
+                            onChange={(e) => handleChange('city', e.target.value)}
+                            autoComplete="address-level2"
+                            required
+                            aria-required="true"
+                        />
+                    </p>
+                </div>
+            </div>
+
+            <p className="form-row form-row-wide">
+                <label htmlFor={`${type}_country`}>
+                    Country / Region&nbsp;<span className="required" aria-label="required">*</span>
+                </label>
+                <br />
+                <strong>Canada</strong>
+                <input type="hidden" id={`${type}_country`} value="CA" />
+            </p>
+
+            <p className="form-row">
+                <label htmlFor={`${type}_postcode`}>
+                    Postal code&nbsp;<abbr className="required" title="required">*</abbr>
+                </label>
+                <input
+                    type="text"
+                    className="input-text form-control"
+                    id={`${type}_postcode`}
+                    value={details.postcode}
+                    onChange={(e) => handleChange('postcode', e.target.value)}
+                    autoComplete="postal-code"
+                    required
+                    aria-required="true"
+                />
+            </p>
+        </>
+    );
 
     return (
-        <div className="container">
+        <main className="container checkout-page">
             <div className="woocommerce">
-                <div className="woocommerce-notices-wrapper"></div>
+                <div className="woocommerce-notices-wrapper" role="alert" aria-live="polite" />
 
-                {/* Login Toggle */}
-                <div className="woocommerce-form-login-toggle">
-                    {/* Login Toggle */}
-                    <div className="woocommerce-form-login-toggle">
-                        <div className="woocommerce-info cart-empty" role="status">
-                             <span>
-                                <WebAssetIcon className='icon-color'/>
-                            </span>
-                            Returning customer?
-                            <button
-                                type="button"
-                                className="showlogin"
-                                onClick={() => setShowLogin(!showLogin)}
-                                style={{ background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', cursor: 'pointer', padding: '0 5px' }}
-                            >
-                                Click here to login
-                            </button>
-                        </div>
-                    </div>
+                {/* Login Section */}
+                <div className="woocommerce-form-login-toggle mb-4">
+                    {renderInfoBox(
+                        'Returning customer?',
+                        true,
+                        'Click here to login',
+                        () => setShowLogin(!showLogin)
+                    )}
 
-                    {/* Login Form */}
                     {showLogin && (
-                        <form className="woocommerce-form woocommerce-form-login login" onSubmit={handleLogin}>
+                        <form className="woocommerce-form woocommerce-form-login login my-3" onSubmit={handleLogin}>
                             <div className="w-75">
                                 <p>If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing section.</p>
 
                                 <div className="row">
                                     <div className="col-md-6">
                                         <p className="form-row">
-                                            <label htmlFor="username">Username or email&nbsp;<span className="required">*</span></label>
+                                            <label htmlFor="username">
+                                                Username or email&nbsp;<span className="required" aria-label="required">*</span>
+                                            </label>
                                             <input
                                                 type="text"
                                                 className="input-text form-control checkoutInput loginInput"
                                                 name="username"
                                                 id="username"
                                                 value={loginData.username}
-                                                onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                                    setLoginData({ ...loginData, username: e.target.value })
+                                                }
                                                 autoComplete="username"
                                                 required
+                                                aria-required="true"
                                             />
                                         </p>
                                     </div>
                                     <div className="col-md-6">
                                         <p className="form-row">
-                                            <label htmlFor="password">Password&nbsp;<span className="required">*</span></label>
+                                            <label htmlFor="password">
+                                                Password&nbsp;<span className="required" aria-label="required">*</span>
+                                            </label>
                                             <input
                                                 className="input-text form-control loginInput"
                                                 type="password"
                                                 name="password"
                                                 id="password"
                                                 value={loginData.password}
-                                                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                                    setLoginData({ ...loginData, password: e.target.value })
+                                                }
                                                 autoComplete="current-password"
                                                 required
+                                                aria-required="true"
                                             />
                                         </p>
                                     </div>
@@ -220,9 +401,9 @@ const Checkout = () => {
                                             type="checkbox"
                                             id="rememberme"
                                             checked={rememberMe}
-                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                            onChange={(e: ChangeEvent<HTMLInputElement>) => setRememberMe(e.target.checked)}
                                         />
-                                        <span className='ml-1'>Remember me</span>
+                                        <span className="ml-1">Remember me</span>
                                     </label>
                                     <button type="submit" className="woocommerce-button button woocommerce-form-login__submit shopButton" name="login">
                                         Login
@@ -231,41 +412,32 @@ const Checkout = () => {
                                 <p className="lost_password">
                                     <button
                                         type="button"
-                                        className='ml-0 pl-0'
+                                        className="ml-0 pl-0"
                                         onClick={() => navigate('/my-account/lost-password')}
+                                        aria-label="Reset password"
                                         style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
                                     >
                                         Lost your password?
                                     </button>
                                 </p>
-                                <div className="clear"></div>
                             </div>
                         </form>
                     )}
+                </div>
 
-                    {/* Coupon Toggle */}
-                    <div className="woocommerce-form-coupon-toggle">
-                        <div className="woocommerce-info cart-empty" role="status">
-                           <span>
-                                <WebAssetIcon className='icon-color'/>
-                            </span>
-                            Have a coupon?
-                            <button
-                                type="button"
-                                className="showcoupon"
-                                onClick={() => setShowCoupon(!showCoupon)}
-                                style={{ background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', cursor: 'pointer', padding: '0 5px' }}
-                            >
-                                Click here to enter your code
-                            </button>
-                        </div>
-                    </div>
+                {/* Coupon Section */}
+                <div className="woocommerce-form-coupon-toggle mb-4">
+                    {renderInfoBox(
+                        'Have a coupon?',
+                        true,
+                        'Click here to enter your code',
+                        () => setShowCoupon(!showCoupon)
+                    )}
 
-                    {/* Coupon Form */}
                     {showCoupon && (
-                        <form className="checkout_coupon woocommerce-form-coupon" onSubmit={handleApplyCoupon}>
+                        <form className="checkout_coupon woocommerce-form-coupon my-3" onSubmit={handleApplyCoupon}>
                             <p>If you have a coupon code, please apply it below.</p>
-                            <p className="form-row float-left">
+                            <div className="d-flex gap-2">
                                 <input
                                     type="text"
                                     name="coupon_code"
@@ -273,353 +445,136 @@ const Checkout = () => {
                                     placeholder="Coupon code"
                                     id="coupon_code"
                                     value={couponCode}
-                                    onChange={(e) => setCouponCode(e.target.value)}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCouponCode(e.target.value)}
+                                    aria-label="Coupon code"
                                 />
-                            </p>
-                            <p className="form-row float-left">
                                 <button type="submit" className="button shopButton" name="apply_coupon">
                                     Apply coupon
                                 </button>
-                            </p>
-                            <div className="clear"></div>
+                            </div>
                         </form>
                     )}
+                </div>
 
-                    <div className="woocommerce-notices-wrapper"></div>
+                {/* Checkout Form */}
+                <form name="checkout" method="post" className="checkout woocommerce-checkout my-5" onSubmit={handlePlaceOrder}>
+                    <div className="row" id="customer_details">
+                        {/* Billing & Shipping Section */}
+                        <div className="col-lg-6 mb-3">
+                            {/* Billing Details */}
+                            <section aria-labelledby="billing-heading">
+                                <h3 id="billing-heading">Billing details</h3>
+                                <div className="woocommerce-billing-fields__field-wrapper">
+                                    {renderAddressFields('billing', billingDetails, handleBillingChange)}
 
-                    {/* Checkout Form */}
-                    <form name="checkout" method="post" className="checkout woocommerce-checkout my-5" onSubmit={handlePlaceOrder}>
-                        <div className="row" id="customer_details">
-                            {/* Billing Section */}
-                            <div className="col-lg-6 mb-3">
-                                <div id="billing_section">
-                                    <div className="woocommerce-billing-fields">
-                                        <h3>Billing details</h3>
-                                        <div className="woocommerce-billing-fields__field-wrapper">
-                                            <div className="row">
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_first_name">First name&nbsp;<span className="required">*</span></label>
-                                                        <input
-                                                            type="text"
-                                                            className="input-text"
-                                                            id="billing_first_name"
-                                                            value={billingDetails.firstName}
-                                                            onChange={(e) => handleBillingChange('firstName', e.target.value)}
-                                                            autoComplete="given-name"
-                                                            required
-                                                        />
-                                                    </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_last_name">Last name&nbsp;<span className="required">*</span></label>
-                                                        <input
-                                                            type="text"
-                                                            className="input-text"
-                                                            id="billing_last_name"
-                                                            value={billingDetails.lastName}
-                                                            onChange={(e) => handleBillingChange('lastName', e.target.value)}
-                                                            autoComplete="family-name"
-                                                            required
-                                                        />
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <p className="form-row form-row-wide">
-                                                <label htmlFor="billing_address_1">Street address&nbsp;<abbr className="required">*</abbr></label>
-                                                <input
-                                                    type="text"
-                                                    className="input-text"
-                                                    id="billing_address_1"
-                                                    placeholder="House number and street name"
-                                                    value={billingDetails.address1}
-                                                    onChange={(e) => handleBillingChange('address1', e.target.value)}
-                                                    autoComplete="address-line1"
-                                                    required
-                                                />
-                                            </p>
-                                            <p className="form-row form-row-wide">
-                                                <label htmlFor="billing_address_2">Apartment, suite, unit, etc.&nbsp;<abbr className="required">*</abbr></label>
-                                                <input
-                                                    type="text"
-                                                    className="input-text"
-                                                    id="billing_address_2"
-                                                    placeholder="Apartment, suite, unit, etc. (optional)"
-                                                    value={billingDetails.address2}
-                                                    onChange={(e) => handleBillingChange('address2', e.target.value)}
-                                                    autoComplete="address-line2"
-                                                />
-                                            </p>
-                                            <div className="row">
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_state">Province&nbsp;<abbr className="required">*</abbr></label>
-                                                        <select
-                                                            id="billing_state"
-                                                            className="state_select input-text"
-                                                            value={billingDetails.state}
-                                                            onChange={(e) => handleBillingChange('state', e.target.value)}
-                                                            autoComplete="address-level1"
-                                                            required
-                                                        >
-                                                            {canadianProvinces.map(province => (
-                                                                <option key={province.value} value={province.value}>{province.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_city">Town / City&nbsp;<abbr className="required">*</abbr></label>
-                                                        <input
-                                                            type="text"
-                                                            className="input-text"
-                                                            id="billing_city"
-                                                            value={billingDetails.city}
-                                                            onChange={(e) => handleBillingChange('city', e.target.value)}
-                                                            autoComplete="address-level2"
-                                                            required
-                                                        />
-                                                    </p>
-                                                </div>
-                                            </div>
-                                             <p className="form-row form-row-wide">
-                                                <label htmlFor="billing_country">Country / Region&nbsp;<span className="required">*</span></label> <br/>
-                                                <strong>Canada</strong>
-                                                <input type="hidden" id="billing_country" value="CA" />
-                                            </p>
-                                            <div className="row">
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_postcode">Postal code&nbsp;<abbr className="required">*</abbr></label>
-                                                        <input
-                                                            type="text"
-                                                            className="input-text"
-                                                            id="billing_postcode"
-                                                            value={billingDetails.postcode}
-                                                            onChange={(e) => handleBillingChange('postcode', e.target.value)}
-                                                            autoComplete="postal-code"
-                                                            required
-                                                        />
-                                                    </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <p className="form-row">
-                                                        <label htmlFor="billing_phone">Phone&nbsp;<span className="required">*</span></label>
-                                                        <input
-                                                            type="tel"
-                                                            className="input-text"
-                                                            id="billing_phone"
-                                                            value={billingDetails.phone}
-                                                            onChange={(e) => handleBillingChange('phone', e.target.value)}
-                                                            autoComplete="tel"
-                                                            required
-                                                        />
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <p className="form-row form-row-wide">
-                                                <label htmlFor="billing_email">Email address&nbsp;<span className="required">*</span></label>
-                                                <input
-                                                    type="email"
-                                                    className="input-text"
-                                                    id="billing_email"
-                                                    value={billingDetails.email}
-                                                    onChange={(e) => handleBillingChange('email', e.target.value)}
-                                                    autoComplete="email username"
-                                                    required
-                                                />
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <p className="form-row">
+                                        <label htmlFor="billing_phone">
+                                            Phone&nbsp;<span className="required" aria-label="required">*</span>
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            className="input-text form-control"
+                                            id="billing_phone"
+                                            value={billingDetails.phone}
+                                            onChange={(e) => handleBillingChange('phone', e.target.value)}
+                                            autoComplete="tel"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </p>
 
-                                    <div className="woocommerce-account-fields">
-                                        <p className="form-row form-row-wide create-account">
-                                            <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-                                                <input
-                                                    className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
-                                                    id="createaccount"
-                                                    type="checkbox"
-                                                    checked={createAccount}
-                                                    onChange={(e) => setCreateAccount(e.target.checked)}
-                                                />
-                                                <span>Create an account?</span>
-                                            </label>
-                                        </p>
-                                    </div>
+                                    <p className="form-row form-row-wide">
+                                        <label htmlFor="billing_email">
+                                            Email address&nbsp;<span className="required" aria-label="required">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            className="input-text form-control"
+                                            id="billing_email"
+                                            value={billingDetails.email}
+                                            onChange={(e) => handleBillingChange('email', e.target.value)}
+                                            autoComplete="email"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </p>
                                 </div>
 
-                                {/* Shipping Section */}
-                                <div id="shipping_section">
-                                    <div className="woocommerce-shipping-fields">
-                                        <h3 className="my-4">
-                                            <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox form d-flex align-items-center">
-                                                <input
-                                                    id="copy-billing-to-shipping-address"
-                                                    className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox d-block mr-2"
-                                                    type="checkbox"
-                                                    checked={copyBillingToShipping}
-                                                    onChange={(e) => handleCopyBillingToShipping(e.target.checked)}
-                                                />
-                                                <span>Copy billing to shipping address?</span>
-                                            </label>
-                                        </h3>
-
-                                        <h3>Shipping details</h3>
-
-                                        <div className="shipping_address">
-                                            <div className="woocommerce-shipping-fields__field-wrapper">
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <p className="form-row">
-                                                            <label htmlFor="shipping_first_name">First name&nbsp;<span className="required">*</span></label>
-                                                            <input
-                                                                type="text"
-                                                                className="input-text"
-                                                                id="shipping_first_name"
-                                                                value={shippingDetails.firstName}
-                                                                onChange={(e) => handleShippingChange('firstName', e.target.value)}
-                                                                autoComplete="given-name"
-                                                                required
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <p className="form-row">
-                                                            <label htmlFor="shipping_last_name">Last name&nbsp;<span className="required">*</span></label>
-                                                            <input
-                                                                type="text"
-                                                                className="input-text"
-                                                                id="shipping_last_name"
-                                                                value={shippingDetails.lastName}
-                                                                onChange={(e) => handleShippingChange('lastName', e.target.value)}
-                                                                autoComplete="family-name"
-                                                                required
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <p className="form-row form-row-wide">
-                                                    <label htmlFor="shipping_address_1">Street address&nbsp;<abbr className="required">*</abbr></label>
-                                                    <input
-                                                        type="text"
-                                                        className="input-text"
-                                                        id="shipping_address_1"
-                                                        placeholder="House number and street name"
-                                                        value={shippingDetails.address1}
-                                                        onChange={(e) => handleShippingChange('address1', e.target.value)}
-                                                        autoComplete="address-line1"
-                                                        required
-                                                    />
-                                                </p>
-                                                <p className="form-row form-row-wide">
-                                                    <label htmlFor="shipping_address_2">Apartment, suite, unit, etc.&nbsp;<abbr className="required">*</abbr></label>
-                                                    <input
-                                                        type="text"
-                                                        className="input-text"
-                                                        id="shipping_address_2"
-                                                        placeholder="Apartment, suite, unit, etc. (optional)"
-                                                        value={shippingDetails.address2}
-                                                        onChange={(e) => handleShippingChange('address2', e.target.value)}
-                                                        autoComplete="address-line2"
-                                                    />
-                                                </p>
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <p className="form-row">
-                                                            <label htmlFor="shipping_state">Province&nbsp;<abbr className="required">*</abbr></label>
-                                                            <select
-                                                                id="shipping_state"
-                                                                className="state_select input-text"
-                                                                value={shippingDetails.state}
-                                                                onChange={(e) => handleShippingChange('state', e.target.value)}
-                                                                autoComplete="address-level1"
-                                                                required
-                                                            >
-                                                                {canadianProvinces.map(province => (
-                                                                    <option key={province.value} value={province.value}>{province.label}</option>
-                                                                ))}
-                                                            </select>
-                                                        </p>
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <p className="form-row">
-                                                            <label htmlFor="shipping_city">Town / City&nbsp;<abbr className="required">*</abbr></label>
-                                                            <input
-                                                                type="text"
-                                                                className="input-text"
-                                                                id="shipping_city"
-                                                                value={shippingDetails.city}
-                                                                onChange={(e) => handleShippingChange('city', e.target.value)}
-                                                                autoComplete="address-level2"
-                                                                required
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <p className="form-row form-row-wide">
-                                                    <label htmlFor="shipping_country">Country / Region&nbsp;<span className="required">*</span></label> <br/>
-                                                    <strong>Canada</strong>
-                                                    <input type="hidden" id="shipping_country" value="CA" />
-                                                </p>
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <p className="form-row">
-                                                            <label htmlFor="shipping_postcode">Postal code&nbsp;<abbr className="required">*</abbr></label>
-                                                            <input
-                                                                type="text"
-                                                                className="input-text"
-                                                                id="shipping_postcode"
-                                                                value={shippingDetails.postcode}
-                                                                onChange={(e) => handleShippingChange('postcode', e.target.value)}
-                                                                autoComplete="postal-code"
-                                                                required
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <p className="form-row form-row-wide">
-                                                    <label htmlFor="shipping_giftcard">Electronic Gift Card&nbsp;<span className="required">*</span></label>
-                                                    <input
-                                                        type="text"
-                                                        className="input-text"
-                                                        id="shipping_giftcard"
-                                                        value={shippingDetails.giftCard}
-                                                        onChange={(e) => handleShippingChange('giftCard', e.target.value)}
-                                                        autoComplete="off"
-                                                        required
-                                                    />
-                                                    {/* currently Commented
-                                                         <span className="description">Would you rather to receive an immediate Electronic Gift Card directly to your email, instead of physically shipped to your address?</span> 
-                                                    */}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="woocommerce-additional-fields">
-                                        <p className="form-row form-row-wide">
-                                            <label className="checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    id="newsletter_checkbox"
-                                                    checked={newsletter}
-                                                    onChange={(e) => setNewsletter(e.target.checked)}
-                                                />
-                                                <span className='ml-2'>
-                                                    Yes, I'm ok with you sending me additional newsletter and email content&nbsp;
-                                                    <span className="optional">(optional)</span>
-                                                </span>
-                                            </label>
-                                        </p>
-                                    </div>
+                                <div className="woocommerce-account-fields">
+                                    <p className="form-row form-row-wide create-account">
+                                        <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+                                            <input
+                                                className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
+                                                id="createaccount"
+                                                type="checkbox"
+                                                checked={createAccount}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) => setCreateAccount(e.target.checked)}
+                                            />
+                                            <span className="ml-1">Create an account?</span>
+                                        </label>
+                                    </p>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Order Summary Section */}
-                            <div className="col-lg-6">
-                                <h3 id="order_review_heading">Order summary</h3>
+                            {/* Shipping Details */}
+                            <section aria-labelledby="shipping-heading" className="mt-4">
+                                <h3 className="my-4">
+                                    <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox d-flex align-items-center">
+                                        <input
+                                            id="copy-billing-to-shipping-address"
+                                            className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox mr-2"
+                                            type="checkbox"
+                                            checked={copyBillingToShipping}
+                                            onChange={(e: ChangeEvent<HTMLInputElement>) => handleCopyBillingToShipping(e.target.checked)}
+                                        />
+                                        <span>Copy billing to shipping address?</span>
+                                    </label>
+                                </h3>
+
+                                <h3 id="shipping-heading">Shipping details</h3>
+                                <div className="woocommerce-shipping-fields__field-wrapper">
+                                    {renderAddressFields('shipping', shippingDetails, handleShippingChange)}
+
+                                    <p className="form-row form-row-wide">
+                                        <label htmlFor="shipping_giftcard">
+                                            Electronic Gift Card&nbsp;<span className="required" aria-label="required">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="input-text form-control"
+                                            id="shipping_giftcard"
+                                            value={shippingDetails.giftCard}
+                                            onChange={(e) => handleShippingChange('giftCard', e.target.value)}
+                                            autoComplete="off"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </p>
+                                </div>
+
+                                <div className="woocommerce-additional-fields mt-3">
+                                    <p className="form-row form-row-wide">
+                                        <label className="checkbox">
+                                            <input
+                                                type="checkbox"
+                                                id="newsletter_checkbox"
+                                                checked={newsletter}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewsletter(e.target.checked)}
+                                            />
+                                            <span className="ml-2">
+                                                Yes, I'm ok with you sending me additional newsletter and email content&nbsp;
+                                                <span className="optional">(optional)</span>
+                                            </span>
+                                        </label>
+                                    </p>
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* Order Summary Section */}
+                        <div className="col-lg-6">
+                            <section aria-labelledby="order-summary-heading">
+                                <h3 id="order-summary-heading">Order summary</h3>
 
                                 <div id="order_review" className="woocommerce-checkout-review-order">
                                     <table className="shop_table woocommerce-checkout-review-order-table">
@@ -676,42 +631,45 @@ const Checkout = () => {
                                     </table>
 
                                     <div id="payment" className="woocommerce-checkout-payment">
-                                        <ul className="wc_payment_methods payment_methods methods">
-                                            <li className="wc_payment_method payment_method_stripe">
-                                                <input
-                                                    id="payment_method_stripe"
-                                                    type="radio"
-                                                    className="input-radio"
-                                                    name="payment_method"
-                                                    value="stripe"
-                                                    checked={paymentMethod === 'stripe'}
-                                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                                />
-                                                <label htmlFor="payment_method_stripe">Credit / Debit Card</label>
-                                                {paymentMethod === 'stripe' && (
-                                                    <div className="payment_box payment_method_stripe">
-                                                        <p>Secure payment via Stripe</p>
-                                                    </div>
-                                                )}
-                                            </li>
-                                            <li className="wc_payment_method payment_method_stripe_klarna">
-                                                <input
-                                                    id="payment_method_stripe_klarna"
-                                                    type="radio"
-                                                    className="input-radio"
-                                                    name="payment_method"
-                                                    value="stripe_klarna"
-                                                    checked={paymentMethod === 'stripe_klarna'}
-                                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                                />
-                                                <label htmlFor="payment_method_stripe_klarna">Klarna</label>
-                                                {paymentMethod === 'stripe_klarna' && (
-                                                    <div className="payment_box payment_method_stripe_klarna">
-                                                        <p>Secure payment via Klarna</p>
-                                                    </div>
-                                                )}
-                                            </li>
-                                        </ul>
+                                        <fieldset>
+                                            <legend className="sr-only">Payment method</legend>
+                                            <ul className="wc_payment_methods payment_methods methods">
+                                                <li className="wc_payment_method payment_method_stripe">
+                                                    <input
+                                                        id="payment_method_stripe"
+                                                        type="radio"
+                                                        className="input-radio"
+                                                        name="payment_method"
+                                                        value="stripe"
+                                                        checked={paymentMethod === 'stripe'}
+                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentMethod(e.target.value as PaymentMethod)}
+                                                    />
+                                                    <label htmlFor="payment_method_stripe">Credit / Debit Card</label>
+                                                    {paymentMethod === 'stripe' && (
+                                                        <div className="payment_box payment_method_stripe">
+                                                            <p>Secure payment via Stripe</p>
+                                                        </div>
+                                                    )}
+                                                </li>
+                                                <li className="wc_payment_method payment_method_stripe_klarna">
+                                                    <input
+                                                        id="payment_method_stripe_klarna"
+                                                        type="radio"
+                                                        className="input-radio"
+                                                        name="payment_method"
+                                                        value="stripe_klarna"
+                                                        checked={paymentMethod === 'stripe_klarna'}
+                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentMethod(e.target.value as PaymentMethod)}
+                                                    />
+                                                    <label htmlFor="payment_method_stripe_klarna">Klarna</label>
+                                                    {paymentMethod === 'stripe_klarna' && (
+                                                        <div className="payment_box payment_method_stripe_klarna">
+                                                            <p>Secure payment via Klarna</p>
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            </ul>
+                                        </fieldset>
 
                                         <div className="form-row place-order">
                                             <div className="woocommerce-terms-and-conditions-wrapper">
@@ -720,7 +678,7 @@ const Checkout = () => {
                                                         Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
                                                         <button
                                                             type="button"
-                                                            className='p-0'
+                                                            className="p-0"
                                                             onClick={() => navigate('/?page_id=3')}
                                                             style={{ background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
                                                         >
@@ -733,7 +691,7 @@ const Checkout = () => {
                                             <div style={{ textAlign: 'right' }}>
                                                 <button
                                                     type="submit"
-                                                    className="button alt shopButton "
+                                                    className="button alt shopButton"
                                                     id="place_order"
                                                 >
                                                     Place order
@@ -742,22 +700,17 @@ const Checkout = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </form>
-
-                      <div className="woocommerce-form-coupon-toggle">
-                        <div className="woocommerce-info cart-empty" role="status">
-                           <span>
-                                <WebAssetIcon className='icon-color'/>
-                            </span>
-                            Thank you for your purchase at Spa A'lita!            
+                            </section>
                         </div>
                     </div>
+                </form>
+
+                <div className="woocommerce-form-coupon-toggle mt-4">
+                    {renderInfoBox('Thank you for your purchase at Spa A\'lita!', false, '', () => { })}
                 </div>
             </div>
-        </div>
+        </main>
     );
-}
+};
 
 export default Checkout;
