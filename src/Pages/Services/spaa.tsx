@@ -2,7 +2,7 @@
 import SpaBanner from '../../assets/images/SpaaBanner.jpg';
 import SpaaMockData from '../../mockData/SpaaMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { SPAA_BOOK_NOW_URL } from './ServicesConstants';
+import { SPAA_BOOK_NOW_URL } from '../../utils/constants.js';
 
 const Spaa = () => {
     return (

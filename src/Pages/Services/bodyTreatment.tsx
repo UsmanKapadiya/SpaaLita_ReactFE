@@ -2,7 +2,7 @@
 import BodyTreatmentBanner from '../../assets/images/bodyTreatmentBanner.jpg';
 import BodyTreatmentMockData from '../../mockData/bodyTreatmentMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { BODYTREATMENT_BOOK_NOW_URL } from './ServicesConstants';
+import { BODYTREATMENT_BOOK_NOW_URL } from '../../utils/constants.js';
 
 const BodyTreatment = () => {
     return (

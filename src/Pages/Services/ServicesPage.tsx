@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useNavigate } from 'react-router-dom';
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';
-import { BOOK_NOW_URL, SERVICES_LIST, SERVICES_HERO_IMAGE, SERVICES_HERO_CONTENT } from './ServicesConstants';
+import { SERVICES_LIST, SERVICES_HERO_IMAGE, SERVICES_HERO_CONTENT } from './ServicesConstants';
+import { BOOK_NOW_URL  } from '../../utils/constants';
 import './ServicesPage.css';
 
 const ServicesPage = () => {

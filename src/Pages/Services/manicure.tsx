@@ -2,7 +2,7 @@
 import ManicureBanner from '../../assets/images/manicureBanner.jpg';
 import ManicureMockData from '../../mockData/manicureMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { MANICURE_BOOK_NOW_URL } from './ServicesConstants';
+import { MANICURE_BOOK_NOW_URL } from '../../utils/constants.js';
 
 const Manicure = () => {
     return (

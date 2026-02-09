@@ -2,7 +2,7 @@
 import FacialServices from '../../assets/images/facial_services.jpg';
 import FacialsMockData from '../../mockData/facialsMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { FACIALS_BOOK_NOW_URL } from './ServicesConstants'
+import { FACIALS_BOOK_NOW_URL } from '../../utils/constants.js'
 
 const Facials = () => {
     return (

@@ -2,7 +2,7 @@
 import BrowsBanner from '../../assets/images/browsBanner.jpg';
 import BrowsMockData from '../../mockData/browsMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { BROW_BOOK_NOW_URL } from './ServicesConstants';
+import { BROW_BOOK_NOW_URL } from '../../utils/constants.js';
 
 const Brows = () => {
     return (

@@ -2,7 +2,7 @@
 import LaserBanner from '../../assets/images/Laser-HairBanner.jpg';
 import LaserMockData from '../../mockData/laserMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { LASER_BOOK_NOW_URL } from './ServicesConstants';
+import { LASER_BOOK_NOW_URL } from '../../utils/constants.js';
 
 const Laser = () => {
     return (
