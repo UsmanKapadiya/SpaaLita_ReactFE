@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { FC, useState, useEffect, useMemo } from 'react';
-import ImageGallery, { ReactImageGalleryItem } from 'react-image-gallery';
+import ImageGallery from 'react-image-gallery';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -39,7 +39,7 @@ const Gallery: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const images = useMemo<ReactImageGalleryItem[]>(() => {
+  const images = useMemo(() => {
     return GALLERY_IMAGES.map(({ src, alt }) => ({
       original: src,
       originalAlt: alt,
