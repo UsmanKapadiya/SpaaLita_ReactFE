@@ -1,15 +1,19 @@
-/* Facials Page Styles */
-.facials-page {
+/* Service Detail Page Styles */
+.service-detail-page {
   min-height: 100vh;
   background: #fff !important;
 }
 
-.centerAlign {
+.service-detail-content {
+  width: 100%;
+}
+
+.service-banner-container {
   display: flex;
   justify-content: center;
 }
 
-.facials-banner {
+.service-banner {
   border-radius: 9999px !important;
 }
 

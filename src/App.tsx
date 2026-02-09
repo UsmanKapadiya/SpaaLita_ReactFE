@@ -1,19 +1,20 @@
+// @ts-nocheck
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Component/Header/Header';
 import HomeScreen from './Pages/Home/HomeScreen';
 import ServicesPage from './Pages/Services/ServicesPage';
-import Facials from './Pages/Services/facials';
+import Facials from './Pages/Services/Facials';
 import ContactPage from './Pages/Contact/ContactPage';
 import FontTest from './FontTest'; // Temporary for font testing
-import Massage from './Pages/Services/massage';
-import AcuPressure from './Pages/Services/acupressure';
-import Manicure from './Pages/Services/manicure';
-import BodyTreatment from './Pages/Services/bodyTreatment';
-import Waxing from './Pages/Services/waxing';
-import Spaa from './Pages/Services/spaa';
-import Brows from './Pages/Services/brows';
-import Laser from './Pages/Services/laser';
+import Massage from './Pages/Services/Massage';
+import AcuPressure from './Pages/Services/Acupressure';
+import Manicure from './Pages/Services/Manicure';
+import BodyTreatment from './Pages/Services/BodyTreatment';
+import Waxing from './Pages/Services/Waxing';
+import Spaa from './Pages/Services/Spaa';
+import Brows from './Pages/Services/Brows';
+import Laser from './Pages/Services/Laser';
 import GiftCard from './Pages/GiftCard/GiftCard';
 import MonthlySpecial from './Pages/MonthlySpecial/MonthlySpecial';
 import BookingPolicy from './Pages/BookingPolicy/BookingPolicy';

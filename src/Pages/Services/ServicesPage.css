@@ -50,7 +50,6 @@
   display: flex;
   flex-direction: column;
   gap: 30px;
-
 }
 
 .service-item {
@@ -63,11 +62,17 @@
   display: flex;
   width: 100%;
   align-items: center;
+  background: transparent;
+}
+
+.service-content.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .service-image {
   flex: 1;
   max-width: 50%;
+  background: transparent;
 }
 
 .service-image img {
@@ -83,6 +88,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  background: transparent;
 }
 
 .service-info h5 {
@@ -98,6 +104,16 @@
   border: 1px solid;
   cursor: pointer;
   background: transparent !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font: inherit;
+  color: inherit;
+}
+
+.service-learn-more {
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+  display: inline-block;
 }
 
 /* Background colors */
@@ -111,7 +127,8 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .service-content {
+  .service-content,
+  .service-content.flex-row-reverse {
     flex-direction: column;
   }
 
