@@ -1,12 +1,14 @@
-// @ts-nocheck
+//@ts-nocheck
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { giftCardMockData, giftCardSortOptions } from '../../mockData/giftCardMockData';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
+import { sortProducts, type SortOption } from '../../utils/sortProducts';
+import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
+import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
+import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
-// Component for individual gift card item
 const GiftCardItem = ({ giftCard, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -15,7 +17,6 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
     const handleAddToCart = (e) => {
         e.preventDefault();
 
-        // Dispatch Redux action to add to cart
         dispatch(addToCart({
             id: giftCard.id,
             name: title,
@@ -23,7 +24,6 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
             image: image.src
         }));
 
-        // Trigger success message in parent component
         onAddToCart({ title, price, currency });
     };
 
@@ -38,7 +38,10 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
 
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
-            <div onClick={handleProductClick} style={{ cursor: 'pointer' }} className="woocommerce-LoopProduct-link woocommerce-loop-product__link">
+            <div 
+                onClick={handleProductClick} 
+                className="woocommerce-LoopProduct-link woocommerce-loop-product__link clickable"
+            >
                 <img
                     width={image.width}
                     height={image.height}
@@ -50,7 +53,7 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
                     loading={image.loading}
                 />
             </div>
-            <div className="product-title" onClick={handleProductClick} style={{ cursor: 'pointer' }}>
+            <div className="product-title clickable" onClick={handleProductClick}>
                 {title}
             </div>
             <span className="price">
@@ -62,18 +65,8 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
                 </span>
             </span>
             <button
-                className="d-block add-to-cart"
+                className="d-block add-to-cart add-to-cart-button"
                 onClick={handleAddToCart}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'inherit',
-                    cursor: 'pointer',
-                    padding: '0',
-                    font: 'inherit',
-                    textDecoration: 'underline',
-                    width: '100%'
-                }}
             >
                 Add to cart
             </button>
@@ -82,12 +75,9 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
 };
 
 const GiftCard = () => {
-    const navigate = useNavigate();
     const [sortBy, setSortBy] = useState('menu_order');
     const [showMessage, setShowMessage] = useState(false);
     const [addedItem, setAddedItem] = useState(null);
-
-    const getTotalCount = () => giftCardMockData.filter(card => card.isAvailable).length;
 
     const handleAddToCart = (item) => {
         setAddedItem(item);
@@ -95,35 +85,18 @@ const GiftCard = () => {
         
         setTimeout(() => {
             setShowMessage(false);
-        }, 5000);
-    };
-
-    const sortGiftCards = (sortBy) => {
-        const sortedData = [...giftCardMockData];
-
-        switch (sortBy) {
-            case 'price':
-                return sortedData.sort((a, b) => a.price - b.price);
-            case 'price-desc':
-                return sortedData.sort((a, b) => b.price - a.price);
-            case 'popularity':
-                return sortedData.sort((a, b) => b.productId - a.productId);
-            case 'date':
-                return sortedData.sort((a, b) => b.id - a.id);
-            case 'menu_order':
-            default:
-                return sortedData.sort((a, b) => a.id - b.id);
-        }
+        }, CART_MESSAGE_TIMEOUT);
     };
 
     const availableGiftCards = useMemo(() => {
-        return sortGiftCards(sortBy).filter(card => card.isAvailable);
+        const availableCards = giftCardMockData.filter((card) => card.isAvailable);
+        return sortProducts(availableCards, sortBy);
     }, [sortBy]);
 
-    const totalCount = getTotalCount();
+    const totalCount = availableGiftCards.length;
 
     const handleSortChange = (event) => {
-        setSortBy(event.target.value);
+        setSortBy(event.target.value as SortOption);
     };
 
     return (
@@ -137,29 +110,7 @@ const GiftCard = () => {
                 <div className="col-md-9">
                     <div className="shop">
                         {showMessage && addedItem && (
-                            <div className="woocommerce-notices-wrapper">
-                                <div className="woocommerce-message d-flex align-items-center" role="alert" tabIndex={-1}>
-                                    <span>
-                                        <CheckCircleIcon className='woocommerce-checkIcon'/>
-                                    </span>
-                                    <span className='ml-3'>
-                                        "{addedItem.title}" has been added to your cart.{' '}
-                                    </span>
-                                    <button
-                                        onClick={() => navigate('/cart')}
-                                        className="button wc-forward shopButton ml-auto"
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: 'inherit',
-                                            cursor: 'pointer',
-                                            textDecoration: 'underline'
-                                        }}
-                                    >
-                                        View cart
-                                    </button>
-                                </div>
-                            </div>
+                            <AddToCartMessage itemTitle={addedItem.title} />
                         )}
 
                         <p className="woocommerce-result-count" role="alert" aria-relevant="all" aria-hidden="false">

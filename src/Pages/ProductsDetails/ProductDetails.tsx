@@ -1,11 +1,12 @@
-// @ts-nocheck
+//@ts-nocheck
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
+import { useState, useMemo } from 'react';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
-import { shopMockData } from '../../mockData/shopMockData';
-import { giftCardMockData } from '../../mockData/giftCardMockData';
+import { getProductBySlug, getDataArrayBySource, type ProductSource } from '../../utils/productHelpers';
+import ProductNavigation from '../../Component/ProductNavigation/ProductNavigation';
+import ProductImageGallery from '../../Component/ProductImageGallery/ProductImageGallery';
+import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
+import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
 
 const ProductDetails = () => {
@@ -14,60 +15,46 @@ const ProductDetails = () => {
     const { itemName } = useParams();
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    // Get source from location state, or auto-detect if not provided
-    const sourceFromState = location.state?.source;
+    const sourceFromState = location.state?.source as ProductSource | undefined;
 
-    const getCurrentProduct = () => {
-        if (sourceFromState === 'shop') {
-            const product = shopMockData.find(product => product.slug === itemName);
-            return { product, source: 'shop' };
-        } else if (sourceFromState === 'giftCard') {
-            const product = giftCardMockData.find(product => product.slug === itemName);
-            return { product, source: 'giftCard' };
-        }
-        
-        let product = shopMockData.find(product => product.slug === itemName);
-        if (product) return { product, source: 'shop' };
-        
-        product = giftCardMockData.find(product => product.slug === itemName);
-        if (product) return { product, source: 'giftCard' };
-        
-        return { product: null, source: null };
-    };
-
-    const { product: currentProduct, source: productSource } = getCurrentProduct();
+    const { product: currentProduct, source: productSource } = useMemo(
+        () => getProductBySlug(itemName, sourceFromState),
+        [itemName, sourceFromState]
+    );
     
-    const currentDataArray = productSource === 'shop' ? shopMockData : giftCardMockData;
+    const currentDataArray = getDataArrayBySource(productSource);
 
-    const currentIndex = currentDataArray.findIndex(product => product.slug === itemName);
+    const currentIndex = currentDataArray.findIndex((product: any) => product.slug === itemName);
     const isFirstProduct = currentIndex === 0;
     const isLastProduct = currentIndex === currentDataArray.length - 1;
 
-    const relatedProducts = currentDataArray
-        .filter((product) => product.slug !== itemName)
-        .slice(0, 4)
-        .map((product) => ({
-            id: product.id,
-            slug: product.slug,
-            title: product.title,
-            price: product.price?.toFixed(2) || product.price,
-            image: product.images?.[0]?.src || product.image?.src || ImageNotFound,
-            srcSet: product.images?.[0]?.srcSet || product.image?.srcSet || '',
-            alt: product.images?.[0]?.alt || product.image?.alt || product.title
-        }));
+    const relatedProducts = useMemo(() => {
+        return currentDataArray
+            .filter((product: any) => product.slug !== itemName)
+            .slice(0, 4)
+            .map((product: any) => ({
+                id: product.id,
+                slug: product.slug,
+                title: product.title,
+                price: product.price?.toFixed(2) || product.price,
+                image: product.images?.[0]?.src || product.image?.src || ImageNotFound,
+                srcSet: product.images?.[0]?.srcSet || product.image?.srcSet || '',
+                alt: product.images?.[0]?.alt || product.image?.alt || product.title
+            }));
+    }, [currentDataArray, itemName]);
 
     const handleShopClick = () => {
         navigate('/shop');
     };
 
-    const handleProductClick = (productSlug, productId) => {
+    const handleProductClick = (productSlug: string, productId: number) => {
         navigate(`/product/${productSlug}`, {
             state: { id: productId, source: productSource }
         });
         setSelectedImageIndex(0);
     };
 
-    const navigateToProduct = (product) => {
+    const navigateToProduct = (product: any) => {
         navigate(`/product/${product.slug}`, {
             state: { id: product.id, source: productSource }
         });
@@ -108,69 +95,21 @@ const ProductDetails = () => {
             <div id="product-273" className="product product-detail">
                 <div className="row mt-5">
                     <div className="col-lg-7 col-md-12">
-                        <div className="woocommerce-product-gallery">
-                            <div className="woocommerce-product-gallery__image">
-                                <div className="main-product-image mb-3">
-                                    {mainImage ? (
-                                        <img
-                                            src={mainImage.src}
-                                            alt={mainImage.alt}
-                                            height={612}
-                                            width={459}
-                                            style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
-                                        />
-                                    ) : (
-                                        <img
-                                            src={ImageNotFound}
-                                            alt="Product not found"
-                                            height={612}
-                                            width={459}
-                                        />
-                                    )}
-                                </div>
-                                {/* Thumbnail images */}
-                                {thumbnailImages.length > 1 && (
-                                    <div className="product-thumbnails d-flex gap-2 mt-3" style={{ flexWrap: 'wrap' }}>
-                                        {thumbnailImages.map((image: any, index: number) => (
-                                            <div
-                                                key={index}
-                                                onClick={() => setSelectedImageIndex(index)}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    border: selectedImageIndex === index ? '2px solid #000' : '1px solid #ddd',
-                                                    padding: '5px',
-                                                    width: '100px',
-                                                    height: '100px'
-                                                }}
-                                            >
-                                                <img
-                                                    src={image.src}
-                                                    alt={image.alt}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <ProductImageGallery
+                            mainImage={mainImage}
+                            thumbnailImages={thumbnailImages}
+                            selectedImageIndex={selectedImageIndex}
+                            onImageSelect={setSelectedImageIndex}
+                        />
                     </div>
                     <div className="col-lg-5 col-md-12">
                         <div className="summary entry-summary">
-                            <div className="mb-4 previous-next-product" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                {!isFirstProduct && (
-                                    <KeyboardBackspaceIcon
-                                        onClick={handlePreviousProduct}
-                                        style={{ fontSize: '18px', cursor: 'pointer' }}
-                                    />
-                                )}
-                                {!isLastProduct && (
-                                    <ArrowRightAltIcon
-                                        onClick={handleNextProduct}
-                                        style={{ fontSize: '18px', cursor: 'pointer', marginLeft: 'auto' }}
-                                    />
-                                )}
-                            </div>
+                            <ProductNavigation
+                                isFirstProduct={isFirstProduct}
+                                isLastProduct={isLastProduct}
+                                onPrevious={handlePreviousProduct}
+                                onNext={handleNextProduct}
+                            />
                             <h4 className="product_title entry-title">{currentProduct?.title}</h4>
                             <div className="woocommerce-product-details__short-description">
                                 <p>{currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'}</p>
@@ -194,7 +133,11 @@ const ProductDetails = () => {
                                     <input type="number" id="quantity_698057c4e0b2c" className="input-text qty text" name="quantity" defaultValue="1" aria-label="Product quantity" min="1" step="1" placeholder="" inputMode="numeric" autoComplete="off" />
                                 </div>
 
-                                <div className="mt-5"><button type="submit" name="add-to-cart" value="273" className="single_add_to_cart_button button alt">Add to cart</button></div>
+                                <div className="mt-5">
+                                    <button type="submit" name="add-to-cart" value="273" className="single_add_to_cart_button button alt">
+                                        Add to cart
+                                    </button>
+                                </div>
 
                                 <div className="fpf-fields after-add-to-cart fpf-clear">
                                 </div>
@@ -223,52 +166,10 @@ const ProductDetails = () => {
                     </div>
                 </div>
             )}
-            <div className="row mt-5">
-                <div className="col-md-12">
-
-                    <section className="related products">
-
-                        <h2>Related products</h2>
-
-                        <ul className="products columns-4">
-                            {relatedProducts.map((product) => (
-                                <li key={product.id} className="col-lg-3 col-md-6 col-sm-6 text-center">
-                                    <div style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug, product.id)}>
-                                        <img
-                                            width="180"
-                                            height="180"
-                                            src={product.image}
-                                            className="wp-post-image"
-                                            alt={product.alt}
-                                            decoding="async"
-                                            loading="lazy"
-                                            srcSet={product.srcSet}
-                                            sizes="(max-width: 180px) 100vw, 180px"
-                                        />
-                                    </div>
-                                    <div className="product-title" style={{ cursor: 'pointer' }} onClick={() => handleProductClick(product.slug, product.id)}>
-                                        {product.title}
-                                    </div>
-                                    <span className="price">
-                                        <span className="woocommerce-Price-amount amount">
-                                            <bdi>
-                                                <span className="woocommerce-Price-currencySymbol">$</span>
-                                                {product.price}
-                                            </bdi>
-                                        </span>
-                                    </span>
-                                    <button
-                                        className="d-block add-to-cart addToCartButton"
-                                        onClick={(e) => e.preventDefault()}>
-                                        Add to cart
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-
-                    </section>
-                </div>
-            </div>
+            <RelatedProducts 
+                products={relatedProducts} 
+                onProductClick={handleProductClick} 
+            />
 
         </div>
     );
