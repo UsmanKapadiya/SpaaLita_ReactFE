@@ -218,6 +218,24 @@
     color: #666;
 }
 
+/* Error State */
+.error-state {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading State */
+.loading-state {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .gallery-container {
@@ -272,5 +290,54 @@
     .custom-image-gallery .image-gallery-thumbnail img {
         height: 50px;
         width: 75px;
+    }
+}
+
+/* Improve navigation button accessibility */
+.image-gallery-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    padding: 0.5rem;
+}
+
+.image-gallery-icon:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.image-gallery-icon:hover:not(:disabled) {
+    opacity: 0.8;
+}
+
+.image-gallery-icon:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.ArrowLeftIcon,
+.ArrowRightIcon,
+.fullScreenButton {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+@media (max-width: 768px) {
+    .gallery-container {
+        padding: 1rem 0 2rem;
+    }
+
+    .image-gallery-icon {
+        padding: 0.25rem;
+    }
+
+    .ArrowLeftIcon,
+    .ArrowRightIcon,
+    .fullScreenButton {
+        width: 20px;
+        height: 20px;
     }
 }

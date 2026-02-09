@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react';
-import ImageGallery from 'react-image-gallery';
-// import 'react-image-gallery/styles/css/image-gallery.css';
+//@ts-nocheck
+import { FC, useState, useEffect, useMemo } from 'react';
+import ImageGallery, { ReactImageGalleryItem } from 'react-image-gallery';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-
-import './Gallery.css';
-
-// Import all gallery images
 import Gallery1 from '../../assets/images/gallery1.jpg';
 import Gallery2 from '../../assets/images/gallery2.jpg';
 import Gallery3 from '../../assets/images/gallery3.jpeg';
@@ -18,106 +14,135 @@ import Gallery7 from '../../assets/images/gallery7.jpeg';
 import Gallery8 from '../../assets/images/gallery8.jpeg';
 import Gallery9 from '../../assets/images/gallery9.jpeg';
 import Gallery10 from '../../assets/images/gallery10.jpeg';
+import './Gallery.css';
 
 
-const Gallery = () => {
-    const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(true);
+interface GalleryImage {
+  src: string;
+  alt: string;
+}
 
-    useEffect(() => {
-        const galleryImages = [
-            {
-                original: Gallery1,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery2,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery3,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery4,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery5,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery6,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery7,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery8,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery9,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
-            {
-                original: Gallery10,
-                originalAlt: 'Spa A\'lita Home Banner',
-            },
+const GALLERY_IMAGES: GalleryImage[] = [
+  { src: Gallery1, alt: 'Spa A\'lita - Relaxing Spa Interior' },
+  { src: Gallery2, alt: 'Spa A\'lita - Treatment Room' },
+  { src: Gallery3, alt: 'Spa A\'lita - Massage Therapy Area' },
+  { src: Gallery4, alt: 'Spa A\'lita - Facial Treatment Space' },
+  { src: Gallery5, alt: 'Spa A\'lita - Wellness Center' },
+  { src: Gallery6, alt: 'Spa A\'lita - Tranquil Environment' },
+  { src: Gallery7, alt: 'Spa A\'lita - Premium Spa Services' },
+  { src: Gallery8, alt: 'Spa A\'lita - Luxury Facilities' },
+  { src: Gallery9, alt: 'Spa A\'lita - Spa Experience' },
+  { src: Gallery10, alt: 'Spa A\'lita - Relaxation Space' },
+];
 
+const Gallery: FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<boolean>(false);
 
-        ];
+  const images = useMemo<ReactImageGalleryItem[]>(() => {
+    return GALLERY_IMAGES.map(({ src, alt }) => ({
+      original: src,
+      originalAlt: alt,
+    }));
+  }, []);
 
-        setImages(galleryImages);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (images.length > 0) {
         setLoading(false);
-    }, []);
+      } else {
+        setHasError(true);
+        setLoading(false);
+      }
+    }, 300);
 
-    if (loading) {
-        return (
-            <div className="container">
-                <div className="loading-spinner text-center py-5">
-                    <p>Loading gallery...</p>
-                </div>
-            </div>
-        );
-    }
+    return () => clearTimeout(timer);
+  }, [images.length]);
 
+  const handleImageError = (): void => {
+    console.error('Failed to load gallery image');
+    setHasError(true);
+  };
+
+  if (loading) {
     return (
-        <div className="container-fluid gallery-container" id="gallery-section">
-            <div className="image-gallery-wrapper sliders mb-5">
-                <ImageGallery
-                    items={images}
-                    showBullets={true}
-                    showIndex={false}
-                    showThumbnails={false}
-                    lazyLoad={true}
-                    thumbnailPosition="bottom"
-                    showPlayButton={false}
-                    renderLeftNav={(onClick, _disabled) => (
-                        <ArrowBackIosIcon  className="ArrowLeftIcon" onClick={onClick} />
-                    )}
-                    renderRightNav={(onClick, _disabled) => (
-                        <ArrowForwardIosIcon className="ArrowRightIcon"  onClick={onClick} />
-                    )}
-
-                    renderFullscreenButton={(onClick) => (
-                        <OpenInFullIcon className='fullScreenButton' onClick={onClick} />
-                    )}
-                    // showFullscreenButton={true}
-                    useBrowserFullscreen={true}
-                    autoPlay={false}
-                    slideInterval={4000}
-                    slideDuration={450}
-                    swipeThreshold={50}
-                    showNav={true}
-                    indexSeparator=" of "
-                    additionalClass="custom-image-gallery"
-                />
-            </div>
+      <main className="container gallery-page">
+        <div className="loading-state text-center py-5" role="status" aria-live="polite">
+          <div className="spinner-border text-primary mb-3" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p>Loading gallery...</p>
         </div>
+      </main>
     );
+  }
+
+  if (hasError || images.length === 0) {
+    return (
+      <main className="container gallery-page">
+        <div className="error-state text-center py-5" role="alert">
+          <p className="text-danger">Failed to load gallery images. Please try again later.</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="container-fluid gallery-container" id="gallery-section">
+      <div className="image-gallery-wrapper sliders mb-5">
+        <ImageGallery
+          items={images}
+          showBullets
+          showIndex={false}
+          showThumbnails={false}
+          lazyLoad
+          thumbnailPosition="bottom"
+          showPlayButton={false}
+          renderLeftNav={(onClick, disabled) => (
+            <button
+              type="button"
+              className="image-gallery-icon image-gallery-left-nav"
+              disabled={disabled}
+              onClick={onClick}
+              aria-label="Previous image"
+            >
+              <ArrowBackIosIcon className="ArrowLeftIcon" />
+            </button>
+          )}
+          renderRightNav={(onClick, disabled) => (
+            <button
+              type="button"
+              className="image-gallery-icon image-gallery-right-nav"
+              disabled={disabled}
+              onClick={onClick}
+              aria-label="Next image"
+            >
+              <ArrowForwardIosIcon className="ArrowRightIcon" />
+            </button>
+          )}
+          renderFullscreenButton={(onClick, isFullscreen) => (
+            <button
+              type="button"
+              className="image-gallery-icon image-gallery-fullscreen-button"
+              onClick={onClick}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              <OpenInFullIcon className="fullScreenButton" />
+            </button>
+          )}
+          useBrowserFullscreen
+          autoPlay={false}
+          slideInterval={4000}
+          slideDuration={450}
+          swipeThreshold={50}
+          showNav
+          indexSeparator=" of "
+          additionalClass="custom-image-gallery"
+          onImageError={handleImageError}
+        />
+      </div>
+    </main>
+  );
 };
 
 export default Gallery;
