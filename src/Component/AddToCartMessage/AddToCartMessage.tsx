@@ -1,10 +1,13 @@
-//@ts-nocheck
 import { useNavigate } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import './AddToCartMessage.css';
 
+interface AddToCartMessageProps {
+    itemTitle: string;
+    onViewCart?: () => void;
+}
 
-const AddToCartMessage = ({ itemTitle, onViewCart }) => {
+const AddToCartMessage: React.FC<AddToCartMessageProps> = ({ itemTitle, onViewCart }) => {
     const navigate = useNavigate();
 
     const handleViewCart = () => {

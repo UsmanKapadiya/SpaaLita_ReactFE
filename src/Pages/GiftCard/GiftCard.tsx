@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { giftCardMockData, giftCardSortOptions } from '../../mockData/giftCardMockData';
@@ -9,12 +8,17 @@ import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
-const GiftCardItem = ({ giftCard, onAddToCart }) => {
+interface GiftCardItemProps {
+    giftCard: any;
+    onAddToCart: (item: { title: string; price: number; currency: string }) => void;
+}
+
+const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { title, price, currency, image, slug } = giftCard;
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         dispatch(addToCart({
@@ -74,12 +78,12 @@ const GiftCardItem = ({ giftCard, onAddToCart }) => {
     );
 };
 
-const GiftCard = () => {
-    const [sortBy, setSortBy] = useState('menu_order');
+const GiftCard: React.FC = () => {
+    const [sortBy, setSortBy] = useState<SortOption>('menu_order');
     const [showMessage, setShowMessage] = useState(false);
-    const [addedItem, setAddedItem] = useState(null);
+    const [addedItem, setAddedItem] = useState<{ title: string; price: number; currency: string } | null>(null);
 
-    const handleAddToCart = (item) => {
+    const handleAddToCart = (item: { title: string; price: number; currency: string }) => {
         setAddedItem(item);
         setShowMessage(true);
         
@@ -89,13 +93,13 @@ const GiftCard = () => {
     };
 
     const availableGiftCards = useMemo(() => {
-        const availableCards = giftCardMockData.filter((card) => card.isAvailable);
+        const availableCards = giftCardMockData.filter((card: any) => card.isAvailable);
         return sortProducts(availableCards, sortBy);
     }, [sortBy]);
 
     const totalCount = availableGiftCards.length;
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSortBy(event.target.value as SortOption);
     };
 
@@ -125,7 +129,7 @@ const GiftCard = () => {
                                 value={sortBy}
                                 onChange={handleSortChange}
                             >
-                                {giftCardSortOptions.map((option) => (
+                                {giftCardSortOptions.map((option: any) => (
                                     <option
                                         key={option.value}
                                         title={option.title}
@@ -140,7 +144,7 @@ const GiftCard = () => {
 
                         <div className="clear"></div>
                         <ul className="products columns-3">
-                            {availableGiftCards.map((giftCard) => (
+                            {availableGiftCards.map((giftCard: any) => (
                                 <GiftCardItem key={giftCard.id} giftCard={giftCard} onAddToCart={handleAddToCart} />
                             ))}
                         </ul>
