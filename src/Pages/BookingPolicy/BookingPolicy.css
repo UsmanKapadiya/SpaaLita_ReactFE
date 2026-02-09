@@ -6,6 +6,41 @@
     font-weight: bold;
 }
 
+.booking-policy-page {
+  min-height: 100vh;
+  padding: 2rem 0 4rem;
+}
+
+.loading-state,
+.error-state,
+.no-data {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-state .btn {
+  min-width: 120px;
+}
+
 .booking-policy-content {
-    font-family: inherit;
+  margin-top: 2rem;
+  padding: 1.5rem;
+}
+
+.booking-policy-content div {
+  line-height: 1.8;
+  word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  .booking-policy-page {
+    padding: 1rem 0 2rem;
+  }
+  
+  .booking-policy-content {
+    padding: 1rem;
+  }
 }

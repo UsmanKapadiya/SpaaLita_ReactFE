@@ -25,3 +25,4 @@ export const LASER_BOOK_NOW_URL = 'https://www.fresha.com/a/spa-alita-victoria-7
 export const BROW_BOOK_NOW_URL = 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=80d46ea4-d25d-4c1e-8480-b313f7cdbccf'
 export const SPAA_BOOK_NOW_URL = 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=2723d027-d0f7-4409-a374-2f515fb1bdde'
 export const MONTHLY_BOOK_NOW_URL = 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=807a6964-5582-4942-be4d-3ddc04e931db'
+export const BOOKING_POLICY = 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=da9b86ef-fae8-4a8e-b0aa-9ba8068777b8'
