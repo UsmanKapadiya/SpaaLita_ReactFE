@@ -1,0 +1,11 @@
+.map-section {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.map-container {
+  height: 470px;
+  width: 100%;
+  overflow: hidden;
+}

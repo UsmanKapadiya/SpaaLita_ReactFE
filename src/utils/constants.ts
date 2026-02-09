@@ -12,6 +12,8 @@ export const PRODUCT_IMAGE_DIMENSIONS = {
     height: 612,
 } as const;
 
+export const GOOGLE_MAPS_EMBED = 'https://www.google.com/maps/embed/v1/place?key=AIzaSyDv4daZyOfRCdRf1YtyD6hUHNe5Aeep-BM&q=101-745 Goldstream Ave,Victoria,BC,V9B 2X4';
+
 export const BOOK_NOW_URL = 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true'
 export const FACIALS_BOOK_NOW_URL= 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=cc4c1338-eb6c-41c6-b847-915f17bff6c0'
 export const MASSAGE_BOOK_NOW_URL= 'https://www.fresha.com/a/spa-alita-victoria-745-goldstream-avenue-dy6qaqva/booking?menu=true&pId=1033567&dppub=true&cartId=ae448754-d145-4967-bc81-f1c2399e3bfa'

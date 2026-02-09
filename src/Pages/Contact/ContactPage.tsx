@@ -1,29 +1,30 @@
 import ContactSection from '../../Component/ContactSection/ContactSection';
+import { GOOGLE_MAPS_EMBED } from '../../utils/constants';
+import './ContactPage.css';
 
 const ContactPage = () => {
-  return (
-    <>
-      <div className="d-block my-3">
-        <div className="w-100">
-          <div className="map-container" style={{ height: '470px', width: '100%', overflow: 'hidden' }}>
-            <iframe
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDv4daZyOfRCdRf1YtyD6hUHNe5Aeep-BM&amp;q=101-745 Goldstream Ave,Victoria,BC,V9B 2X4"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Spa A'lita Location"
-            />
-          </div>
-        </div>
-      </div>
-      <div className='container my-5 pb-5'>
-        <ContactSection topPadding={'pt-3'} normalFont={true} />
-      </div>
-    </>
 
+  return (
+    <main>
+      <section className="map-section">
+        <div className="map-container">
+          <iframe
+            src={GOOGLE_MAPS_EMBED}
+            // src={`https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${address}&zoom=15`}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Spa A'lita Location"
+          />
+        </div>
+      </section>
+      <section className="container my-5 pb-5">
+        <ContactSection topPadding="pt-3" normalFont />
+      </section>
+    </main>
   );
 };
 
