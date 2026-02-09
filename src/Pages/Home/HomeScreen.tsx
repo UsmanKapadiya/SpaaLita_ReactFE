@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeAboutBanner from '../../assets/images/home-about.jpg';
 import ServicBanner from '../../assets/images/our_service.jpg';
@@ -10,8 +10,103 @@ import './HomeScreen.css';
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const modalShown = localStorage.getItem('homeModalShown');
+    if (!modalShown) {
+      setShowModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '15px';
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    }
+
+    // Cleanup function to restore scroll on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, [showModal]);
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    localStorage.setItem('homeModalShown', 'true');
+  };
   return (
     <div className="home-screen ">
+      {/* Welcome Modal */}
+      {showModal && (
+        <>
+          <div className="modal-backdrop fade show" style={{ opacity: 0.5 }}></div>
+          <div 
+            className="modal fade show" 
+            tabIndex={-1} 
+            role="dialog" 
+            id="home_modal" 
+            style={{ paddingRight: '15px', display: 'block', overflowY: 'auto' }}
+          >
+            <div className="modal-dialog modal-dialog-centered modal-lg" role="document" style={{ margin: '3rem auto' }}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <div className="text-center w-100">
+                    <img 
+                      src="https://spaalita.ca/wp-content/themes/spaalita/images/SpaAlita_logo.png" 
+                      width="210" 
+                      alt="Logo"
+                    />
+                  </div>
+                  <button 
+                    type="button" 
+                    className="close" 
+                    onClick={handleCloseModal}
+                    aria-label="Close"
+                    style={{ 
+                      position: 'absolute', 
+                      right: '15px', 
+                      top: '15px',
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      color: '#000',
+                      textShadow: '0 1px 0 #fff',
+                      opacity: 0.5,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <div className="container-fluid">
+                    <div className="col-lg-12">
+                      <figure className="wp-block-gallery has-nested-images columns-default is-cropped wp-block-gallery-1">
+                        <img 
+                          decoding="async" 
+                          width="1024" 
+                          height="1024" 
+                          src="https://spaalita.ca/wp-content/uploads/2026/01/2026-FebSpecials-1024x1024.png" 
+                          alt="February Specials" 
+                          className="wp-image-18083"
+                          style={{ width: '100%', height: 'auto' }}
+                        />
+                      </figure>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       <div>
         <img
           src='https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-5.jpg'
