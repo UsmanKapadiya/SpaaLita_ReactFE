@@ -2,15 +2,21 @@
 .bg-240 {
     background-color: rgb(240, 240, 240);
 }
-.who-we-are{
-  margin-top: 3rem;
-}
-.who-we-are{
- font-size: 15px;
- line-height: 1.75rem;
+
+.who-we-are {
+    margin-top: 3rem;
+    font-size: 15px;
+    line-height: 1.75rem;
 }
 
-.our-service{
+.home-banner {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.our-service {
     position: absolute;
     top: 0;   
     color: #fff;        
@@ -18,7 +24,8 @@
     height: 100%;
     background-color: rgba(0,0,0,0.2);
 }
-.our-service-text{
+
+.our-service-text {
     text-align: center;    
     width: 100%;
     text-decoration: underline;
@@ -27,10 +34,69 @@
     top: 50%;
     position: absolute;
     transform: translate(0%, -50%);
+    cursor: pointer;
 }
-.our-service-text a{
+
+.our-service-text a {
     color: white !important;
 }
+
+/* Modal Styles */
+.welcome-modal {
+    padding-right: 15px;
+    display: block;
+    overflow-y: auto;
+}
+
+.welcome-modal .modal-dialog {
+    margin: 3rem auto;
+}
+
+.modal-backdrop {
+    opacity: 0.5;
+}
+
+.modal-close-button {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.modal-close-button:hover,
+.modal-close-button:focus {
+    opacity: 0.75;
+}
+
+.modal-special-image {
+    width: 100%;
+    height: auto;
+}
+
+/* Map Container */
+.map-container {
+    height: 400px;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Business Hours Table */
+.business-hours-table {
+    margin: 0 auto;
+}
+
+.business-hours-table td {
+    padding: 0.5rem 1rem;
+}
+
 .wp-block-image img {
     box-sizing: border-box;
     height: auto;
@@ -38,10 +104,11 @@
     vertical-align: bottom;
 }
 
-.gift-card-h5{
+.gift-card-h5 {
     line-height: 1.41em;
 }
-.round-buttton{
+
+.round-buttton {
     padding: 0.8em 2em;
     border-radius: 50px;
     border: 1px solid !important; 
@@ -51,51 +118,73 @@
     text-decoration: none !important;
     border-color: black !important;   
 }
-.round-buttton:hover,.round-buttton:focus,.round-buttton:active{
+
+.round-buttton:hover,
+.round-buttton:focus,
+.round-buttton:active {
     background: black !important;
     color: white !important;
     text-decoration: none !important;
     border-color: black !important;
 }
-.round-buttton.text-white:hover,.round-buttton.text-white:focus,.round-buttton.text-white:active{
+
+.round-buttton.text-white:hover,
+.round-buttton.text-white:focus,
+.round-buttton.text-white:active {
     background: white;
     color: rgb(240,240,240) !important;
     text-decoration: none !important;
     border-color: white;   
 }
-.vertical-middle{
+
+.vertical-middle {
     display: inherit;
     vertical-align: middle;
 }
-.contact-form-container{
+
+.contact-form-container {
     width: 90%;
     margin: 0 auto;
 }
-.contact-form-container input:not(.parsley-error),.contact-form-container textarea:not(.parsley-error){
+
+.contact-form-container input:not(.parsley-error),
+.contact-form-container textarea:not(.parsley-error) {
     border: none !important;
     border-bottom: 1px solid black !important;   
 }
-.newsletter input:not(.parsley-error){
-   border: 1px solid black !important;   
+
+.newsletter input:not(.parsley-error) {
+    border: 1px solid black !important;   
 }
-.contact-form-container input:not(.parsley-error):focus,.contact-form-container input:not(.parsley-error):hover,.contact-form-container input:not(.parsley-error):active,.contact-form-container textarea:not(.parsley-error):focus,.contact-form-container textarea:not(.parsley-error):hover,.contact-form-container textarea:not(.parsley-error):active{
-   border: 1px solid black !important;
+
+.contact-form-container input:not(.parsley-error):focus,
+.contact-form-container input:not(.parsley-error):hover,
+.contact-form-container input:not(.parsley-error):active,
+.contact-form-container textarea:not(.parsley-error):focus,
+.contact-form-container textarea:not(.parsley-error):hover,
+.contact-form-container textarea:not(.parsley-error):active {
+    border: 1px solid black !important;
 }
-input.parsley-error,textarea.parsley-error{
+
+input.parsley-error,
+textarea.parsley-error {
     border: 1px solid rgb(255, 64, 64) !important;
 }
-.erf-two-columns:last-child div{
+
+.erf-two-columns:last-child div {
     float: none !important;
     width: 100% !important;
 }
-.erf-layout-two-column.erf-container .erf-two-columns .form-group:nth-child(even){
+
+.erf-layout-two-column.erf-container .erf-two-columns .form-group:nth-child(even) {
     margin-left: 0% !important;
 }
-.parsley-errors-list{
+
+.parsley-errors-list {
     padding: 0px;
 }
 
-.black-button{
+.black-button {
     background: black !important;
     border: 0px !important;
     color: white !important;
@@ -103,13 +192,20 @@ input.parsley-error,textarea.parsley-error{
     font-weight: normal !important;
     cursor: pointer;
 }
-.black-button:hover,.black-button:focus,.black-button:active{
-     background: rbga(0,0,0,0.6) !important;
+
+.black-button:hover,
+.black-button:focus,
+.black-button:active {
+    background: rgba(0,0,0,0.6) !important;
 }
-a{
+
+a {
     color: rgb(64, 64, 64);    
 }
-a:hover,a:focus,a:active{
+
+a:hover,
+a:focus,
+a:active {
     color: rgb(64, 64, 64);
     text-decoration: underline;   
 }
