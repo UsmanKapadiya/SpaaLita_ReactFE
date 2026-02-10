@@ -1,11 +1,13 @@
 import type { FC } from 'react';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
 import { getProductBySlug, getDataArrayBySource, type ProductSource } from '../../utils/productHelpers';
 import ProductNavigation from '../../Component/ProductNavigation/ProductNavigation';
 import ProductImageGallery from '../../Component/ProductImageGallery/ProductImageGallery';
 import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
+import { useAppDispatch } from '../../store/hooks';
+import { addToCart } from '../../store/cartSlice';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
 interface LocationState {
@@ -15,8 +17,10 @@ interface LocationState {
 const ProductDetails: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const dispatch = useAppDispatch();
     const { itemName } = useParams<{ itemName: string }>();
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+    const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
 
     const sourceFromState = (location.state as LocationState)?.source;
 
@@ -24,14 +28,14 @@ const ProductDetails: FC = () => {
         () => getProductBySlug(itemName, sourceFromState),
         [itemName, sourceFromState]
     );
-    
+
     const currentDataArray = getDataArrayBySource(productSource);
 
-    const currentIndex = useMemo(() => 
+    const currentIndex = useMemo(() =>
         currentDataArray.findIndex((product: any) => product.slug === itemName),
         [currentDataArray, itemName]
     );
-    
+
     const isFirstProduct = currentIndex === 0;
     const isLastProduct = currentIndex === currentDataArray.length - 1;
 
@@ -69,18 +73,45 @@ const ProductDetails: FC = () => {
     }, [navigate, productSource]);
 
     const handlePreviousProduct = useCallback(() => {
-        const product = currentIndex > 0 
-            ? currentDataArray[currentIndex - 1] 
+        const product = currentIndex > 0
+            ? currentDataArray[currentIndex - 1]
             : currentDataArray[currentDataArray.length - 1];
         navigateToProduct(product);
     }, [currentIndex, currentDataArray, navigateToProduct]);
 
     const handleNextProduct = useCallback(() => {
-        const product = currentIndex < currentDataArray.length - 1 
-            ? currentDataArray[currentIndex + 1] 
+        const product = currentIndex < currentDataArray.length - 1
+            ? currentDataArray[currentIndex + 1]
             : currentDataArray[0];
         navigateToProduct(product);
     }, [currentIndex, currentDataArray, navigateToProduct]);
+
+    const handleAddToCart = useCallback((e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!currentProduct) return;
+
+        const quantityInput = document.getElementById('quantity_698057c4e0b2c') as HTMLInputElement;
+        const quantity = parseInt(quantityInput?.value || '1', 10);
+
+        dispatch(addToCart({
+            id: currentProduct.id?.toString() || itemName || '',
+            name: currentProduct.title,
+            price: currentProduct.price,
+            quantity: quantity,
+            image: currentProduct.images?.[0]?.src || currentProduct.image?.src || ImageNotFound
+        }));
+
+        setIsAddedToCart(true);
+    }, [currentProduct, dispatch, itemName]);
+
+    const handleViewCart = useCallback(() => {
+        navigate('/cart');
+    }, [navigate]);
+
+    useEffect(() => {
+        setIsAddedToCart(false);
+    }, [itemName]);
 
     const mainImage = currentProduct?.images?.[selectedImageIndex] || currentProduct?.image || null;
     const thumbnailImages = currentProduct?.images || [];
@@ -124,7 +155,7 @@ const ProductDetails: FC = () => {
                             <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">{currentProduct?.currency || '$'}</span>{currentProduct?.price?.toFixed(2)}</bdi></span></p>
 
 
-                            <form className="cart" onSubmit={(e) => e.preventDefault()} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
+                            <form className="cart" onSubmit={handleAddToCart} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
                                 <div className="fpf-fields before-add-to-cart">
                                     <input type="hidden" name="_fpf_nonce" value="68f4b39d79" form="fpf-add-to-cart-form" />
                                     <input type="hidden" name="_fpf_product_id" value="273" form="fpf-add-to-cart-form" />
@@ -140,10 +171,20 @@ const ProductDetails: FC = () => {
                                     <input type="number" id="quantity_698057c4e0b2c" className="input-text qty text" name="quantity" defaultValue="1" aria-label="Product quantity" min="1" step="1" placeholder="" inputMode="numeric" autoComplete="off" />
                                 </div>
 
-                                <div className="mt-5">
+                                <div className="mt-5" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                     <button type="submit" name="add-to-cart" value="273" className="single_add_to_cart_button button alt">
                                         Add to cart
                                     </button>
+                                    {isAddedToCart && (
+                                        <span
+
+                                            onClick={handleViewCart}
+                                            className="single_add_to_cart_button  alt"
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            View Cart
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="fpf-fields after-add-to-cart fpf-clear">
@@ -162,12 +203,12 @@ const ProductDetails: FC = () => {
                 <div className="w-100 my-5 pt-5">
                     <ul className="nav nav-tabs" role="tablist">
                         <li className="nav-item">
-                            <button 
-                                className="nav-link active" 
-                                id="description-tab" 
+                            <button
+                                className="nav-link active"
+                                id="description-tab"
                                 type="button"
-                                role="tab" 
-                                aria-controls="Description" 
+                                role="tab"
+                                aria-controls="Description"
                                 aria-selected="true"
                                 style={{ background: 'none', border: 'none' }}
                             >
@@ -183,9 +224,9 @@ const ProductDetails: FC = () => {
                     </div>
                 </div>
             )}
-            <RelatedProducts 
-                products={relatedProducts} 
-                onProductClick={handleProductClick} 
+            <RelatedProducts
+                products={relatedProducts}
+                onProductClick={handleProductClick}
             />
 
         </div>
