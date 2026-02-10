@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import type { FC, FormEvent } from 'react';
+import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-const AccountDetails = () => {
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const AccountDetails: FC = () => {
+    const [showCurrentPassword, setShowCurrentPassword] = useState<boolean>(false);
+    const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+        e.preventDefault();
+        // TODO: Add form validation
+        // TODO: Implement API call to update account details
+    };
 
     return (
         <div className="">                    
-            <form className="woocommerce-EditAccountForm edit-account w-75" action="" method="post">                            
+            <form className="woocommerce-EditAccountForm edit-account w-75" onSubmit={handleSubmit} method="post">                            
                 <div className="row">
                     <div className="col-md-6">
                         <p className="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">

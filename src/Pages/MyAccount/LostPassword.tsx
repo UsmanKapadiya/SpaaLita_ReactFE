@@ -1,16 +1,17 @@
 
 
 
-import React from 'react';
+import type { FC, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyAccount.css';
 
-const LostPassword = () => {
+const LostPassword: FC = () => {
     const navigate = useNavigate();
 
-    const handleResetPassword = (e) => {
+    const handleResetPassword = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        console.log('Password reset link sent');
+        // TODO: Implement actual password reset API call
+        // console.log('Password reset link sent');
         navigate('/my-account');
     };
 

@@ -1,8 +1,23 @@
-import React, { useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
-const Addresses = () => {
-    const [editingBilling, setEditingBilling] = useState(false);
-    const [editingShipping, setEditingShipping] = useState(false);
+const Addresses: FC = () => {
+    const [editingBilling, setEditingBilling] = useState<boolean>(false);
+    const [editingShipping, setEditingShipping] = useState<boolean>(false);
+
+    const handleBillingSubmit = (e: FormEvent<HTMLFormElement>): void => {
+        e.preventDefault();
+        // TODO: Add form validation
+        // TODO: Implement API call to save billing address
+        setEditingBilling(false);
+    };
+
+    const handleShippingSubmit = (e: FormEvent<HTMLFormElement>): void => {
+        e.preventDefault();
+        // TODO: Add form validation
+        // TODO: Implement API call to save shipping address
+        setEditingShipping(false);
+    };
 
     return (
         <div className="account-addresses">
@@ -18,7 +33,7 @@ const Addresses = () => {
 
                         {editingBilling && (
                             <div className="address-form-container mt-3">
-                                <form className="address-form">
+                                <form className="address-form" onSubmit={handleBillingSubmit}>
                                     <div className="form-row">
                                         <div className="form-group col-md-6">
                                             <label>First Name *</label>
@@ -99,7 +114,7 @@ const Addresses = () => {
 
                         {editingShipping && (
                             <div className="address-form-container">
-                                <form className="address-form">
+                                <form className="address-form" onSubmit={handleShippingSubmit}>
                                     <div className="form-row">
                                         <div className="form-group col-md-6">
                                             <label>First Name *</label>

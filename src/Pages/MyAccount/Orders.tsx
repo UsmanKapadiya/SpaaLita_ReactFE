@@ -1,16 +1,12 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 
-const Orders = () => {
+const Orders: FC = () => {
     const navigate = useNavigate();
 
-    // Mock data for orders - empty by default to show "no orders" message
-    const orders = [
-        // { id: '#12345', date: 'February 1, 2026', status: 'Completed', total: '$150.00', items: 3 },
-        // { id: '#12344', date: 'January 25, 2026', status: 'Processing', total: '$89.99', items: 2 },
-        // { id: '#12343', date: 'January 15, 2026', status: 'Completed', total: '$220.00', items: 5 },
-    ];
+    // TODO: Replace with actual API call to fetch user orders
+    const orders: any[] = [];
 
     return (
         <div className="account-orders">

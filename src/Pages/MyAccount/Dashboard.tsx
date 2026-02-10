@@ -1,9 +1,11 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+interface DashboardProps {
+    userName: string;
+}
 
-
-const Dashboard = ({ userName }) => {
+const Dashboard: FC<DashboardProps> = ({ userName }) => {
     const navigate = useNavigate();
 
     return (

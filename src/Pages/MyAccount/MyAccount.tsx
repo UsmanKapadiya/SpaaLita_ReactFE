@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import type { FC, FormEvent } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -12,32 +13,36 @@ import AccountDetails from './AccountDetails';
 import Submissions from './Submissions';
 import LostPassword from './LostPassword';
 
-const MyAccount = () => {
+type TabType = 'dashboard' | 'orders' | 'downloads' | 'addresses' | 'payment-methods' | 'account-details' | 'submissions' | 'lost-password';
+
+const MyAccount: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [userName] = useState('Spaalita');
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showLostPassword, setShowLostPassword] = useState(false);
+    const [userName] = useState<string>('Spaalita');
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [showLostPassword, setShowLostPassword] = useState<boolean>(false);
 
-    const handleLogout = () => {
+    const handleLogout = useCallback((): void => {
         setIsLoggedIn(false);
-        console.log('Logging out...');
-    };
+        // TODO: Implement actual logout API call and clear auth tokens
+        // Clear local storage, cookies, etc.
+    }, []);
 
-    const handleLogin = (e) => {
+    const handleLogin = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
+        // TODO: Implement actual login API call with proper authentication
         setIsLoggedIn(true);
         navigate('/my-account');
-    };
+    }, [navigate]);
 
-    const handleResetPassword = (e) => {
+    const handleResetPassword = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        console.log('Password reset link sent');
+        // TODO: Implement actual password reset API call
         setShowLostPassword(false);
-    };
+    }, []);
 
-    const getActiveTab = () => {
+    const getActiveTab = useCallback((): TabType => {
         const path = location.pathname;
         if (path === '/my-account' || path === '/my-account/') return 'dashboard';
         if (path.includes('/orders')) return 'orders';
@@ -48,9 +53,9 @@ const MyAccount = () => {
         if (path.includes('/submissions')) return 'submissions';
         if (path.includes('/lost-password')) return 'lost-password';
         return 'dashboard';
-    };
+    }, [location.pathname]);
 
-    const activeTab = getActiveTab();
+    const activeTab = useMemo(() => getActiveTab(), [getActiveTab]);
 
     
     if (!isLoggedIn) {

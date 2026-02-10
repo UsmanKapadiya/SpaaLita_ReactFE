@@ -1,8 +1,8 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 
-const PaymentMethods = () => {
+const PaymentMethods: FC = () => {
     const navigate = useNavigate();
 
     return (

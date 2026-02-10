@@ -1,8 +1,8 @@
-import React from 'react';
+import type { FC } from 'react';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import './MyAccount.css'
 
-const Submissions = () => {
+const Submissions: FC = () => {
     return (
         <div className="erf-my-account clearfix">
             <div className="erf-my-account-content">
