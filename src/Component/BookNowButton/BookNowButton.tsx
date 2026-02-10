@@ -1,5 +1,15 @@
-// @ts-nocheck
-const BookNowButton = ({ 
+import type { FC } from 'react';
+
+interface BookNowButtonProps {
+    text?: string;
+    url?: string;
+    className?: string;
+    marginTop?: string;
+    marginBottom?: string;
+    showStrong?: boolean;
+}
+
+const BookNowButton: FC<BookNowButtonProps> = ({ 
     text = 'BOOK NOW!', 
     url = 'https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&pId=1033567',
     className = '',

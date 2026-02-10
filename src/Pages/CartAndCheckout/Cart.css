@@ -2,6 +2,9 @@
         border-top-color: #1e85be !important;
 }
 
+.justyfy-start{
+    justify-content: flex-start !important;
+}
 .woocommerce-error, .woocommerce-info, .woocommerce-message {
     padding: 1em 2em 1em 1.3em;
     margin: 0 0 2em;

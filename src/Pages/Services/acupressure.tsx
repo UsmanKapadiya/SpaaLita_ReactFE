@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import AcuPressureBanner from '../../assets/images/accupressureBanner.jpg';
 import AcuPressureMockData from '../../mockData/AcuPressureMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { ACUPRESSURE_BOOK_NOW_URL } from '../../utils/constants.js';
+import { ACUPRESSURE_BOOK_NOW_URL } from '../../utils/constants';
 
-const AcuPressure = () => {
+const AcuPressure: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={ACUPRESSURE_BOOK_NOW_URL}

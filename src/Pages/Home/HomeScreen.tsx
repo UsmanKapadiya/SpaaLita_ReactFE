@@ -1,4 +1,4 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeAboutBanner from '../../assets/images/home-about.jpg';
 import ServicBanner from '../../assets/images/our_service.jpg';
@@ -11,7 +11,7 @@ import { useWelcomeModal } from './useWelcomeModal';
 import { STORAGE_KEYS, HOME_URLS, CONTENT } from './homeConstants';
 import './HomeScreen.css';
 
-const HomeScreen = () => {
+const HomeScreen: FC = () => {
   const navigate = useNavigate();
   const { showModal, closeModal } = useWelcomeModal(STORAGE_KEYS.HOME_MODAL_SHOWN);
   return (

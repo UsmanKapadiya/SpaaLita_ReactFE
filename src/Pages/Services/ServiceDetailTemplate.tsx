@@ -1,10 +1,25 @@
-// @ts-nocheck
-import React from 'react';
+import type { FC } from 'react';
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import './GlobalServices.css';
 
+interface MockData {
+    pageContent?: {
+        description?: string;
+    };
+}
 
-const ServiceDetailTemplate = ({
+interface ServiceDetailTemplateProps {
+    bookNowUrl: string;
+    title: string;
+    bannerImage: string;
+    bannerAlt: string;
+    bannerWidth?: number;
+    bannerHeight?: number;
+    mockData?: MockData;
+    extraTopSpace?: boolean;
+}
+
+const ServiceDetailTemplate: FC<ServiceDetailTemplateProps> = ({
     bookNowUrl,
     title,
     bannerImage,
@@ -12,7 +27,7 @@ const ServiceDetailTemplate = ({
     bannerWidth = 400,
     bannerHeight = 400,
     mockData,
-    extraTopSpace= false
+    extraTopSpace = false
 }) => {
     return (
         <div className="service-detail-page">

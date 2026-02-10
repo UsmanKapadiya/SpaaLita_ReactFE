@@ -1,5 +1,5 @@
-//@ts-nocheck
-import { FC, useState, useCallback, FormEvent, ChangeEvent } from 'react';
+import type { FC, FormEvent, ChangeEvent } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import './Cart.css';
@@ -187,10 +187,10 @@ const Checkout: FC = () => {
         </div>
     );
 
-    const renderAddressFields = (
+    const renderAddressFields = <T extends BillingDetails | ShippingDetails>(
         type: 'billing' | 'shipping',
-        details: BillingDetails | ShippingDetails,
-        handleChange: (field: string, value: string) => void
+        details: T,
+        handleChange: (field: keyof T, value: string) => void
     ) => (
         <>
             <div className="row">

@@ -1,7 +1,12 @@
-//@ts-nocheck
 export type SortOption = 'menu_order' | 'price' | 'price-desc' | 'popularity' | 'date';
 
-export const sortProducts = (products, sortBy) => {
+interface Product {
+    id: number;
+    price: number;
+    productId?: number;
+}
+
+export const sortProducts = <T extends Product>(products: T[], sortBy: SortOption): T[] => {
     const sortedData = [...products];
 
     switch (sortBy) {

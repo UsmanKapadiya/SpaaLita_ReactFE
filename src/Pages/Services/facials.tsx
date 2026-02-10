@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import FacialServices from '../../assets/images/facial_services.jpg';
 import FacialsMockData from '../../mockData/facialsMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { FACIALS_BOOK_NOW_URL } from '../../utils/constants.js'
+import { FACIALS_BOOK_NOW_URL } from '../../utils/constants'
 
-const Facials = () => {
+const Facials: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={FACIALS_BOOK_NOW_URL}

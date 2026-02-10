@@ -1,19 +1,11 @@
-//@ts-nocheck
-import { FC, useState, useCallback, ChangeEvent, FormEvent } from 'react';
+import type { FC, ChangeEvent, FormEvent } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { removeFromCart, updateQuantity as updateCartQuantity } from '../../store/cartSlice';
+import { removeFromCart, updateQuantity as updateCartQuantity, type CartItem } from '../../store/cartSlice';
 import './Cart.css';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
 
 const Cart: FC = () => {
   const navigate = useNavigate();
@@ -22,6 +14,10 @@ const Cart: FC = () => {
   const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
+
+  const cartTotal = useMemo((): number => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  }, [cartItems]);
 
   const updateQuantity = useCallback((id: string, newQuantity: number): void => {
     if (newQuantity < 1 || isNaN(newQuantity)) return;
@@ -33,10 +29,6 @@ const Cart: FC = () => {
       dispatch(removeFromCart(id));
     }
   }, [dispatch]);
-
-  const getCartTotal = useCallback((): number => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  }, [cartItems]);
 
   const handleCouponSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -68,7 +60,7 @@ const Cart: FC = () => {
         <div className="woocommerce">
           <div className="woocommerce-notices-wrapper" role="alert" aria-live="polite" />
           <div className="wc-empty-cart-message">
-            <div className="cart-empty woocommerce-info" role="status">
+            <div className="cart-empty woocommerce-info justyfy-start" role="status">
               <span aria-hidden="true">
                 <WebAssetIcon className="icon-color" />
               </span>
@@ -217,7 +209,7 @@ const Cart: FC = () => {
                     <span className="woocommerce-Price-amount amount">
                       <bdi>
                         <span className="woocommerce-Price-currencySymbol">$</span>
-                        {getCartTotal().toFixed(2)}
+                        {cartTotal.toFixed(2)}
                       </bdi>
                     </span>
                   </td>
@@ -229,7 +221,7 @@ const Cart: FC = () => {
                       <span className="woocommerce-Price-amount amount">
                         <bdi>
                           <span className="woocommerce-Price-currencySymbol">$</span>
-                          {getCartTotal().toFixed(2)}
+                          {cartTotal.toFixed(2)}
                         </bdi>
                       </span>
                     </strong>

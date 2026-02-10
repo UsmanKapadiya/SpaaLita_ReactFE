@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import BrowsBanner from '../../assets/images/browsBanner.jpg';
 import BrowsMockData from '../../mockData/browsMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { BROW_BOOK_NOW_URL } from '../../utils/constants.js';
+import { BROW_BOOK_NOW_URL } from '../../utils/constants';
 
-const Brows = () => {
+const Brows: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={BROW_BOOK_NOW_URL}

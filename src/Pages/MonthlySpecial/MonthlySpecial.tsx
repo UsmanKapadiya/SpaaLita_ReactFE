@@ -1,11 +1,11 @@
-//@ts-nocheck
+import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import './MonthlySpecial.css';
-import { fetchMonthlySpecial } from '../../mockData/monthlySpecialMockData.js';
-import BookNowButton from '../../Component/BookNowButton/BookNowButton.js';
+import { fetchMonthlySpecial } from '../../mockData/monthlySpecialMockData';
+import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import LoadingSpinner from '../../Component/LoadingSpinner/LoadingSpinner';
 import ErrorMessage from '../../Component/ErrorMessage/ErrorMessage';
-import { MONTHLY_BOOK_NOW_URL } from '../../utils/constants.js';
+import { MONTHLY_BOOK_NOW_URL } from '../../utils/constants';
 
 interface SpecialImage {
     url: string;
@@ -21,10 +21,10 @@ interface SpecialData {
     featured: boolean;
 }
 
-const MonthlySpecial: React.FC = () => {
+const MonthlySpecial: FC = () => {
     const [specialData, setSpecialData] = useState<SpecialData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
 
     useEffect(() => {
         const loadSpecialData = async () => {

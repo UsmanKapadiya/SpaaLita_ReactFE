@@ -1,5 +1,5 @@
-//@ts-nocheck
-import { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './BookingPolicy.css';
 import { BookingPolicyMockData } from '../../mockData/BookingPolicyMockData';
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';

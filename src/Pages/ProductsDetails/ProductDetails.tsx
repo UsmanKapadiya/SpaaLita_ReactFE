@@ -1,6 +1,6 @@
-//@ts-nocheck
+import type { FC } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useMemo } from 'react';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
 import { getProductBySlug, getDataArrayBySource, type ProductSource } from '../../utils/productHelpers';
 import ProductNavigation from '../../Component/ProductNavigation/ProductNavigation';
@@ -8,14 +8,17 @@ import ProductImageGallery from '../../Component/ProductImageGallery/ProductImag
 import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
+interface LocationState {
+    source?: ProductSource;
+}
 
-const ProductDetails = () => {
+const ProductDetails: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { itemName } = useParams();
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const { itemName } = useParams<{ itemName: string }>();
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 
-    const sourceFromState = location.state?.source as ProductSource | undefined;
+    const sourceFromState = (location.state as LocationState)?.source;
 
     const { product: currentProduct, source: productSource } = useMemo(
         () => getProductBySlug(itemName, sourceFromState),
@@ -24,7 +27,11 @@ const ProductDetails = () => {
     
     const currentDataArray = getDataArrayBySource(productSource);
 
-    const currentIndex = currentDataArray.findIndex((product: any) => product.slug === itemName);
+    const currentIndex = useMemo(() => 
+        currentDataArray.findIndex((product: any) => product.slug === itemName),
+        [currentDataArray, itemName]
+    );
+    
     const isFirstProduct = currentIndex === 0;
     const isLastProduct = currentIndex === currentDataArray.length - 1;
 
@@ -43,37 +50,37 @@ const ProductDetails = () => {
             }));
     }, [currentDataArray, itemName]);
 
-    const handleShopClick = () => {
+    const handleShopClick = useCallback(() => {
         navigate('/shop');
-    };
+    }, [navigate]);
 
-    const handleProductClick = (productSlug: string, productId: number) => {
+    const handleProductClick = useCallback((productSlug: string, productId: number) => {
         navigate(`/product/${productSlug}`, {
             state: { id: productId, source: productSource }
         });
         setSelectedImageIndex(0);
-    };
+    }, [navigate, productSource]);
 
-    const navigateToProduct = (product: any) => {
+    const navigateToProduct = useCallback((product: any) => {
         navigate(`/product/${product.slug}`, {
             state: { id: product.id, source: productSource }
         });
         setSelectedImageIndex(0);
-    };
+    }, [navigate, productSource]);
 
-    const handlePreviousProduct = () => {
+    const handlePreviousProduct = useCallback(() => {
         const product = currentIndex > 0 
             ? currentDataArray[currentIndex - 1] 
             : currentDataArray[currentDataArray.length - 1];
         navigateToProduct(product);
-    };
+    }, [currentIndex, currentDataArray, navigateToProduct]);
 
-    const handleNextProduct = () => {
+    const handleNextProduct = useCallback(() => {
         const product = currentIndex < currentDataArray.length - 1 
             ? currentDataArray[currentIndex + 1] 
             : currentDataArray[0];
         navigateToProduct(product);
-    };
+    }, [currentIndex, currentDataArray, navigateToProduct]);
 
     const mainImage = currentProduct?.images?.[selectedImageIndex] || currentProduct?.image || null;
     const thumbnailImages = currentProduct?.images || [];
@@ -155,7 +162,17 @@ const ProductDetails = () => {
                 <div className="w-100 my-5 pt-5">
                     <ul className="nav nav-tabs" role="tablist">
                         <li className="nav-item">
-                            <a className="nav-link active" id="description-tab" data-toggle="tab" href="#content_description" role="tab" aria-controls="Description" aria-selected="true">Description</a>
+                            <button 
+                                className="nav-link active" 
+                                id="description-tab" 
+                                type="button"
+                                role="tab" 
+                                aria-controls="Description" 
+                                aria-selected="true"
+                                style={{ background: 'none', border: 'none' }}
+                            >
+                                Description
+                            </button>
                         </li>
                     </ul>
                     <div className="tab-content pt-3 px-3" id="product-tabs">

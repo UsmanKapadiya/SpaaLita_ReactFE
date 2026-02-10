@@ -1,8 +1,15 @@
-//@ts-nocheck
+import type { FC } from 'react';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 
-const ProductNavigation = ({
+interface ProductNavigationProps {
+    isFirstProduct: boolean;
+    isLastProduct: boolean;
+    onPrevious: () => void;
+    onNext: () => void;
+}
+
+const ProductNavigation: FC<ProductNavigationProps> = ({
     isFirstProduct,
     isLastProduct,
     onPrevious,

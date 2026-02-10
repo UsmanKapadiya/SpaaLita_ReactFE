@@ -1,5 +1,5 @@
-//@ts-nocheck
-import { useState, useMemo } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { shopMockData, shopSortOptions } from '../../mockData/shopMockData';
 import { useAppDispatch } from '../../store/hooks';
@@ -9,8 +9,39 @@ import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
+interface ShopProduct {
+    id: number;
+    productId: number;
+    title: string;
+    price: number;
+    currency: string;
+    slug: string;
+    images: Array<{
+        src: string;
+        alt: string;
+        width?: number;
+        height?: number;
+        className?: string;
+        loading?: string;
+        srcSet?: string;
+        sizes?: string;
+    }>;
+    isAvailable: boolean;
+}
+
+interface AddedItem {
+    title: string;
+    price: number;
+    currency: string;
+}
+
+interface ShopItemProps {
+    shop: ShopProduct;
+    onAddToCart: (item: AddedItem) => void;
+}
+
 // Component for individual shop item
-const ShopItem = ({ shop, onAddToCart }) => {
+const ShopItem: FC<ShopItemProps> = ({ shop, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { title, price, currency, images, slug } = shop;
@@ -18,27 +49,27 @@ const ShopItem = ({ shop, onAddToCart }) => {
     // Use the first image from the images array
     const mainImage = images && images.length > 0 ? images[0] : null;
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         dispatch(addToCart({
-            id: shop.id,
+            id: String(shop.id),
             name: title,
             price: price,
             image: mainImage?.src || ''
         }));
 
         onAddToCart({ title, price, currency });
-    };
+    }, [dispatch, shop.id, title, price, mainImage?.src, currency, onAddToCart]);
 
-    const handleProductClick = () => {
+    const handleProductClick = useCallback(() => {
         navigate(`/product/${slug}`, { 
             state: { 
                 id: shop.id, 
                 source: 'shop' 
             } 
         });
-    };
+    }, [navigate, slug, shop.id]);
 
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
@@ -78,30 +109,32 @@ const ShopItem = ({ shop, onAddToCart }) => {
     );
 };
 
-const Shop = () => {
-    const [sortBy, setSortBy] = useState('menu_order');
-    const [showMessage, setShowMessage] = useState(false);
-    const [addedItem, setAddedItem] = useState(null);
+const Shop: FC = () => {
+    const [sortBy, setSortBy] = useState<SortOption>('menu_order');
+    const [showMessage, setShowMessage] = useState<boolean>(false);
+    const [addedItem, setAddedItem] = useState<AddedItem | null>(null);
 
-    const handleAddToCart = (item) => {
+    const handleAddToCart = useCallback((item: AddedItem) => {
         setAddedItem(item);
         setShowMessage(true);
         
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             setShowMessage(false);
         }, CART_MESSAGE_TIMEOUT);
-    };
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const availableProducts = useMemo(() => {
-        const availableItems = shopMockData.filter((item: any) => item.isAvailable);
+        const availableItems = shopMockData.filter((item: ShopProduct) => item.isAvailable);
         return sortProducts(availableItems, sortBy);
     }, [sortBy]);
 
     const totalCount = availableProducts.length;
 
-    const handleSortChange = (event) => {
+    const handleSortChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
         setSortBy(event.target.value as SortOption);
-    };
+    }, []);
 
     return (
         <div className="container my-5">
@@ -129,7 +162,7 @@ const Shop = () => {
                                 value={sortBy}
                                 onChange={handleSortChange}
                             >
-                                {shopSortOptions.map((option: any) => (
+                                {shopSortOptions.map((option: {value: string, title: string, label: string}) => (
                                     <option
                                         key={option.value}
                                         title={option.title}

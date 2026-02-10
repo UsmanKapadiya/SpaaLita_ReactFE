@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import LaserBanner from '../../assets/images/Laser-HairBanner.jpg';
 import LaserMockData from '../../mockData/laserMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { LASER_BOOK_NOW_URL } from '../../utils/constants.js';
+import { LASER_BOOK_NOW_URL } from '../../utils/constants';
 
-const Laser = () => {
+const Laser: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={LASER_BOOK_NOW_URL}

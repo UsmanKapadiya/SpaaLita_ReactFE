@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import BodyTreatmentBanner from '../../assets/images/bodyTreatmentBanner.jpg';
 import BodyTreatmentMockData from '../../mockData/bodyTreatmentMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { BODYTREATMENT_BOOK_NOW_URL } from '../../utils/constants.js';
+import { BODYTREATMENT_BOOK_NOW_URL } from '../../utils/constants';
 
-const BodyTreatment = () => {
+const BodyTreatment: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={BODYTREATMENT_BOOK_NOW_URL}

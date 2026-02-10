@@ -1,12 +1,17 @@
-// @ts-nocheck
+import type { FC } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import { SERVICES_LIST, SERVICES_HERO_IMAGE, SERVICES_HERO_CONTENT } from './ServicesConstants';
 import { BOOK_NOW_URL  } from '../../utils/constants';
 import './ServicesPage.css';
 
-const ServicesPage = () => {
+const ServicesPage: FC = () => {
   const navigate = useNavigate();
+
+  const handleServiceClick = useCallback((link: string) => {
+    navigate(`/${link}`);
+  }, [navigate]);
 
   return (
     <div className="services-page">
@@ -48,7 +53,7 @@ const ServicesPage = () => {
                   </h5>
                   <button 
                     className={`round-buttton service-learn-more ${service.textClass || ''}`} 
-                    onClick={() => navigate(`/${service.link}`)}
+                    onClick={() => handleServiceClick(service.link)}
                     aria-label={`Learn more about ${service.title}`}
                   >
                     Learn More

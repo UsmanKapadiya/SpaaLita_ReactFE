@@ -1,12 +1,17 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
+import { storage } from '../../utils/storage';
 
-export const useWelcomeModal = (storageKey) => {
-  const [showModal, setShowModal] = useState(false);
+interface UseWelcomeModalReturn {
+  showModal: boolean;
+  closeModal: () => void;
+}
+
+export const useWelcomeModal = (storageKey: string): UseWelcomeModalReturn => {
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   // Check if modal should be shown on mount
   useEffect(() => {
-    const modalShown = localStorage.getItem(storageKey);
+    const modalShown = storage.getItem(storageKey);
     if (!modalShown) {
       setShowModal(true);
     }
@@ -28,9 +33,9 @@ export const useWelcomeModal = (storageKey) => {
     };
   }, [showModal]);
 
-  const closeModal = () => {
+  const closeModal = (): void => {
     setShowModal(false);
-    localStorage.setItem(storageKey, 'true');
+    storage.setItem(storageKey, 'true');
   };
 
   return { showModal, closeModal };

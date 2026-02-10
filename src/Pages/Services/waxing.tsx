@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import WaxingBanner from '../../assets/images/waxingBanner.jpg';
 import WaxingMockData from '../../mockData/waxingMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { WAXING_BOOK_NOW_URL } from '../../utils/constants.js';
+import { WAXING_BOOK_NOW_URL } from '../../utils/constants';
 
-const Waxing = () => {
+const Waxing: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={WAXING_BOOK_NOW_URL}

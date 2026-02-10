@@ -1,7 +1,19 @@
-//@ts-nocheck
+import type { FC } from 'react';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
 
-const ProductImageGallery = ({
+interface ImageData {
+    src: string;
+    alt: string;
+}
+
+interface ProductImageGalleryProps {
+    mainImage: ImageData | null;
+    thumbnailImages: ImageData[];
+    selectedImageIndex: number;
+    onImageSelect: (index: number) => void;
+}
+
+const ProductImageGallery: FC<ProductImageGalleryProps> = ({
     mainImage,
     thumbnailImages,
     selectedImageIndex,

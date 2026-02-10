@@ -1,7 +1,22 @@
-//@ts-nocheck
-import ImageNotFound from '../../assets/images/productImageNotFound.png';
+import type { FC } from 'react';
+import { useCallback } from 'react';
 
-const RelatedProducts = ({ products, onProductClick }) => {
+interface RelatedProduct {
+    id: number;
+    slug: string;
+    title: string;
+    price: string | number;
+    image: string;
+    srcSet?: string;
+    alt: string;
+}
+
+interface RelatedProductsProps {
+    products: RelatedProduct[];
+    onProductClick: (slug: string, id: number) => void;
+}
+
+const RelatedProducts: FC<RelatedProductsProps> = ({ products, onProductClick }) => {
     if (products.length === 0) {
         return null;
     }

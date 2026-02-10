@@ -7,7 +7,7 @@ const PaymentMethods = () => {
 
     return (
         <>
-            <div className="woocommerce-info" role="status">
+            <div className="woocommerce-info justyfy-start" role="status">
                 <span>
                     <WebAssetIcon className='icon-color mr-2' />
                 </span>

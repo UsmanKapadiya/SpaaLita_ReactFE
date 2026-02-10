@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import SpaBanner from '../../assets/images/SpaaBanner.jpg';
 import SpaaMockData from '../../mockData/SpaaMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { SPAA_BOOK_NOW_URL } from '../../utils/constants.js';
+import { SPAA_BOOK_NOW_URL } from '../../utils/constants';
 
-const Spaa = () => {
+const Spaa: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={SPAA_BOOK_NOW_URL}

@@ -1,5 +1,5 @@
-//@ts-nocheck
-import { FC, useState, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ImageGallery from 'react-image-gallery';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';

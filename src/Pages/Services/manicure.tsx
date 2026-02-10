@@ -1,10 +1,10 @@
-// @ts-nocheck
+import type { FC } from 'react';
 import ManicureBanner from '../../assets/images/manicureBanner.jpg';
 import ManicureMockData from '../../mockData/manicureMockData';
 import ServiceDetailTemplate from './ServiceDetailTemplate';
-import { MANICURE_BOOK_NOW_URL } from '../../utils/constants.js';
+import { MANICURE_BOOK_NOW_URL } from '../../utils/constants';
 
-const Manicure = () => {
+const Manicure: FC = () => {
     return (
         <ServiceDetailTemplate
             bookNowUrl={MANICURE_BOOK_NOW_URL}

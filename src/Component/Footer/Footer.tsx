@@ -1,24 +1,40 @@
-import React from 'react';
+import type { FC, FormEvent } from 'react';
+import { useCallback, useState } from 'react';
 import './Footer.css';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
-const Footer = () => {
+
+const Footer: FC = () => {
+  const [email, setEmail] = useState<string>('');
+
+  const handleNewsletterSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    // TODO: Implement newsletter subscription logic
+    console.log('Newsletter subscription requested for:', email);
+    // Reset form after submission
+    setEmail('');
+  }, [email]);
+
   return (
-    // <footer className="footer">
     <div>
       <div className="newsletter-signup">
         <p className='mb-0'>Please sign up to receive updates and promotional offers</p>
-        <form onSubmit={e => e.preventDefault()} className="newsletter-form">
+        <form onSubmit={handleNewsletterSubmit} className="newsletter-form">
           <div>
             <input
               type="email"
               placeholder="Email address"
               className="newsletter-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              aria-label="Email address for newsletter"
             />
           </div>
           <div>
-            <button type="submit" className="newsletter-btn">Submit</button>
+            <button type="submit" className="newsletter-btn" disabled={!email.trim()}>
+              Submit
+            </button>
           </div>
         </form>
       </div>
