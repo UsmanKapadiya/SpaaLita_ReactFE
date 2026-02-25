@@ -103,7 +103,7 @@ const ShopItem: FC<ShopItemProps> = ({ shop, onAddToCart }) => {
                 className="d-block add-to-cart add-to-cart-button"
                 onClick={handleAddToCart}
             >
-                Add to cart
+                Add to carts
             </button>
         </li>
     );
