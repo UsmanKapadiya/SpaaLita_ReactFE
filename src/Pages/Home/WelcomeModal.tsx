@@ -5,9 +5,10 @@ import { HOME_URLS } from './homeConstants';
 interface WelcomeModalProps {
   show: boolean;
   onClose: () => void;
+  monthlySpecialUrl: string;
 }
 
-const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose }) => {
+const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose, monthlySpecialUrl }) => {
   if (!show) return null;
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
@@ -15,6 +16,7 @@ const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose }) => {
       onClose();
     }
   };
+
 
   return (
     <>
@@ -59,7 +61,7 @@ const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose }) => {
                       decoding="async"
                       width="1024"
                       height="1024"
-                      src={HOME_URLS.MONTHLY_SPECIAL}
+                      src={monthlySpecialUrl || HOME_URLS.MONTHLY_SPECIAL}
                       alt="February Specials"
                       className="wp-image-18083 modal-special-image"
                     />

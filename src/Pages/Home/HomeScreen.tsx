@@ -13,10 +13,10 @@ import './HomeScreen.css';
 
 const HomeScreen: FC = () => {
   const navigate = useNavigate();
-  const { showModal, closeModal } = useWelcomeModal(STORAGE_KEYS.HOME_MODAL_SHOWN);
+  const { showModal, closeModal, monthlySpecialUrl } = useWelcomeModal(STORAGE_KEYS.HOME_MODAL_SHOWN);
   return (
     <div className="home-screen">
-      <WelcomeModal show={showModal} onClose={closeModal} />
+      <WelcomeModal show={showModal} onClose={closeModal} monthlySpecialUrl={monthlySpecialUrl} />
       <div>
         <img
           src={HOME_URLS.BANNER}
