@@ -1,77 +1,70 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { giftCardMockData, giftCardSortOptions } from '../../mockData/giftCardMockData';
+import { giftCardSortOptions } from '../../mockData/giftCardMockData';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
 import { sortProducts, type SortOption } from '../../utils/sortProducts';
 import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
+import { getAllGiftCard } from '../../Services/GiftCardServices'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
-interface GiftCardItemProps {
-    giftCard: any;
-    onAddToCart: (item: { title: string; price: number; currency: string }) => void;
+
+interface GiftCardItemType {
+    _id: string;
+    productName: string;
+    price: number;
+    status: string; // 'active' | 'inactive'
+    productImages?: { src: string; alt?: string }[]; // optional
 }
+
+interface GiftCardItemProps {
+    giftCard: GiftCardItemType;
+    onAddToCart: (item: GiftCardItemType) => void;
+}
+
+type SortOption = "menu_order" | "price_asc" | "price_desc" | "title_asc" | "title_desc";
+
 
 const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { title, price, currency, image, slug } = giftCard;
+
+    const imageUrl = giftCard.productImages?.[0]?.src || 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
 
     const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-
         dispatch(addToCart({
-            id: giftCard.id,
-            name: title,
-            price: price,
-            image: image.src
+            id: giftCard._id,
+            name: giftCard.productName,
+            price: giftCard.price,
+            image: imageUrl
         }));
-
-        onAddToCart({ title, price, currency });
+        onAddToCart(giftCard);
     };
 
     const handleProductClick = () => {
-        navigate(`/product/${slug}`, { 
-            state: { 
-                id: giftCard.id, 
-                source: 'giftCard' 
-            } 
+        navigate(`/product/${giftCard._id}`, {
+            state: { source: 'giftCard' }
         });
     };
 
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
-            <div 
-                onClick={handleProductClick} 
-                className="woocommerce-LoopProduct-link woocommerce-loop-product__link clickable"
-            >
+            <div onClick={handleProductClick} className="clickable">
                 <img
-                    width={image.width}
-                    height={image.height}
-                    src={image.src}
-                    className={image.className || "attachment-woocommerce_thumbnail size-woocommerce_thumbnail"}
-                    alt={image.alt}
-                    srcSet={image.srcSet}
-                    sizes={image.sizes}
-                    loading={image.loading}
+                    src={imageUrl}
+                    alt={giftCard.productName}
+                    className="attachment-woocommerce_thumbnail size-woocommerce_thumbnail"
                 />
             </div>
             <div className="product-title clickable" onClick={handleProductClick}>
-                {title}
+                {giftCard.productName}
             </div>
             <span className="price">
-                <span className="woocommerce-Price-amount amount">
-                    <bdi>
-                        <span className="woocommerce-Price-currencySymbol">{currency}</span>
-                        {price.toFixed(2)}
-                    </bdi>
-                </span>
+                <bdi>${giftCard.price.toFixed(2)}</bdi>
             </span>
-            <button
-                className="d-block add-to-cart add-to-cart-button"
-                onClick={handleAddToCart}
-            >
+            <button className="d-block add-to-cart add-to-cart-button" onClick={handleAddToCart}>
                 Add to cart
             </button>
         </li>
@@ -79,30 +72,54 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, onAddToCart }) =>
 };
 
 const GiftCard: React.FC = () => {
-    const [sortBy, setSortBy] = useState<SortOption>('menu_order');
+    const [giftCards, setGiftCards] = useState<GiftCardItemType[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>("");
+    const [sortBy, setSortBy] = useState<SortOption>("menu_order");
     const [showMessage, setShowMessage] = useState(false);
-    const [addedItem, setAddedItem] = useState<{ title: string; price: number; currency: string } | null>(null);
+    const [addedItem, setAddedItem] = useState<GiftCardItemType | null>(null);
 
-    const handleAddToCart = (item: { title: string; price: number; currency: string }) => {
-        setAddedItem(item);
-        setShowMessage(true);
-        
-        setTimeout(() => {
-            setShowMessage(false);
-        }, CART_MESSAGE_TIMEOUT);
-    };
+    useEffect(() => {
+        const fetchGiftCards = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                const response = await getAllGiftCard();
+
+                if (!response.success || !response.data?.length) {
+                    throw new Error("No gift cards found.");
+                }
+
+                setGiftCards(response.data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Failed to load gift cards.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchGiftCards();
+    }, []);
 
     const availableGiftCards = useMemo(() => {
-        const availableCards = giftCardMockData.filter((card: any) => card.isAvailable);
-        return sortProducts(availableCards, sortBy);
-    }, [sortBy]);
+        const available = giftCards.filter(card => card.status === 'active');
+        return sortProducts(available, sortBy);
+    }, [giftCards, sortBy]);
 
     const totalCount = availableGiftCards.length;
+
+    const handleAddToCart = (item: GiftCardItemType) => {
+        setAddedItem(item);
+        setShowMessage(true);
+        setTimeout(() => setShowMessage(false), CART_MESSAGE_TIMEOUT);
+    };
 
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSortBy(event.target.value as SortOption);
     };
 
+
+    console.log(giftCards)
     return (
         <div className="container my-5">
             <div className="row">
@@ -114,7 +131,7 @@ const GiftCard: React.FC = () => {
                 <div className="col-md-9">
                     <div className="shop">
                         {showMessage && addedItem && (
-                            <AddToCartMessage itemTitle={addedItem.title} />
+                            <AddToCartMessage itemTitle={addedItem.productName} />
                         )}
 
                         <p className="woocommerce-result-count" role="alert" aria-relevant="all" aria-hidden="false">
@@ -144,8 +161,8 @@ const GiftCard: React.FC = () => {
 
                         <div className="clear"></div>
                         <ul className="products columns-3">
-                            {availableGiftCards.map((giftCard: any) => (
-                                <GiftCardItem key={giftCard.id} giftCard={giftCard} onAddToCart={handleAddToCart} />
+                            {availableGiftCards.map(card => (
+                                <GiftCardItem key={card._id} giftCard={card} onAddToCart={handleAddToCart} />
                             ))}
                         </ul>
                     </div>
