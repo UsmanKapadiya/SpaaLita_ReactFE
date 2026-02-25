@@ -1,5 +1,7 @@
 import type { FC, FormEvent, ChangeEvent } from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import './Cart.css';
@@ -64,37 +66,117 @@ const CANADIAN_PROVINCES: Province[] = [
 ];
 
 const INITIAL_BILLING_DETAILS: BillingDetails = {
-    firstName: '',
-    lastName: '',
-    address1: '',
+    firstName: 'John',
+    lastName: 'Doe',
+    address1: '123 Test St',
     address2: '',
     country: 'CA',
-    state: '',
-    city: '',
-    postcode: '',
-    phone: '',
-    email: ''
+    state: 'ON',
+    city: 'Toronto',
+    postcode: 'M1M1M1',
+    phone: '1234567890',
+    email: 'john.doe@example.com'
 };
 
 const INITIAL_SHIPPING_DETAILS: ShippingDetails = {
-    firstName: '',
-    lastName: '',
-    address1: '',
+    firstName: 'John',
+    lastName: 'Doe',
+    address1: '123 Test St',
     address2: '',
-    state: '',
-    city: '',
+    state: 'ON',
+    city: 'Toronto',
     country: 'CA',
-    postcode: '',
+    postcode: 'M1M1M1',
     giftCard: ''
 };
 
 const CART_ITEMS: CartItem[] = [
-    { id: '1', name: 'Active Pureness Corrector', price: 47.00, quantity: 1 },
-    { id: '2', name: 'Gift Card - $100.00', price: 100.00, quantity: 1 },
-    { id: '3', name: 'Amazing Base Loose Mineral Foundation', price: 60.00, quantity: 1 }
+    { id: '1', name: 'Test Product', price: 105.00, quantity: 1 }
 ];
 
 type PaymentMethod = 'stripe' | 'stripe_klarna';
+
+const stripePromise = loadStripe('pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr');
+
+const StripeCheckoutForm: FC<{ amount: number }> = ({ amount }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [orderResponse, setOrderResponse] = useState<string | null>(null);
+
+    // Dummy token for testing
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5M2ZhNTcxM2JlNGUzMTRiNmM2NzA1NiIsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQHNwYWFsaXRhLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MTIzNzc1MCwiZXhwIjoxNzcxMjQxMzUwfQ.9CRPwA5WKKaQuLAicNI1KayaUV-7o5-yGS06lkbEaSw";
+    // Dummy productId for testing
+    const productId = "1";
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements) return;
+        setProcessing(true);
+        setError(null);
+        setOrderResponse(null);
+        // 1. Create order and get clientSecret from backend
+        const orderRes = await fetch("http://localhost:5000/api/orders/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                items: [
+                    {
+                        productId: "698c34caa15147e1fa89768b",
+                        qty: 1
+                    }
+                ],
+                totalAmount: amount,
+                shippingAddress: "123 Main St, City"
+            })
+        });
+        const orderData = await orderRes.json();
+        setOrderResponse(JSON.stringify(orderData, null, 2));
+        if (!orderData.clientSecret) {
+            setProcessing(false);
+            setError('No clientSecret returned from backend');
+            return;
+        }
+        // 2. Confirm payment with Stripe
+        const result = await stripe.confirmCardPayment(orderData.clientSecret, {
+            payment_method: {
+                card: elements.getElement(CardElement)!,
+            },
+        });
+        if (result.error) {
+            setProcessing(false);
+            setError(result.error.message || 'Payment failed');
+        } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+            setSuccess(true);
+            setProcessing(false);
+        } else {
+            setProcessing(false);
+        }
+    };
+
+    return (
+        <div style={{ marginTop: 16 }}>
+            <CardElement options={{ hidePostalCode: true }} />
+            <button
+                type="button"
+                disabled={!stripe || processing || success}
+                className="button alt shopButton"
+                style={{ marginTop: 16 }}
+                onClick={handleSubmit}
+            >
+                {processing ? 'Processing...' : success ? 'Payment Successful' : 'Pay Now'}
+            </button>
+            {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+            {success && <div style={{ color: 'green', marginTop: 8 }}>Payment successful!</div>}
+            {orderResponse && <div style={{ marginTop: 8, wordBreak: 'break-all' }}><strong>Order API Response:</strong> {orderResponse}</div>}
+        </div>
+    );
+};
 
 const Checkout: FC = () => {
     const navigate = useNavigate();
@@ -148,10 +230,11 @@ const Checkout: FC = () => {
 
     const handlePlaceOrder = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        // TODO: Implement order placement logic
-        console.log('Order placed:', { billingDetails, shippingDetails, cartItems, paymentMethod });
-        alert('Order placed successfully!');
-    }, [billingDetails, shippingDetails, cartItems, paymentMethod]);
+        // Stripe payment handled in StripeCheckoutForm
+        if (paymentMethod !== 'stripe') {
+            alert('Order placed successfully!');
+        }
+    }, [paymentMethod]);
 
     const handleApplyCoupon = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
@@ -648,6 +731,9 @@ const Checkout: FC = () => {
                                                     {paymentMethod === 'stripe' && (
                                                         <div className="payment_box payment_method_stripe">
                                                             <p>Secure payment via Stripe</p>
+                                                            <Elements stripe={stripePromise}>
+                                                                <StripeCheckoutForm amount={calculateTotal()} />
+                                                            </Elements>
                                                         </div>
                                                     )}
                                                 </li>
