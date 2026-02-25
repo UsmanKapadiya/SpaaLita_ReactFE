@@ -3,9 +3,10 @@ import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import './GlobalServices.css';
 
 interface MockData {
-    pageContent?: {
-        description?: string;
-    };
+    buttonUrl?: string
+    serviceDescription?: string;
+    serviceImage: string;
+    serviceName: string;
 }
 
 interface ServiceDetailTemplateProps {
@@ -34,9 +35,9 @@ const ServiceDetailTemplate: FC<ServiceDetailTemplateProps> = ({
             <div className="service-detail-content">
                 <div className="container">
                     {extraTopSpace && (
-                    <p></p>
+                        <p></p>
                     )}
-                    <BookNowButton  url={bookNowUrl}/>
+                    <BookNowButton url={bookNowUrl} />
 
                     <div className="service-banner-container">
                         <figure className="wp-block-image size-large is-resized is-style-rounded text-center mt-5">
@@ -55,10 +56,15 @@ const ServiceDetailTemplate: FC<ServiceDetailTemplateProps> = ({
                     <h1 className="wp-block-heading text-center my-5">{title}</h1>
 
                     <div className="page-description my-4">
-                        {mockData?.pageContent?.description && (
+                        {mockData?.serviceDescription && (
                             <div
-                                dangerouslySetInnerHTML={{ __html: mockData.pageContent.description }}
-                                className="spa-description"
+                                dangerouslySetInnerHTML={{
+                                    __html: mockData.serviceDescription
+                                        .replace(/&lt;/g, '<')
+                                        .replace(/&gt;/g, '>')
+                                        .replace(/&amp;/g, '&')
+                                        .replace(/&nbsp;/g, ' ')
+                                }}
                             />
                         )}
                     </div>
