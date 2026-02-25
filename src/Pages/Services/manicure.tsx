@@ -11,6 +11,7 @@ const Manicure: FC = () => {
     let searchTerm = "manicures-and-pedicures"
 
     useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
         const fetchServices = async () => {
             try {
                 const response = await getServicesByName(searchTerm);

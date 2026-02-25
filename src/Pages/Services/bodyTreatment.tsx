@@ -13,6 +13,7 @@ const BodyTreatment: FC = () => {
     let searchTerm = "body-treatments"
 
     useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
         const fetchServices = async () => {
             try {
                 const response = await getServicesByName(searchTerm);

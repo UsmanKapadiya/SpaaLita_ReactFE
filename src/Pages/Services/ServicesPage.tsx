@@ -17,7 +17,7 @@ const ServicesPage: FC = () => {
     <div className="services-page">
       <div className="container-fluid px-0">
         <BookNowButton className="mb-3" url={BOOK_NOW_URL} />
-        <div style={{height:50}} aria-hidden="true" class="wp-block-spacer"></div>
+        <div style={{height:50}} aria-hidden="true" className="wp-block-spacer"></div>
         {/* Hero Section */}
         <div className="hero-section">
           <div className="position-relative">

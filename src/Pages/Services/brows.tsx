@@ -11,6 +11,7 @@ const Brows: FC = () => {
     let searchTerm = "brows-and-lashes"
 
     useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
         const fetchServices = async () => {
             try {
                 const response = await getServicesByName(searchTerm);
