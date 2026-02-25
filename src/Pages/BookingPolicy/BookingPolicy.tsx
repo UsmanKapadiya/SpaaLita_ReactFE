@@ -1,41 +1,53 @@
-import type { FC } from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import './BookingPolicy.css';
-import { BookingPolicyMockData } from '../../mockData/BookingPolicyMockData';
+//@ts-nocheck
+import { FC, useEffect, useState, useCallback } from "react";
+import { getBookingPolicy } from "../../Services/BookingPolicyServices";
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import { BOOKING_POLICY } from '../../utils/constants';
 
-interface PageContent {
+interface BookingPolicyItem {
+  _id: string;
+  title: string;
   description: string;
-}
-
-interface BookingPolicyData {
-  pageContent?: PageContent;
+  buttonUrl?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const BookingPolicy: FC = () => {
-  const [policyData, setPolicyData] = useState<BookingPolicyData | null>(null);
+  const [policyData, setPolicyData] = useState<BookingPolicyItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
-  const loadPolicyData = useCallback(async (): Promise<void> => {
+  const loadPolicyData = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
-      const data = await BookingPolicyMockData;
+      const response = await getBookingPolicy();
 
-      if (!data) {
-        throw new Error('No data received from server');
+      if (!response.success || !response.data?.length) {
+        throw new Error("No booking policy data found.");
       }
 
-      setPolicyData(data as BookingPolicyData);
+      const activePolicy = response.data.find(
+        (item: BookingPolicyItem) =>
+          item.status?.toLowerCase() === "active"
+      );
+
+      if (!activePolicy) {
+        throw new Error("No active booking policy found.");
+      }
+
+      setPolicyData(activePolicy);
     } catch (err) {
-      const errorMessage = err instanceof Error
-        ? err.message
-        : 'Failed to load booking policy data. Please try again.';
-      setError(errorMessage);
-      console.error('Error loading booking policy:', err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to load booking policy. Please try again.";
+
+      setError(message);
+      console.error("Error loading booking policy:", err);
     } finally {
       setLoading(false);
     }
@@ -45,55 +57,53 @@ const BookingPolicy: FC = () => {
     loadPolicyData();
   }, [loadPolicyData]);
 
+  // ------------------ Loading ------------------
   if (loading) {
     return (
-      <main className="container booking-policy-page">
-        <div className="loading-state text-center py-5" role="status" aria-live="polite">
-          <div className="spinner-border text-primary mb-3" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p>Loading booking policy...</p>
-        </div>
+      <main className="container booking-policy-page text-center py-5">
+        <div className="spinner-border text-primary mb-3" role="status" />
+        <p>Loading booking policy...</p>
       </main>
     );
   }
 
+  // ------------------ Error ------------------
   if (error) {
     return (
-      <main className="container booking-policy-page">
-        <div className="error-state text-center py-5" role="alert" aria-live="assertive">
-          <p className="error-message text-danger mb-3">{error}</p>
-          <button
-            className="btn btn-primary"
-            onClick={loadPolicyData}
-            aria-label="Retry loading booking policy"
-          >
-            Try Again
-          </button>
-        </div>
+      <main className="container booking-policy-page text-center py-5">
+        <p className="text-danger mb-3">{error}</p>
+        <button className="btn btn-primary" onClick={loadPolicyData}>
+          Try Again
+        </button>
       </main>
     );
   }
 
-  if (!policyData?.pageContent?.description) {
+  // ------------------ No Data ------------------
+  if (!policyData) {
     return (
-      <main className="container booking-policy-page">
-        <div className="no-data text-center py-5" role="status">
-          <p>Booking policy information is not available at this time.</p>
-        </div>
+      <main className="container booking-policy-page text-center py-5">
+        <p>Booking policy information is not available.</p>
       </main>
     );
   }
 
+  // ------------------ Success ------------------
   return (
     <main className="container booking-policy-page">
-      <div className="wp-block-buttons is-content-justification-center is-layout-flex wp-container-core-buttons-is-layout-16018d1d wp-block-buttons-is-layout-flex">
-        <BookNowButton url={BOOKING_POLICY} />
+      <div className="text-center my-4">
+        <BookNowButton
+          url={policyData.buttonUrl || BOOKING_POLICY}
+        />
       </div>
+
+      <h4 className="text-center my-5">
+        ONLINE BOOKING AND POLICY
+      </h4>
 
       <article className="col-lg-10 m-auto booking-policy-content">
         <div
-          dangerouslySetInnerHTML={{ __html: policyData.pageContent.description }}
+          dangerouslySetInnerHTML={{ __html: policyData.description }}
           aria-label="Booking policy details"
         />
       </article>
