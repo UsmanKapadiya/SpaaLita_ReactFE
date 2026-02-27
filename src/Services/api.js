@@ -52,7 +52,7 @@ instance.interceptors.response.use(
       Cookies.remove('userToken');
 
       // Redirect to login
-      window.location.href = '/';
+      // window.location.href = '/';
     }
     
     // Handle network errors

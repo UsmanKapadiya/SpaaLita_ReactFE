@@ -4,8 +4,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
+import { userLogin } from '../../Services/UserServices'
 import './Cart.css';
-
+import axios from 'axios';
 interface CartItem {
     id: string;
     name: string;
@@ -66,7 +67,7 @@ const CANADIAN_PROVINCES: Province[] = [
 ];
 
 const INITIAL_BILLING_DETAILS: BillingDetails = {
-    firstName: 'John',
+    firstName: 'sss',
     lastName: 'Doe',
     address1: '123 Test St',
     address2: '',
@@ -89,6 +90,31 @@ const INITIAL_SHIPPING_DETAILS: ShippingDetails = {
     postcode: 'M1M1M1',
     giftCard: ''
 };
+const emptyBilling: BillingDetails = {
+    firstName: '',
+    lastName: '',
+    address1: '',
+    address2: '',
+    country: 'CA',
+    state: '',
+    city: '',
+    postcode: '',
+    phone: '',
+    email: '',
+};
+
+const emptyShipping: ShippingDetails = {
+    firstName: '',
+    lastName: '',
+    address1: '',
+    address2: '',
+    country: 'CA',
+    state: '',
+    city: '',
+    postcode: '',
+    giftCard: '',
+};
+
 
 const CART_ITEMS: CartItem[] = [
     { id: '1', name: 'Test Product', price: 105.00, quantity: 1 }
@@ -182,6 +208,7 @@ const Checkout: FC = () => {
     const navigate = useNavigate();
 
     const [showLogin, setShowLogin] = useState<boolean>(false);
+    const [isUserLogin, setIsUserLogin] = useState<boolean>(false)
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
     const [createAccount, setCreateAccount] = useState<boolean>(false);
@@ -195,9 +222,54 @@ const Checkout: FC = () => {
         password: ''
     });
 
-    const [billingDetails, setBillingDetails] = useState<BillingDetails>(INITIAL_BILLING_DETAILS);
-    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(INITIAL_SHIPPING_DETAILS);
+    const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
+    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
     const [cartItems] = useState<CartItem[]>(CART_ITEMS);
+
+    useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
+    if (token && userStr) {
+        const user = JSON.parse(userStr);
+
+        setIsUserLogin(true);
+
+        // Set billing details from user data if available
+        setBillingDetails({
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            address1: user.address || '',
+            address2: user.address2 || '',
+            country: user.country || 'CA',
+            state: user.state || '',
+            city: user.city || '',
+            postcode: user.postalCode || '',
+            phone: user.phone || '',
+            email: user.email || '',
+        });
+
+        // Set shipping details from user data if available
+        setShippingDetails({
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            address1: user.address || '',
+            address2: user.address2 || '',
+            country: user.country || 'CA',
+            state: user.state || '',
+            city: user.city || '',
+            postcode: user.postalCode || '',
+            giftCard: user.giftCard || '',
+        });
+    } else {
+        setIsUserLogin(false);
+        // Optional: clear details
+        setBillingDetails(emptyBilling);
+        setShippingDetails(emptyShipping);
+    }
+}, []); // run once on mount
+
+
 
     const calculateTotal = useCallback((): number => {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -243,12 +315,38 @@ const Checkout: FC = () => {
         alert('Coupon applied!');
     }, [couponCode]);
 
-    const handleLogin = useCallback((e: FormEvent<HTMLFormElement>): void => {
-        e.preventDefault();
-        // TODO: Implement authentication logic
-        console.log('Login attempt:', loginData);
-        alert('Logged in successfully!');
-    }, [loginData]);
+    const handleLogin = useCallback(
+        async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+            e.preventDefault();
+
+            try {
+                let payload = {
+                    email: loginData?.username,
+                    password: loginData?.password
+                }
+                const response = await userLogin(payload);
+                const { token, user } = response.data;
+                console.log(user)
+                setBillingDetails(user.billing || null);
+                setShippingDetails(user.shipping || null);
+                localStorage.setItem("token", token);
+                localStorage.setItem("user", JSON.stringify(user));
+                setIsUserLogin(true);
+                alert("Logged in successfully!");
+
+                // Optional: navigate
+                // navigate("/dashboard");
+
+            } catch (err: any) {
+                //   setError(
+                //     err.response?.data?.message || "Login failed. Try again."
+                //   );
+            } finally {
+                //   setLoading(false);
+            }
+        },
+        [loginData]
+    );
 
     const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
         <div className="woocommerce-info cart-empty" style={{ justifyContent: 'flex-start' }} role="status">
@@ -420,93 +518,95 @@ const Checkout: FC = () => {
                 <div className="woocommerce-notices-wrapper" role="alert" aria-live="polite" />
 
                 {/* Login Section */}
-                <div className="woocommerce-form-login-toggle mb-4">
-                    {renderInfoBox(
-                        'Returning customer?',
-                        true,
-                        'Click here to login',
-                        () => setShowLogin(!showLogin)
-                    )}
+                {!isUserLogin &&
+                    <div className="woocommerce-form-login-toggle mb-4">
+                        {renderInfoBox(
+                            'Returning customer?',
+                            true,
+                            'Click here to login',
+                            () => setShowLogin(!showLogin)
+                        )}
 
-                    {showLogin && (
-                        <form className="woocommerce-form woocommerce-form-login login my-3" onSubmit={handleLogin}>
-                            <div className="w-75">
-                                <p>If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing section.</p>
+                        {showLogin && (
+                            <form className="woocommerce-form woocommerce-form-login login my-3" onSubmit={handleLogin}>
+                                <div className="w-75">
+                                    <p>If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing section.</p>
 
-                                <div className="row">
-                                    <div className="col-md-6">
-                                        <p className="form-row">
-                                            <label htmlFor="username">
-                                                Username or email&nbsp;<span className="required" aria-label="required">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="input-text form-control checkoutInput loginInput"
-                                                name="username"
-                                                id="username"
-                                                value={loginData.username}
-                                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                                    setLoginData({ ...loginData, username: e.target.value })
-                                                }
-                                                autoComplete="username"
-                                                required
-                                                aria-required="true"
-                                            />
-                                        </p>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <p className="form-row">
+                                                <label htmlFor="username">
+                                                    Username or email&nbsp;<span className="required" aria-label="required">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="input-text form-control checkoutInput loginInput"
+                                                    name="username"
+                                                    id="username"
+                                                    value={loginData.username}
+                                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                                        setLoginData({ ...loginData, username: e.target.value })
+                                                    }
+                                                    autoComplete="username"
+                                                    required
+                                                    aria-required="true"
+                                                />
+                                            </p>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <p className="form-row">
+                                                <label htmlFor="password">
+                                                    Password&nbsp;<span className="required" aria-label="required">*</span>
+                                                </label>
+                                                <input
+                                                    className="input-text form-control loginInput"
+                                                    type="password"
+                                                    name="password"
+                                                    id="password"
+                                                    value={loginData.password}
+                                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                                        setLoginData({ ...loginData, password: e.target.value })
+                                                    }
+                                                    autoComplete="current-password"
+                                                    required
+                                                    aria-required="true"
+                                                />
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="col-md-6">
-                                        <p className="form-row">
-                                            <label htmlFor="password">
-                                                Password&nbsp;<span className="required" aria-label="required">*</span>
-                                            </label>
+
+                                    <p className="form-row">
+                                        <label className="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__rememberme">
                                             <input
-                                                className="input-text form-control loginInput"
-                                                type="password"
-                                                name="password"
-                                                id="password"
-                                                value={loginData.password}
-                                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                                    setLoginData({ ...loginData, password: e.target.value })
-                                                }
-                                                autoComplete="current-password"
-                                                required
-                                                aria-required="true"
+                                                className="woocommerce-form__input woocommerce-form__input-checkbox"
+                                                name="rememberme"
+                                                type="checkbox"
+                                                id="rememberme"
+                                                checked={rememberMe}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) => setRememberMe(e.target.checked)}
                                             />
-                                        </p>
-                                    </div>
+                                            <span className="ml-1">Remember me</span>
+                                        </label>
+                                        <button type="submit" className="woocommerce-button button woocommerce-form-login__submit shopButton" name="login">
+                                            Login
+                                        </button>
+                                    </p>
+                                    <p className="lost_password">
+                                        <button
+                                            type="button"
+                                            className="ml-0 pl-0"
+                                            onClick={() => navigate('/my-account/lost-password')}
+                                            aria-label="Reset password"
+                                            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
+                                        >
+                                            Lost your password?
+                                        </button>
+                                    </p>
                                 </div>
-
-                                <p className="form-row">
-                                    <label className="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__rememberme">
-                                        <input
-                                            className="woocommerce-form__input woocommerce-form__input-checkbox"
-                                            name="rememberme"
-                                            type="checkbox"
-                                            id="rememberme"
-                                            checked={rememberMe}
-                                            onChange={(e: ChangeEvent<HTMLInputElement>) => setRememberMe(e.target.checked)}
-                                        />
-                                        <span className="ml-1">Remember me</span>
-                                    </label>
-                                    <button type="submit" className="woocommerce-button button woocommerce-form-login__submit shopButton" name="login">
-                                        Login
-                                    </button>
-                                </p>
-                                <p className="lost_password">
-                                    <button
-                                        type="button"
-                                        className="ml-0 pl-0"
-                                        onClick={() => navigate('/my-account/lost-password')}
-                                        aria-label="Reset password"
-                                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-                                    >
-                                        Lost your password?
-                                    </button>
-                                </p>
-                            </div>
-                        </form>
-                    )}
-                </div>
+                            </form>
+                        )}
+                    </div>
+                }
 
                 {/* Coupon Section */}
                 <div className="woocommerce-form-coupon-toggle mb-4">
@@ -558,7 +658,7 @@ const Checkout: FC = () => {
                                             type="tel"
                                             className="input-text form-control"
                                             id="billing_phone"
-                                            value={billingDetails.phone}
+                                            value={billingDetails?.phone}
                                             onChange={(e) => handleBillingChange('phone', e.target.value)}
                                             autoComplete="tel"
                                             required
@@ -574,7 +674,7 @@ const Checkout: FC = () => {
                                             type="email"
                                             className="input-text form-control"
                                             id="billing_email"
-                                            value={billingDetails.email}
+                                            value={billingDetails?.email}
                                             onChange={(e) => handleBillingChange('email', e.target.value)}
                                             autoComplete="email"
                                             required
@@ -583,6 +683,7 @@ const Checkout: FC = () => {
                                     </p>
                                 </div>
 
+                            {!isUserLogin && (
                                 <div className="woocommerce-account-fields">
                                     <p className="form-row form-row-wide create-account">
                                         <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
@@ -597,6 +698,7 @@ const Checkout: FC = () => {
                                         </label>
                                     </p>
                                 </div>
+                                )}
                             </section>
 
                             {/* Shipping Details */}
