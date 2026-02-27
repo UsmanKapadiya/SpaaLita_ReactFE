@@ -6,8 +6,9 @@ import { addToCart } from '../../store/cartSlice';
 import { sortProducts, type SortOption } from '../../utils/sortProducts';
 import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
-import { getAllGiftCard } from '../../Services/GiftCardServices'
+import { getAllGiftCard } from '../../Services/ProductRelatedServices'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
+import Pagination from '../../Component/Pagination/Pagination';
 
 
 interface GiftCardItemType {
@@ -26,7 +27,7 @@ interface GiftCardItemProps {
 type SortOption = "menu_order" | "price_asc" | "price_desc" | "title_asc" | "title_desc";
 
 
-const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, onAddToCart }) => {
+const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAddToCart }) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
@@ -43,9 +44,15 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, onAddToCart }) =>
         onAddToCart(giftCard);
     };
 
+    // const handleProductClick = () => {
+    //     navigate(`/product/${giftCard._id}`, {
+    //         state: { source: 'giftCard' }
+    //     });
+    // };
     const handleProductClick = () => {
+        console.log(giftCard);
         navigate(`/product/${giftCard._id}`, {
-            state: { source: 'giftCard' }
+            state: { source: 'giftCard', allProducts: allProducts, currentProduct: giftCard } //currentProductID:
         });
     };
 
@@ -78,28 +85,39 @@ const GiftCard: React.FC = () => {
     const [sortBy, setSortBy] = useState<SortOption>("menu_order");
     const [showMessage, setShowMessage] = useState(false);
     const [addedItem, setAddedItem] = useState<GiftCardItemType | null>(null);
+    const [page, setPage] = useState(1);
+    const itemPerPage = 5;
+    const [pagination, setPagination] = useState({
+        total: 0,
+        page: 1,
+        limit: 9,
+        pages: 1
+    });
+
+    const fetchGiftCards = async (page: number, itemPerPage: number, sortBy: string) => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const response = await getAllGiftCard(page, itemPerPage, sortBy);
+
+            if (!response.success || !response.data?.length) {
+                throw new Error("No gift cards found.");
+            }
+
+            setGiftCards(response.data);
+            setPagination(response.pagination);
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to load gift cards.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchGiftCards = async () => {
-            try {
-                setLoading(true);
-                setError("");
-
-                const response = await getAllGiftCard();
-
-                if (!response.success || !response.data?.length) {
-                    throw new Error("No gift cards found.");
-                }
-
-                setGiftCards(response.data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Failed to load gift cards.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchGiftCards();
-    }, []);
+        fetchGiftCards(page, itemPerPage, sortBy);
+    }, [page, itemPerPage, sortBy]);
 
     const availableGiftCards = useMemo(() => {
         const available = giftCards.filter(card => card.status === 'active');
@@ -116,10 +134,10 @@ const GiftCard: React.FC = () => {
 
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSortBy(event.target.value as SortOption);
+        setPage(1);
     };
 
 
-    console.log(giftCards)
     return (
         <div className="container my-5">
             <div className="row">
@@ -130,41 +148,57 @@ const GiftCard: React.FC = () => {
                 </div>
                 <div className="col-md-9">
                     <div className="shop">
+
                         {showMessage && addedItem && (
                             <AddToCartMessage itemTitle={addedItem.productName} />
                         )}
 
-                        <p className="woocommerce-result-count" role="alert" aria-relevant="all" aria-hidden="false">
+                        <p className="woocommerce-result-count">
                             Showing all {totalCount} results
                         </p>
+
                         <form className="woocommerce-ordering" method="get">
                             <span className="pl-2">Sort By:</span>
                             <select
                                 name="orderby"
                                 className="orderby"
-                                aria-label="Shop order"
                                 value={sortBy}
                                 onChange={handleSortChange}
                             >
                                 {giftCardSortOptions.map((option: any) => (
                                     <option
                                         key={option.value}
-                                        title={option.title}
                                         value={option.value}
                                     >
                                         {option.label}
                                     </option>
                                 ))}
                             </select>
-                            <input type="hidden" name="paged" value="1" />
                         </form>
 
                         <div className="clear"></div>
+
                         <ul className="products columns-3">
                             {availableGiftCards.map(card => (
-                                <GiftCardItem key={card._id} giftCard={card} onAddToCart={handleAddToCart} />
+                                <GiftCardItem
+                                    key={card._id}
+                                    giftCard={card}
+                                    allProducts={availableGiftCards}
+                                    onAddToCart={handleAddToCart}
+                                />
                             ))}
                         </ul>
+
+                        <div style={{ clear: "both" }}></div>
+
+                        {pagination.pages > 1 && (
+                            <Pagination
+                                currentPage={pagination.page}
+                                totalPages={pagination.pages}
+                                onPageChange={(newPage) => setPage(newPage)}
+                            />
+                        )}
+
                     </div>
                 </div>
             </div>

@@ -1,76 +1,136 @@
+//@ts-nocheck
 import type { FC } from 'react';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
-import { getProductBySlug, getDataArrayBySource, type ProductSource } from '../../utils/productHelpers';
 import ProductNavigation from '../../Component/ProductNavigation/ProductNavigation';
 import ProductImageGallery from '../../Component/ProductImageGallery/ProductImageGallery';
 import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
+import { getRelatedProducts, getGiftCardRelatedProducts } from '../../Services/ProductRelatedServices'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
+
+interface Product {
+    _id: string;
+    productName: string;
+    description?: string;
+    price: number;
+    currency?: string;
+    qty: number;
+    category?: string;
+    images?: { src: string }[];
+    image?: { src: string };
+}
+
+interface RelatedProduct {
+    id: string;
+    slug: string;
+    productName: string;
+    price: number | string;
+    image: string;
+    alt: string;
+    category?: string;
+}
+
+type ProductSource = "shop" | "giftCard";
 
 interface LocationState {
     source?: ProductSource;
+    allProducts?: Product[];
+    currentProduct?: Product;
 }
-
 const ProductDetails: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const { itemName } = useParams<{ itemName: string }>();
+    const { itemName } = useParams<{ itemName: string }>(); //id Get here
+    const sourceFromState = (location.state as LocationState)?.source;
+    const AllProducts = (location.state as LocationState)?.allProducts;
+    const currentProduct = (location.state as LocationState)?.currentProduct;
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
     const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
+    const [quantity, setQuantity] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [relatedProducts, setRelatedProducts] = useState([])
 
-    const sourceFromState = (location.state as LocationState)?.source;
 
-    const { product: currentProduct, source: productSource } = useMemo(
-        () => getProductBySlug(itemName, sourceFromState),
-        [itemName, sourceFromState]
-    );
 
-    const currentDataArray = getDataArrayBySource(productSource);
+    const fetchRelatedProducts = async () => {
+        if (!itemName) return; // important: prevent API call with undefined
 
+        try {
+            setLoading(true);
+            setError("");
+
+            let response;
+            if (sourceFromState === 'shop') {
+                response = await getRelatedProducts(itemName);
+            } else {
+                response = await getGiftCardRelatedProducts(itemName);
+            }
+
+            if (!response.success || !response.data?.length) {
+                throw new Error("No related products found.");
+            }
+            const formattedProducts = response.data.map((item: any) => ({
+                id: item._id,
+                slug: item._id,
+                productName: item.productName,
+                price: item.price,
+                image: item.productImages?.[0]?.src || ImageNotFound,
+                alt: item.productName,
+                category: item.category
+
+            }));
+
+            setRelatedProducts(formattedProducts);
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to load related products.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!itemName) return;
+        fetchRelatedProducts();
+    }, [sourceFromState, itemName]);
+
+    const currentDataArray = AllProducts
     const currentIndex = useMemo(() =>
-        currentDataArray.findIndex((product: any) => product.slug === itemName),
+        currentDataArray.findIndex((product: any) => product._id === itemName),
         [currentDataArray, itemName]
     );
 
     const isFirstProduct = currentIndex === 0;
     const isLastProduct = currentIndex === currentDataArray.length - 1;
 
-    const relatedProducts = useMemo(() => {
-        return currentDataArray
-            .filter((product: any) => product.slug !== itemName)
-            .slice(0, 4)
-            .map((product: any) => ({
-                id: product.id,
-                slug: product.slug,
-                title: product.title,
-                price: product.price?.toFixed(2) || product.price,
-                image: product.images?.[0]?.src || product.image?.src || ImageNotFound,
-                srcSet: product.images?.[0]?.srcSet || product.image?.srcSet || '',
-                alt: product.images?.[0]?.alt || product.image?.alt || product.title
-            }));
-    }, [currentDataArray, itemName]);
-
     const handleShopClick = useCallback(() => {
         navigate('/shop');
     }, [navigate]);
 
-    const handleProductClick = useCallback((productSlug: string, productId: number) => {
-        navigate(`/product/${productSlug}`, {
-            state: { id: productId, source: productSource }
+
+    const handleProductClick = useCallback((product: any) => {
+        navigate(`/product/${product.id}`, {
+            state: {
+                source: sourceFromState,
+                allProducts: AllProducts,
+                currentProduct: product
+            }
         });
-        setSelectedImageIndex(0);
-    }, [navigate, productSource]);
+
+
+    }, [navigate, sourceFromState, AllProducts]);
 
     const navigateToProduct = useCallback((product: any) => {
-        navigate(`/product/${product.slug}`, {
-            state: { id: product.id, source: productSource }
+        navigate(`/product/${product._id}`, {
+            state: { source: sourceFromState, allProducts: AllProducts, currentProduct: product }
         });
         setSelectedImageIndex(0);
-    }, [navigate, productSource]);
+    }, [navigate, sourceFromState]);
 
     const handlePreviousProduct = useCallback(() => {
         const product = currentIndex > 0
@@ -86,24 +146,52 @@ const ProductDetails: FC = () => {
         navigateToProduct(product);
     }, [currentIndex, currentDataArray, navigateToProduct]);
 
-    const handleAddToCart = useCallback((e: React.FormEvent) => {
-        e.preventDefault();
+    const addProductToCart = useCallback(
+        (product: Product, qty: number) => {
+            dispatch(
+                addToCart({
+                    id: product._id?.toString() || '',
+                    name: product.productName,
+                    price: product.price,
+                    quantity: qty,
+                    image:
+                        product.images?.[0]?.src ||
+                        product.image?.src ||
+                        ImageNotFound,
+                })
+            );
 
-        if (!currentProduct) return;
+            setIsAddedToCart(true);
+        },
+        [dispatch]
+    );
 
-        const quantityInput = document.getElementById('quantity_698057c4e0b2c') as HTMLInputElement;
-        const quantity = parseInt(quantityInput?.value || '1', 10);
+    const handleRelatedAddToCart = useCallback(
+        (product: RelatedProduct) => {
+            addProductToCart(
+                {
+                    _id: product.id,
+                    productName: product.productName,
+                    price: Number(product.price),
+                    images: [{ src: product.image }],
+                } as any,
+                1
+            );
+        },
+        [addProductToCart]
+    );
 
-        dispatch(addToCart({
-            id: currentProduct.id?.toString() || itemName || '',
-            name: currentProduct.title,
-            price: currentProduct.price,
-            quantity: quantity,
-            image: currentProduct.images?.[0]?.src || currentProduct.image?.src || ImageNotFound
-        }));
+    const handleFormSubmit = useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
 
-        setIsAddedToCart(true);
-    }, [currentProduct, dispatch, itemName]);
+            if (!currentProduct) return;
+
+            addProductToCart(currentProduct, quantity);
+        },
+        [currentProduct, quantity, addProductToCart]
+    );
+
 
     const handleViewCart = useCallback(() => {
         navigate('/cart');
@@ -113,9 +201,25 @@ const ProductDetails: FC = () => {
         setIsAddedToCart(false);
     }, [itemName]);
 
+    const handleChange = (e) => {
+        let value = parseInt(e.target.value, 10);
+
+        if (value > currentProduct.qty) {
+            value = currentProduct.qty;
+        }
+
+        if (value < 1 || isNaN(value)) {
+            value = 1;
+        }
+
+        setQuantity(value);
+    };
+
+
+
     const mainImage = currentProduct?.images?.[selectedImageIndex] || currentProduct?.image || null;
     const thumbnailImages = currentProduct?.images || [];
-    const isGiftCard = productSource === 'giftCard' || currentProduct?.title?.toLowerCase().includes('gift card');
+    const isGiftCard = sourceFromState === 'giftCard' || currentProduct?.title?.toLowerCase().includes('gift card');
 
     return (
         <div className="container py-5">
@@ -126,7 +230,7 @@ const ProductDetails: FC = () => {
                         <span onClick={() => navigate('/giftcard')} style={{ cursor: 'pointer' }}>Gift Card</span>&nbsp;/&nbsp;
                     </>
                 )}
-                {currentProduct?.title || 'Product'}
+                <span>{currentProduct?.category}</span> / <span>{currentProduct?.productName}</span>
             </nav>
 
             <div className="woocommerce-notices-wrapper"></div>
@@ -148,14 +252,22 @@ const ProductDetails: FC = () => {
                                 onPrevious={handlePreviousProduct}
                                 onNext={handleNextProduct}
                             />
-                            <h4 className="product_title entry-title">{currentProduct?.title}</h4>
+                            <h4 className="product_title entry-title">{currentProduct?.productName}</h4>
                             <div className="woocommerce-product-details__short-description">
-                                <p>{currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'}</p>
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
+                                            .replace(/&lt;/g, '<')
+                                            .replace(/&gt;/g, '>')
+                                            .replace(/&amp;/g, '&')
+                                            .replace(/&nbsp;/g, ' ')
+                                    }}
+                                />
                             </div>
                             <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">{currentProduct?.currency || '$'}</span>{currentProduct?.price?.toFixed(2)}</bdi></span></p>
 
 
-                            <form className="cart" onSubmit={handleAddToCart} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
+                            <form className="cart" onSubmit={handleFormSubmit} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
                                 <div className="fpf-fields before-add-to-cart">
                                     <input type="hidden" name="_fpf_nonce" value="68f4b39d79" form="fpf-add-to-cart-form" />
                                     <input type="hidden" name="_fpf_product_id" value="273" form="fpf-add-to-cart-form" />
@@ -166,9 +278,18 @@ const ProductDetails: FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="qty">Qty </div><div className="quantity">
-                                    {/* <label className="screen-reader-text" htmlFor="quantity_698057c4e0b2c">Gift Card - $100.00 quantity</label> */}
-                                    <input type="number" id="quantity_698057c4e0b2c" className="input-text qty text" name="quantity" defaultValue="1" aria-label="Product quantity" min="1" step="1" placeholder="" inputMode="numeric" autoComplete="off" />
+                                <div className="qty">Qty</div>
+                                <div className="quantity">
+                                    <input
+                                        type="number"
+                                        className="input-text qty text"
+                                        value={quantity}
+                                        min="1"
+                                        max={currentProduct.qty}
+                                        step="1"
+                                        onChange={handleChange}
+                                    />
+
                                 </div>
 
                                 <div className="mt-5" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
@@ -219,7 +340,17 @@ const ProductDetails: FC = () => {
                     <div className="tab-content pt-3 px-3" id="product-tabs">
                         <div className="tab-pane fade show active" id="content_description" role="tabpanel" aria-labelledby="content_description">
                             <h2>Description</h2>
-                            <p>{currentProduct.description}</p>
+                            <p>
+                                 <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
+                                            .replace(/&lt;/g, '<')
+                                            .replace(/&gt;/g, '>')
+                                            .replace(/&amp;/g, '&')
+                                            .replace(/&nbsp;/g, ' ')
+                                    }}
+                                />
+                                </p>
                         </div>
                     </div>
                 </div>
@@ -227,6 +358,9 @@ const ProductDetails: FC = () => {
             <RelatedProducts
                 products={relatedProducts}
                 onProductClick={handleProductClick}
+                // cartClick={handleAddToCart}
+                cartClick={handleRelatedAddToCart}
+
             />
 
         </div>
