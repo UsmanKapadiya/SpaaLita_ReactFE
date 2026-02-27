@@ -1,0 +1,65 @@
+/* Container for the entire pagination */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Arrow icons */
+.pagination-arrow {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.2s;
+  border: 1px solid
+}
+
+.pagination-arrow.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* Page numbers container */
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 8px;
+  
+}
+
+/* Individual page number */
+.pagination-page {
+  cursor: pointer;
+  padding: 4px 12px;
+  margin: 0 4px;
+  font-weight: 400;
+  color: #888; /* gray text */
+  border-radius: 1px;
+  user-select: none;
+  transition: all 0.2s;
+  border: 1px solid #000
+}
+
+/* Active page */
+.pagination-page.active {
+  font-weight: 500;
+  color: #000; /* black text */
+}
+
+/* Hover effect */
+.pagination-page:hover {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Ellipsis style */
+.pagination-ellipsis {
+  padding: 6px 8px;
+  margin: 0 4px;
+  color: #888;
+  user-select: none;
+}
