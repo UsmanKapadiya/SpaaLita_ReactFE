@@ -13,12 +13,14 @@ import PaymentMethods from './PaymentMethods';
 import AccountDetails from './AccountDetails';
 import Submissions from './Submissions';
 import LostPassword from './LostPassword';
-import { useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { logout } from '../../store/authSlice';
 
 type TabType = 'dashboard' | 'orders' | 'OrdersDetails' | 'downloads' | 'addresses' | 'payment-methods' | 'account-details' | 'submissions' | 'lost-password';
 
 const MyAccount: FC = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const location = useLocation();
     const user = useAppSelector((state) => state.auth.user);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
@@ -26,10 +28,9 @@ const MyAccount: FC = () => {
     const [showLostPassword, setShowLostPassword] = useState<boolean>(false);
 
     const handleLogout = useCallback((): void => {
+        dispatch(logout());
         setIsLoggedIn(false);
-        // TODO: Implement actual logout API call and clear auth tokens
-        // Clear local storage, cookies, etc.
-    }, []);
+    }, [dispatch]);
 
     const handleLogin = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();

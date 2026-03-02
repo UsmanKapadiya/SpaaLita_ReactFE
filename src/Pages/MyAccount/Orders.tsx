@@ -40,7 +40,7 @@ const Orders: FC = () => {
 
     return (
         <div className="account-orders">
-            {orders.length > 0 ? (
+            {orders?.length > 0 ? (
                 <div className="orders-table">
                     <table className="woocommerce-orders-table woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
                         <thead>

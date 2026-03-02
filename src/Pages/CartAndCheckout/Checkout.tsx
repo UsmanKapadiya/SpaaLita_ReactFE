@@ -9,6 +9,7 @@ import './Cart.css';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/authSlice';
+import { toast } from 'react-toastify';
 interface CartItem {
     id: string;
     name: string;
@@ -231,8 +232,10 @@ const Checkout: FC = () => {
     const [cartItems] = useState<CartItem[]>(CART_ITEMS);
 
     useEffect(() => {
-        setBillingDetails(user.billing || null);
-        setShippingDetails(user.shipping || null);
+        if (user) {
+            setBillingDetails(user?.billing || null);
+            setShippingDetails(user?.shipping || null);
+        }
     }, [user])
 
 
@@ -269,7 +272,7 @@ const Checkout: FC = () => {
         e.preventDefault();
         // Stripe payment handled in StripeCheckoutForm
         if (paymentMethod !== 'stripe') {
-            alert('Order placed successfully!');
+            toast.success('Order placed successfully!')
         }
     }, [paymentMethod]);
 
@@ -290,11 +293,12 @@ const Checkout: FC = () => {
                     password: loginData?.password
                 }
                 const response = await userLogin(payload);
+                console.log(response);
                 const { token, user } = response.data;
                 setBillingDetails(user.billing || null);
                 setShippingDetails(user.shipping || null);
                 dispatch(login({ user: user, token: token }));
-                alert("Logged in successfully!");
+                toast.success(response?.message || "Logged in successfully!");
 
                 // Optional: navigate
                 // navigate("/dashboard");
@@ -346,7 +350,7 @@ const Checkout: FC = () => {
                             type="text"
                             className="input-text form-control"
                             id={`${type}_first_name`}
-                            value={details.firstName}
+                            value={details?.firstName}
                             onChange={(e) => handleChange('firstName', e.target.value)}
                             autoComplete="given-name"
                             required
@@ -363,7 +367,7 @@ const Checkout: FC = () => {
                             type="text"
                             className="input-text form-control"
                             id={`${type}_last_name`}
-                            value={details.lastName}
+                            value={details?.lastName}
                             onChange={(e) => handleChange('lastName', e.target.value)}
                             autoComplete="family-name"
                             required
