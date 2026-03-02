@@ -1,19 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage
+import storage from 'redux-persist/lib/storage';
 import cartReducer from './cartSlice';
+import authReducer from './authSlice';
 
-const persistConfig = {
+const cartPersistConfig = {
     key: 'cart',
     storage,
-    whitelist: ['items'] // only persist items, not lastAddedItem
+    whitelist: ['items']
 };
 
-const persistedCartReducer = persistReducer(persistConfig, cartReducer);
+const authPersistConfig = {
+    key: 'auth',
+    storage,
+    whitelist: ['isLoggedIn', 'user', 'token']
+};
+
+const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 export const store = configureStore({
     reducer: {
-        cart: persistedCartReducer
+        cart: persistedCartReducer,
+        auth: persistedAuthReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

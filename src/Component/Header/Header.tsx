@@ -1,17 +1,18 @@
 import type { FC } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import Badge from '@mui/material/Badge';
 import { useAppSelector } from '../../store/hooks';
 import logo from '../../assets/images/SpaAlita_logo.png';
+import PersonIcon from '@mui/icons-material/Person';
 import './Header.css'
 
 const Header: FC = () => {
   const navigate = useNavigate();
-  
+  const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
   // Memoize cart count calculation for performance
-  const cartItemsCount = useAppSelector(state => 
+  const cartItemsCount = useAppSelector(state =>
     state.cart.items.reduce((total, item) => total + item.quantity, 0)
   );
 
@@ -44,7 +45,12 @@ const Header: FC = () => {
           </button>
 
           <div className="collapse navbar-collapse" id="menubar">
-            <ul id="menu-desktop-menu" className="navbar-nav w-100 justify-content-center"><li id="menu-item-17492" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-17492"><span onClick={() => handleNavigation('/')} style={{ cursor: 'pointer' }}>Home</span></li>
+            {/* <ul id="menu-desktop-menu" className="navbar-nav w-100 justify-content-center"> */}
+              <ul
+                id="menu-desktop-menu"
+                className={`navbar-nav w-100 justify-content-center ${isUserLogin ? 'user-logged-in' : ''}`}
+              >
+              <li id="menu-item-17492" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-17492"><span onClick={() => handleNavigation('/')} style={{ cursor: 'pointer' }}>Home</span></li>
               <li id="menu-item-14584" className="menu-item menu-item-type-custom menu-item-object-custom menu-item-14584"><a href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567" target="_blank" rel="noopener noreferrer">Book NOW!</a></li>
               <li id="menu-item-1929" className="menu-item menu-item-type-post_type menu-item-object-page current-menu-item page_item page-item-209 current_page_item menu-item-has-children menu-item-1929"><span onClick={() => handleNavigation('/services')} style={{ cursor: 'pointer' }} aria-current="page">Services</span>
                 <ul className="sub-menu">
@@ -66,20 +72,31 @@ const Header: FC = () => {
               <li id="menu-item-1925" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-1925"><span onClick={() => handleNavigation('/spa-policy')} style={{ cursor: 'pointer' }}>Booking Policy</span></li>
               <li id="menu-item-472" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-472"><span onClick={() => handleNavigation('/gallery')} style={{ cursor: 'pointer' }}>Gallery</span></li>
               <li className="menu-item">
-                <div 
-                  onClick={() => handleNavigation('/cart')} 
-                  className="d-flex align-items-center" 
+                <div
+                  onClick={() => handleNavigation('/cart')}
+                  className="d-flex align-items-center"
                   style={{ cursor: 'pointer' }}
                 >
                   <span className="mr-2">Cart</span>
-                  <Badge 
-                    badgeContent={cartItemsCount} 
+                  <Badge
+                    badgeContent={cartItemsCount}
                     sx={badgeStyles}
                   >
                     <LocalMallIcon className='cartIconColor' />
                   </Badge>
-                </div>               
+                </div>
               </li>
+              {isUserLogin && (
+                <li className="menu-item">
+                  <div
+                    onClick={() => handleNavigation('/cart')}
+                    className="d-flex align-items-center"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <PersonIcon className='cartIconColor' />
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
         </nav>

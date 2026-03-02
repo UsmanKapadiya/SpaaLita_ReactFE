@@ -9,3 +9,11 @@
 li span{
     font-size: 13pt !important;
 }
+.navbar-nav li {
+  margin: 0 1em;
+  cursor: pointer;
+}
+
+.navbar-nav.user-logged-in li {
+  margin: 0 0.9em;
+}

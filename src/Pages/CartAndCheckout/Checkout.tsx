@@ -7,6 +7,8 @@ import WebAssetIcon from '@mui/icons-material/WebAsset';
 import { userLogin } from '../../Services/UserServices'
 import './Cart.css';
 import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { login } from '../../store/authSlice';
 interface CartItem {
     id: string;
     name: string;
@@ -206,9 +208,10 @@ const StripeCheckoutForm: FC<{ amount: number }> = ({ amount }) => {
 
 const Checkout: FC = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const [showLogin, setShowLogin] = useState<boolean>(false);
-    const [isUserLogin, setIsUserLogin] = useState<boolean>(false)
+    const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
     const [createAccount, setCreateAccount] = useState<boolean>(false);
@@ -225,50 +228,6 @@ const Checkout: FC = () => {
     const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
     const [cartItems] = useState<CartItem[]>(CART_ITEMS);
-
-    useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
-
-    if (token && userStr) {
-        const user = JSON.parse(userStr);
-
-        setIsUserLogin(true);
-
-        // Set billing details from user data if available
-        setBillingDetails({
-            firstName: user.firstName || '',
-            lastName: user.lastName || '',
-            address1: user.address || '',
-            address2: user.address2 || '',
-            country: user.country || 'CA',
-            state: user.state || '',
-            city: user.city || '',
-            postcode: user.postalCode || '',
-            phone: user.phone || '',
-            email: user.email || '',
-        });
-
-        // Set shipping details from user data if available
-        setShippingDetails({
-            firstName: user.firstName || '',
-            lastName: user.lastName || '',
-            address1: user.address || '',
-            address2: user.address2 || '',
-            country: user.country || 'CA',
-            state: user.state || '',
-            city: user.city || '',
-            postcode: user.postalCode || '',
-            giftCard: user.giftCard || '',
-        });
-    } else {
-        setIsUserLogin(false);
-        // Optional: clear details
-        setBillingDetails(emptyBilling);
-        setShippingDetails(emptyShipping);
-    }
-}, []); // run once on mount
-
 
 
     const calculateTotal = useCallback((): number => {
@@ -329,10 +288,8 @@ const Checkout: FC = () => {
                 console.log(user)
                 setBillingDetails(user.billing || null);
                 setShippingDetails(user.shipping || null);
-                localStorage.setItem("token", token);
-                localStorage.setItem("user", JSON.stringify(user));
-                setIsUserLogin(true);
-                alert("Logged in successfully!");
+                dispatch(login({ user: response.user, token: response.token }));
+               alert("Logged in successfully!");
 
                 // Optional: navigate
                 // navigate("/dashboard");
@@ -683,21 +640,21 @@ const Checkout: FC = () => {
                                     </p>
                                 </div>
 
-                            {!isUserLogin && (
-                                <div className="woocommerce-account-fields">
-                                    <p className="form-row form-row-wide create-account">
-                                        <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-                                            <input
-                                                className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
-                                                id="createaccount"
-                                                type="checkbox"
-                                                checked={createAccount}
-                                                onChange={(e: ChangeEvent<HTMLInputElement>) => setCreateAccount(e.target.checked)}
-                                            />
-                                            <span className="ml-1">Create an account?</span>
-                                        </label>
-                                    </p>
-                                </div>
+                                {!isUserLogin && (
+                                    <div className="woocommerce-account-fields">
+                                        <p className="form-row form-row-wide create-account">
+                                            <label className="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+                                                <input
+                                                    className="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
+                                                    id="createaccount"
+                                                    type="checkbox"
+                                                    checked={createAccount}
+                                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCreateAccount(e.target.checked)}
+                                                />
+                                                <span className="ml-1">Create an account?</span>
+                                            </label>
+                                        </p>
+                                    </div>
                                 )}
                             </section>
 
