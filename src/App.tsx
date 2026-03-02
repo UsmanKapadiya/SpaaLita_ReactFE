@@ -24,6 +24,9 @@ import Shop from './Pages/Shop/Shop';
 import ProductDetails from './Pages/ProductsDetails/ProductDetails';
 import MyAccount from './Pages/MyAccount/MyAccount';
 import LostPassword from './Pages/MyAccount/LostPassword';
+import { ToastContainer } from 'react-toastify';
+
+import ProtectedRoute from './ProtectedRoute';
 
 // NotFound Component
 const NotFound: FC = () => (
@@ -62,12 +65,20 @@ const App: FC = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/my-account/*" element={<MyAccount />} />
+            <Route
+              path="/my-account/*"
+              element={
+                <ProtectedRoute>
+                  <MyAccount />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/my-account/lost-password" element={<LostPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>
+      <ToastContainer />
     </Router>
   );
 }
