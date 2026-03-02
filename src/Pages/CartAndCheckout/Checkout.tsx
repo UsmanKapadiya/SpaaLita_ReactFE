@@ -212,6 +212,7 @@ const Checkout: FC = () => {
 
     const [showLogin, setShowLogin] = useState<boolean>(false);
     const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
+    const user = useAppSelector((state) => state.auth.user);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
     const [createAccount, setCreateAccount] = useState<boolean>(false);
@@ -228,6 +229,11 @@ const Checkout: FC = () => {
     const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
     const [cartItems] = useState<CartItem[]>(CART_ITEMS);
+
+    useEffect(() => {
+        setBillingDetails(user.billing || null);
+        setShippingDetails(user.shipping || null);
+    }, [user])
 
 
     const calculateTotal = useCallback((): number => {
@@ -285,11 +291,10 @@ const Checkout: FC = () => {
                 }
                 const response = await userLogin(payload);
                 const { token, user } = response.data;
-                console.log(user)
                 setBillingDetails(user.billing || null);
                 setShippingDetails(user.shipping || null);
-                dispatch(login({ user: response.user, token: response.token }));
-               alert("Logged in successfully!");
+                dispatch(login({ user: user, token: token }));
+                alert("Logged in successfully!");
 
                 // Optional: navigate
                 // navigate("/dashboard");
