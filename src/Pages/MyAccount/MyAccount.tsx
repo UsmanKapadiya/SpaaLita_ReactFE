@@ -6,19 +6,21 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import './MyAccount.css';
 import Dashboard from './Dashboard';
 import Orders from './Orders';
+import OrderDetails from './OrderDetails';
 import Downloads from './Downloads';
 import Addresses from './Addresses';
 import PaymentMethods from './PaymentMethods';
 import AccountDetails from './AccountDetails';
 import Submissions from './Submissions';
 import LostPassword from './LostPassword';
+import { useAppSelector } from '../../store/hooks';
 
-type TabType = 'dashboard' | 'orders' | 'downloads' | 'addresses' | 'payment-methods' | 'account-details' | 'submissions' | 'lost-password';
+type TabType = 'dashboard' | 'orders' | 'OrdersDetails' | 'downloads' | 'addresses' | 'payment-methods' | 'account-details' | 'submissions' | 'lost-password';
 
 const MyAccount: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [userName] = useState<string>('Spaalita');
+    const user = useAppSelector((state) => state.auth.user);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showLostPassword, setShowLostPassword] = useState<boolean>(false);
@@ -44,8 +46,10 @@ const MyAccount: FC = () => {
 
     const getActiveTab = useCallback((): TabType => {
         const path = location.pathname;
+
         if (path === '/my-account' || path === '/my-account/') return 'dashboard';
-        if (path.includes('/orders')) return 'orders';
+        if (path === '/my-account/orders') return 'orders'; // main orders list
+        if (path.startsWith('/my-account/orders/')) return 'OrdersDetails'; // order details page
         if (path.includes('/downloads')) return 'downloads';
         if (path.includes('/addresses')) return 'addresses';
         if (path.includes('/payment-methods')) return 'payment-methods';
@@ -56,8 +60,6 @@ const MyAccount: FC = () => {
     }, [location.pathname]);
 
     const activeTab = useMemo(() => getActiveTab(), [getActiveTab]);
-
-    
     if (!isLoggedIn) {
         return (
             <div className="my-account-page">
@@ -139,8 +141,9 @@ const MyAccount: FC = () => {
                     <div className="col-lg-10 ml-0 pl-0">
                         <div className="account-content">
                             <Routes>
-                                <Route path="/" element={<Dashboard userName={userName} />} />
+                                <Route path="/" element={<Dashboard userName={user?.userName} />} />
                                 <Route path="/orders" element={<Orders />} />
+                                <Route path="/orders/:id" element={<OrderDetails />} />
                                 <Route path="/downloads" element={<Downloads />} />
                                 <Route path="/addresses" element={<Addresses />} />
                                 <Route path="/payment-methods" element={<PaymentMethods />} />

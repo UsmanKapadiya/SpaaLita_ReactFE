@@ -1,6 +1,7 @@
 import requests from "./api.js";
 
 const USER_API_BASE = '/users/login';
+const ORDER_API_BASE = '/orders'
 
 
 export const getAllGiftCard = async (page, itemPerPage, sorting) => {
@@ -19,11 +20,15 @@ export const userLogin = async (data) => {
     try {
         let url = `${USER_API_BASE}`
         return await requests.post(url, data);
-        // return await requests(`${USER_API_BASE}`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(data),
-        // });
+    } catch (error) {
+        return { success: false, error: error.message || 'Failed to fetch products' };
+    }
+};
+
+export const getUserOrder = async (page, itemPerPage) => {
+    try {
+        let url = `${ORDER_API_BASE}?page=${page}&limit=${itemPerPage}`;
+        return await requests.get(url);
     } catch (error) {
         return { success: false, error: error.message || 'Failed to fetch products' };
     }
