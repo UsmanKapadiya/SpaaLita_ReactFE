@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
+import { store } from '../store/store';
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || `http://localhost:5000/api/`,
   timeout: 50000,
@@ -13,31 +13,46 @@ const instance = axios.create({
 // Request Interceptor
 instance.interceptors.request.use(
   function (config) {
-    let token;
-    
-    // Try to get token from cookies first
-    if (Cookies.get('authToken')) {
-      try {
-        const cookieData = JSON.parse(Cookies.get('authToken'));
-        token = cookieData.token;
-      } catch (e) {
-        console.error('Failed to parse cookie token:', e);
-      }
+    const state = store.getState();
+    const token = state.auth?.token;
+
+    if (token && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
-    
-    // Fallback to localStorage
-    const authToken = token || localStorage.getItem('authToken');
-    
-    if (authToken && !config.headers['Authorization']) {
-      config.headers['Authorization'] = `${authToken}`;
-    }
-    
+    console.log(token)
     return config;
   },
   function (error) {
     return Promise.reject(error);
   }
 );
+// instance.interceptors.request.use(
+//   function (config) {
+//     let token;
+    
+//     // Try to get token from cookies first
+//     if (Cookies.get('authToken')) {
+//       try {
+//         const cookieData = JSON.parse(Cookies.get('authToken'));
+//         token = cookieData.token;
+//       } catch (e) {
+//         console.error('Failed to parse cookie token:', e);
+//       }
+//     }
+    
+//     // Fallback to localStorage
+//     const authToken = token || localStorage.getItem('authToken');
+    
+//     if (authToken && !config.headers['Authorization']) {
+//       config.headers['Authorization'] = `${authToken}`;
+//     }
+    
+//     return config;
+//   },
+//   function (error) {
+//     return Promise.reject(error);
+//   }
+// );
 
 // Response Interceptor
 instance.interceptors.response.use(
