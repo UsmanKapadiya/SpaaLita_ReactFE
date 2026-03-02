@@ -89,7 +89,7 @@ const Header: FC = () => {
               {isUserLogin && (
                 <li className="menu-item">
                   <div
-                    onClick={() => handleNavigation('/cart')}
+                    onClick={() => handleNavigation('/my-account')}
                     className="d-flex align-items-center"
                     style={{ cursor: 'pointer' }}
                   >
