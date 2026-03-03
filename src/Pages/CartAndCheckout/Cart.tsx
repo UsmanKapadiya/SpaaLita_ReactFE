@@ -1,56 +1,108 @@
 import type { FC, ChangeEvent, FormEvent } from 'react';
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import WebAssetIcon from '@mui/icons-material/WebAsset';
-import ClearIcon from '@mui/icons-material/Clear';
+import { applyCoupon } from '../../Services/ProductRelatedServices'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { applyCouponToCart, removeCoupon } from '../../store/cartSlice'
+import ClearIcon from '@mui/icons-material/Clear';
+import WebAssetIcon from '@mui/icons-material/WebAsset';
 import { removeFromCart, updateQuantity as updateCartQuantity, type CartItem } from '../../store/cartSlice';
 import './Cart.css';
+import { toast } from 'react-toastify';
 
 const Cart: FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
+
   const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
+  const { discountAmount, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
-
   const cartTotal = useMemo((): number => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [cartItems]);
 
-  const updateQuantity = useCallback((id: string, newQuantity: number): void => {
-    if (newQuantity < 1 || isNaN(newQuantity)) return;
-    dispatch(updateCartQuantity({ id, quantity: newQuantity }));
-  }, [dispatch]);
 
-  const removeItem = useCallback((id: string): void => {
-    if (window.confirm('Are you sure you want to remove this item from your cart?')) {
-      dispatch(removeFromCart(id));
-    }
-  }, [dispatch]);
+  const updateQuantity = useCallback(
+    (id: string, newQuantity: number): void => {
+      if (newQuantity < 1 || newQuantity > 99 || isNaN(newQuantity)) return;
+      dispatch(updateCartQuantity({ id, quantity: newQuantity }));
+    },
+    [dispatch]
+  );
 
-  const handleCouponSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
+  const removeItem = useCallback(
+    (id: string): void => {
+      if (window.confirm('Are you sure you want to remove this item from your cart?')) {
+        dispatch(removeFromCart(id));
+      }
+    },
+    [dispatch]
+  );
+
+  const handleCouponSubmit = useCallback(async () => {
     if (!couponCode.trim()) {
-      alert('Please enter a coupon code');
+      toast.info('Please enter a coupon code');
       return;
     }
-    
-    setIsApplyingCoupon(true);
-    // TODO: Implement coupon validation logic
-    setTimeout(() => {
-      setIsApplyingCoupon(false);
-      alert('Coupon applied successfully!');
-    }, 500);
-  }, [couponCode]);
 
-  const handleQuantityChange = useCallback((e: ChangeEvent<HTMLInputElement>, id: string): void => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value)) {
-      updateQuantity(id, value);
+    try {
+      setIsApplyingCoupon(true);
+
+      const payload = cartItems.map(item => ({
+        productId: item.id,
+        price: item.price,
+        qty: item.quantity,
+        category: item.category || '',
+      }));
+
+      const data = {
+        couponCode: couponCode.trim(),
+        cartItems: payload,
+        shippingAmount: 50, // replace with dynamic shipping if needed
+      };
+
+      const response = await applyCoupon(data);
+      console.log('API response:', response);
+
+      if (response.success) {
+        toast.success(response.message || 'Coupon applied successfully!');
+        dispatch(
+          applyCouponToCart({
+            couponCode: response.data.couponCode,
+            discountAmount: response.data.discountAmount || 0,
+            freeShippingAmount: response.data.freeShippingAmount || 0,
+            totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
+          })
+        );
+
+      } else {
+        toast.error(response.message || 'Failed to apply coupon');
+      }
+    } catch (error: any) {
+      console.error(error);
+      console.log(error)
+
+      // Correctly extract the server message from the error response
+      const serverMessage =
+        error?.response?.message || error?.response?.error || 'Error applying coupon';
+
+      toast.error(serverMessage);
+
+    } finally {
+      setIsApplyingCoupon(false);
     }
-  }, [updateQuantity]);
+  }, [couponCode, cartItems, cartTotal]);
+
+  const handleQuantityChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>, id: string): void => {
+      const value = parseInt(e.target.value, 10);
+      if (!isNaN(value)) {
+        updateQuantity(id, value);
+      }
+    },
+    [updateQuantity]
+  );
 
   const isEmpty = cartItems.length === 0;
 
@@ -60,7 +112,7 @@ const Cart: FC = () => {
         <div className="woocommerce">
           <div className="woocommerce-notices-wrapper" role="alert" aria-live="polite" />
           <div className="wc-empty-cart-message">
-            <div className="cart-empty woocommerce-info justyfy-start" role="status">
+            <div className="cart-empty woocommerce-info justify-start" role="status">
               <span aria-hidden="true">
                 <WebAssetIcon className="icon-color" />
               </span>
@@ -68,8 +120,8 @@ const Cart: FC = () => {
             </div>
           </div>
           <p className="return-to-shop">
-            <button 
-              className="button wc-backward shopButton" 
+            <button
+              className="button wc-backward shopButton"
               onClick={() => navigate('/shop')}
               aria-label="Return to shop"
             >
@@ -85,12 +137,20 @@ const Cart: FC = () => {
     <main className="container cart-page">
       <div className="woocommerce">
         <div className="woocommerce-notices-wrapper" role="alert" aria-live="polite" />
-        
+
         <section aria-labelledby="cart-heading">
-          <h2 id="cart-heading" className="sr-only">Shopping Cart</h2>
-          
-          <form className="woocommerce-cart-form" onSubmit={(e) => e.preventDefault()}>
-            <table className="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellSpacing="0">
+          <h2 id="cart-heading" className="sr-only">
+            Shopping Cart
+          </h2>
+
+          <form
+            className="woocommerce-cart-form"
+            onSubmit={(e: FormEvent<HTMLFormElement>) => e.preventDefault()}
+          >
+            <table
+              className="shop_table shop_table_responsive cart woocommerce-cart-form__contents"
+              cellSpacing={0}
+            >
               <thead>
                 <tr>
                   <th className="product-remove" scope="col">
@@ -99,19 +159,27 @@ const Cart: FC = () => {
                   <th className="product-thumbnail" scope="col">
                     <span className="sr-only">Image</span>
                   </th>
-                  <th className="product-name" scope="col">Product</th>
-                  <th className="product-price" scope="col">Price</th>
-                  <th className="product-quantity" scope="col">Quantity</th>
-                  <th className="product-subtotal" scope="col">Subtotal</th>
+                  <th className="product-name" scope="col">
+                    Product
+                  </th>
+                  <th className="product-price" scope="col">
+                    Price
+                  </th>
+                  <th className="product-quantity" scope="col">
+                    Quantity
+                  </th>
+                  <th className="product-subtotal" scope="col">
+                    Subtotal
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {cartItems.map((item) => (
+                {cartItems.map(item => (
                   <tr key={item.id} className="woocommerce-cart-form__cart-item cart_item">
                     <td className="product-remove">
-                      <button 
+                      <button
                         type="button"
-                        className="remove" 
+                        className="remove"
                         onClick={() => removeItem(item.id)}
                         aria-label={`Remove ${item.name} from cart`}
                       >
@@ -119,11 +187,11 @@ const Cart: FC = () => {
                       </button>
                     </td>
                     <td className="product-thumbnail">
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
-                        width="100" 
-                        height="100"
+                        width={100}
+                        height={100}
                         className="attachment-custom-thumb size-custom-thumb"
                         loading="lazy"
                       />
@@ -144,15 +212,15 @@ const Cart: FC = () => {
                         <label htmlFor={`quantity-${item.id}`} className="sr-only">
                           Quantity for {item.name}
                         </label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           id={`quantity-${item.id}`}
-                          className="input-text qty text" 
+                          className="input-text qty text"
                           value={item.quantity}
-                          onChange={(e) => handleQuantityChange(e, item.id)}
-                          min="1" 
-                          max="99"
-                          step="1"
+                          onChange={e => handleQuantityChange(e, item.id)}
+                          min={1}
+                          max={99}
+                          step={1}
                           aria-label={`Quantity for ${item.name}`}
                         />
                       </div>
@@ -167,32 +235,52 @@ const Cart: FC = () => {
                     </td>
                   </tr>
                 ))}
+
+                {/* Coupon Row */}
                 <tr>
                   <td colSpan={6} className="actions">
-                    <form className="coupon" onSubmit={handleCouponSubmit}>
-                      <label htmlFor="coupon_code">Coupon:</label>
-                      <input 
-                        type="text" 
-                        name="coupon_code" 
-                        className="input-text" 
-                        id="coupon_code" 
-                        value={couponCode}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setCouponCode(e.target.value)}
-                        placeholder="Coupon code"
-                        aria-label="Enter coupon code"
-                      />
-                      <button 
-                        type="submit" 
-                        className="button shopButton" 
-                        name="apply_coupon"
-                        disabled={isApplyingCoupon || !couponCode.trim()}
-                        aria-label="Apply coupon"
-                      >
-                        {isApplyingCoupon ? 'Applying...' : 'Apply coupon'}
-                      </button>
-                    </form>
+                    <div className="coupon">
+                      {appliedCoupon ? (
+                        // Show applied coupon
+                        <div className="applied-coupon">
+                          <span>Coupon Applied: <strong>{appliedCoupon} </strong></span>
+                          <button
+                            type="button"
+                            className="button shopButton"
+                            onClick={() => dispatch(removeCoupon())}
+                            aria-label="Remove coupon"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        // Show input to apply new coupon
+                        <>
+                          <label htmlFor="coupon_code">Coupon:</label>
+                          <input
+                            type="text"
+                            name="coupon_code"
+                            className="input-text"
+                            id="coupon_code"
+                            value={couponCode}
+                            onChange={e => setCouponCode(e.target.value)}
+                            placeholder="Coupon code"
+                            aria-label="Enter coupon code"
+                          />
+                          <button
+                            type="button"
+                            className="button shopButton"
+                            onClick={handleCouponSubmit}
+                            disabled={isApplyingCoupon || !couponCode.trim()}
+                            aria-label="Apply coupon"
+                          >
+                            {isApplyingCoupon ? 'Applying...' : 'Apply coupon'}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
-                </tr>
+                </tr>s      
               </tbody>
             </table>
           </form>
@@ -201,7 +289,7 @@ const Cart: FC = () => {
         <section className="cart-collaterals" aria-labelledby="cart-totals-heading">
           <div className="cart_totals pb-5">
             <h2 id="cart-totals-heading">Cart totals</h2>
-            <table cellSpacing="0" className="shop_table shop_table_responsive">
+            <table cellSpacing={0} className="shop_table shop_table_responsive">
               <tbody>
                 <tr className="cart-subtotal">
                   <th scope="row">Subtotal</th>
@@ -214,6 +302,21 @@ const Cart: FC = () => {
                     </span>
                   </td>
                 </tr>
+
+                {discountAmount > 0 && (
+                  <tr className="cart-discount">
+                    <th scope="row">Discount</th>
+                    <td data-title="Discount">
+                      <span className="woocommerce-Price-amount amount">
+                        <bdi>
+                          <span className="woocommerce-Price-currencySymbol">-</span>
+                          {discountAmount.toFixed(2)}
+                        </bdi>
+                      </span>
+                    </td>
+                  </tr>
+                )}
+
                 <tr className="order-total">
                   <th scope="row">Total</th>
                   <td data-title="Total">
@@ -221,7 +324,7 @@ const Cart: FC = () => {
                       <span className="woocommerce-Price-amount amount">
                         <bdi>
                           <span className="woocommerce-Price-currencySymbol">$</span>
-                          {cartTotal.toFixed(2)}
+                          {totalAfterDiscount.toFixed(2)}
                         </bdi>
                       </span>
                     </strong>
@@ -229,8 +332,9 @@ const Cart: FC = () => {
                 </tr>
               </tbody>
             </table>
+
             <div className="wc-proceed-to-checkout">
-              <button 
+              <button
                 className="checkout-button button alt wc-forward shopButton"
                 onClick={() => navigate('/checkout')}
                 aria-label="Proceed to checkout"
@@ -243,6 +347,6 @@ const Cart: FC = () => {
       </div>
     </main>
   );
-};
+}
 
 export default Cart;

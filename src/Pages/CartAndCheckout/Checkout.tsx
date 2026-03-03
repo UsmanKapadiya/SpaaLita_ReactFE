@@ -1,15 +1,16 @@
 import type { FC, FormEvent, ChangeEvent } from 'react';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import { userLogin } from '../../Services/UserServices'
 import './Cart.css';
-import axios from 'axios';
+import { applyCoupon } from '../../Services/ProductRelatedServices'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/authSlice';
 import { toast } from 'react-toastify';
+import { applyCouponToCart, removeCoupon } from '../../store/cartSlice';
 interface CartItem {
     id: string;
     name: string;
@@ -119,10 +120,6 @@ const emptyShipping: ShippingDetails = {
 };
 
 
-const CART_ITEMS: CartItem[] = [
-    { id: '1', name: 'Test Product', price: 105.00, quantity: 1 }
-];
-
 type PaymentMethod = 'stripe' | 'stripe_klarna';
 
 const stripePromise = loadStripe('pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr');
@@ -210,12 +207,14 @@ const StripeCheckoutForm: FC<{ amount: number }> = ({ amount }) => {
 const Checkout: FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-
+    const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
+    const { discountAmount = 0, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
     const [showLogin, setShowLogin] = useState<boolean>(false);
     const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
     const user = useAppSelector((state) => state.auth.user);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
     const [createAccount, setCreateAccount] = useState<boolean>(false);
     const [copyBillingToShipping, setCopyBillingToShipping] = useState<boolean>(false);
     const [newsletter, setNewsletter] = useState<boolean>(false);
@@ -229,7 +228,10 @@ const Checkout: FC = () => {
 
     const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
-    const [cartItems] = useState<CartItem[]>(CART_ITEMS);
+
+    const cartTotal = useMemo((): number => {
+        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+      }, [cartItems]);
 
     useEffect(() => {
         if (user) {
@@ -276,11 +278,59 @@ const Checkout: FC = () => {
         }
     }, [paymentMethod]);
 
-    const handleApplyCoupon = useCallback((e: FormEvent<HTMLFormElement>): void => {
-        e.preventDefault();
-        // TODO: Implement coupon validation logic
-        console.log('Applying coupon:', couponCode);
-        alert('Coupon applied!');
+    const handleApplyCoupon = useCallback(async () => {
+        if (!couponCode.trim()) {
+            toast.info('Please enter a coupon code');
+            return;
+        }
+
+        try {
+            setIsApplyingCoupon(true);
+
+            const payload = cartItems.map(item => ({
+                productId: item.id,
+                price: item.price,
+                qty: item.quantity,
+                category: item.category || '',
+            }));
+
+            const data = {
+                couponCode: couponCode.trim(),
+                cartItems: payload,
+                shippingAmount: 50, // replace with dynamic shipping if needed
+            };
+
+            const response = await applyCoupon(data);
+            console.log('API response:', response);
+
+            if (response.success) {
+                toast.success(response.message || 'Coupon applied successfully!');
+                dispatch(
+                    applyCouponToCart({
+                        couponCode: response.data.couponCode,
+                        discountAmount: response.data.discountAmount || 0,
+                        freeShippingAmount: response.data.freeShippingAmount || 0,
+                        totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
+                    })
+                );
+
+            } else {
+                toast.error(response.message || 'Failed to apply coupon');
+            }
+        } catch (error: any) {
+            console.error(error);
+            console.log(error)
+
+            // Correctly extract the server message from the error response
+            const serverMessage =
+                error?.response?.message || error?.response?.error || 'Error applying coupon';
+
+            toast.error(serverMessage);
+
+        } finally {
+            setIsApplyingCoupon(false);
+        }
+
     }, [couponCode]);
 
     const handleLogin = useCallback(
@@ -313,7 +363,10 @@ const Checkout: FC = () => {
         },
         [loginData]
     );
-
+    console.log(discountAmount);
+    console.log(totalAfterDiscount);
+    console.log(appliedCoupon);
+    console.log(cartItems);
     const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
         <div className="woocommerce-info cart-empty" style={{ justifyContent: 'flex-start' }} role="status">
             <span>
@@ -576,11 +629,22 @@ const Checkout: FC = () => {
 
                 {/* Coupon Section */}
                 <div className="woocommerce-form-coupon-toggle mb-4">
-                    {renderInfoBox(
-                        'Have a coupon?',
-                        true,
-                        'Click here to enter your code',
-                        () => setShowCoupon(!showCoupon)
+                    {appliedCoupon ? (
+                        // Show applied coupon info
+                        renderInfoBox(
+                            'Coupon Applied',
+                            true, // maybe no toggle needed
+                            `Your applied coupon: ${appliedCoupon}`,
+                            () => dispatch(removeCoupon()) // optional: remove on click
+                        )
+                    ) : (
+                        // Show input info when no coupon
+                        renderInfoBox(
+                            'Have a coupon?',
+                            true,
+                            'Click here to enter your code',
+                            () => setShowCoupon(!showCoupon)
+                        )
                     )}
 
                     {showCoupon && (
@@ -597,8 +661,15 @@ const Checkout: FC = () => {
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setCouponCode(e.target.value)}
                                     aria-label="Coupon code"
                                 />
-                                <button type="submit" className="button shopButton" name="apply_coupon">
-                                    Apply coupon
+
+                                <button
+                                    type="button"
+                                    className="button shopButton"
+                                    onClick={handleApplyCoupon}
+                                    disabled={isApplyingCoupon || !couponCode.trim()}
+                                    aria-label="Apply coupon"
+                                >
+                                    {isApplyingCoupon ? 'Applying...' : 'Apply coupon'}
                                 </button>
                             </div>
                         </form>
@@ -754,6 +825,7 @@ const Checkout: FC = () => {
                                             ))}
                                         </tbody>
                                         <tfoot>
+                                            {/* Subtotal */}
                                             <tr className="cart-subtotal">
                                                 <th>Subtotal</th>
                                                 <td>
@@ -765,6 +837,23 @@ const Checkout: FC = () => {
                                                     </span>
                                                 </td>
                                             </tr>
+
+                                            {/* Discount (only show if applied) */}
+                                            {discountAmount > 0 && (
+                                                <tr className="cart-discount">
+                                                    <th>Discount</th>
+                                                    <td>
+                                                        <span className="woocommerce-Price-amount amount">
+                                                            <bdi>
+                                                                <span className="woocommerce-Price-currencySymbol">-</span>
+                                                                {discountAmount.toFixed(2)}
+                                                            </bdi>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            )}
+
+                                            {/* Total after discount */}
                                             <tr className="order-total">
                                                 <th>Total</th>
                                                 <td>
@@ -772,7 +861,7 @@ const Checkout: FC = () => {
                                                         <span className="woocommerce-Price-amount amount">
                                                             <bdi>
                                                                 <span className="woocommerce-Price-currencySymbol">$</span>
-                                                                {calculateTotal().toFixed(2)}
+                                                                {(calculateTotal() - discountAmount).toFixed(2)}
                                                             </bdi>
                                                         </span>
                                                     </strong>

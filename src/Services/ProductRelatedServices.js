@@ -2,6 +2,7 @@ import requests from "./api.js";
 
 const GIFTCARD_API_BASE = '/giftcards';
 const PRODUCT_API_BASE = '/products';
+const COUPON_API_BASE = '/coupon/apply'
 
 export const getAllGiftCard = async (page, itemPerPage, sorting) => {
   try {
@@ -50,3 +51,11 @@ export const getRelatedProducts = async (id) => {
   }
 };
 
+export const applyCoupon = async (data) => {
+  try {
+     let url = `${COUPON_API_BASE}`;
+    return await requests.post(url, data);
+  } catch (error) {
+    return { success: false, error: error.message || 'Failed to fetch products' };
+  }
+}

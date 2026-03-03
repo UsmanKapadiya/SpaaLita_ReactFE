@@ -12,11 +12,19 @@ export interface CartItem {
 interface CartState {
     items: CartItem[];
     lastAddedItem: CartItem | null;
+    appliedCoupon?: string;       // store coupon code
+    discountAmount?: number;      // store discount value
+    freeShippingAmount?: number;  // optional
+    totalAfterDiscount?: number;  // optional
 }
 
 const initialState: CartState = {
     items: [],
-    lastAddedItem: null
+    lastAddedItem: null,
+    appliedCoupon: undefined,
+    discountAmount: 0,
+    freeShippingAmount: 0,
+    totalAfterDiscount: 0,
 };
 
 const cartSlice = createSlice({
@@ -25,7 +33,7 @@ const cartSlice = createSlice({
     reducers: {
         addToCart: (state, action: PayloadAction<Omit<CartItem, 'quantity'> & { quantity?: number }>) => {
             const existingItem = state.items.find(item => item.id === action.payload.id);
-            
+
             if (existingItem) {
                 existingItem.quantity += action.payload.quantity || 1;
             } else {
@@ -34,41 +42,69 @@ const cartSlice = createSlice({
                     quantity: action.payload.quantity || 1
                 });
             }
-            
+
             state.lastAddedItem = {
                 ...action.payload,
                 quantity: action.payload.quantity || 1
             };
         },
-        
+
         removeFromCart: (state, action: PayloadAction<string>) => {
             state.items = state.items.filter(item => item.id !== action.payload);
         },
-        
+
         updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
             const item = state.items.find(item => item.id === action.payload.id);
             if (item) {
                 item.quantity = action.payload.quantity;
             }
         },
-        
+
+        applyCouponToCart: (
+            state,
+            action: PayloadAction<{
+                couponCode: string;
+                discountAmount: number;
+                freeShippingAmount?: number;
+                totalAfterDiscount: number;
+            }>
+        ) => {
+            state.appliedCoupon = action.payload.couponCode;
+            state.discountAmount = action.payload.discountAmount;
+            state.freeShippingAmount = action.payload.freeShippingAmount || 0;
+            state.totalAfterDiscount = action.payload.totalAfterDiscount;
+        },
+
+        removeCoupon: (state) => {
+            state.appliedCoupon = undefined;
+            state.discountAmount = 0;
+            state.freeShippingAmount = 0;
+            // recalculate total after discount to be just the cart total
+            state.totalAfterDiscount = state.items.reduce(
+                (total, item) => total + item.price * item.quantity,
+                0
+            );
+        },
+
         clearCart: (state) => {
             state.items = [];
             state.lastAddedItem = null;
         },
-        
+
         clearLastAddedItem: (state) => {
             state.lastAddedItem = null;
         }
     }
 });
 
-export const { 
-    addToCart, 
-    removeFromCart, 
-    updateQuantity, 
+export const {
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    applyCouponToCart,
+    removeCoupon,
     clearCart,
-    clearLastAddedItem 
+    clearLastAddedItem
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
