@@ -2723,3 +2723,7 @@ body:not(.search-results) .twentysixteen .entry-summary {
     background: inherit;
     color: inherit
 }
+
+.justify-start{
+    justify-content: flex-start !important;
+}

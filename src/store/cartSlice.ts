@@ -5,8 +5,9 @@ export interface CartItem {
     id: string;
     name: string;
     price: number;
-    quantity: number;
+    qty: number;
     image: string;
+    category:string;
 }
 
 interface CartState {
@@ -31,21 +32,21 @@ const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        addToCart: (state, action: PayloadAction<Omit<CartItem, 'quantity'> & { quantity?: number }>) => {
+        addToCart: (state, action: PayloadAction<Omit<CartItem, 'quantity'> & { qty?: number }>) => {
             const existingItem = state.items.find(item => item.id === action.payload.id);
 
             if (existingItem) {
-                existingItem.quantity += action.payload.quantity || 1;
+                existingItem.qty += action.payload.qty || 1;
             } else {
                 state.items.push({
                     ...action.payload,
-                    quantity: action.payload.quantity || 1
+                    qty: action.payload.qty || 1
                 });
             }
 
             state.lastAddedItem = {
                 ...action.payload,
-                quantity: action.payload.quantity || 1
+                qty: action.payload.qty || 1
             };
         },
 
@@ -53,10 +54,10 @@ const cartSlice = createSlice({
             state.items = state.items.filter(item => item.id !== action.payload);
         },
 
-        updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
+        updateQuantity: (state, action: PayloadAction<{ id: string; qty: number }>) => {
             const item = state.items.find(item => item.id === action.payload.id);
             if (item) {
-                item.quantity = action.payload.quantity;
+                item.qty = action.payload.qty;
             }
         },
 
@@ -81,7 +82,7 @@ const cartSlice = createSlice({
             state.freeShippingAmount = 0;
             // recalculate total after discount to be just the cart total
             state.totalAfterDiscount = state.items.reduce(
-                (total, item) => total + item.price * item.quantity,
+                (total, item) => total + item.price * item.qty,
                 0
             );
         },

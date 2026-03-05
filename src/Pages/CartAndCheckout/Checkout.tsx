@@ -4,18 +4,18 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
-import { userLogin } from '../../Services/UserServices'
+import { userLogin, orderPlaced } from '../../Services/UserServices'
 import './Cart.css';
 import { applyCoupon } from '../../Services/ProductRelatedServices'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/authSlice';
 import { toast } from 'react-toastify';
-import { applyCouponToCart, removeCoupon } from '../../store/cartSlice';
+import { applyCouponToCart, clearCart, removeCoupon } from '../../store/cartSlice';
 interface CartItem {
     id: string;
     name: string;
     price: number;
-    quantity: number;
+    qty: number;
     category?: string;
 }
 
@@ -101,66 +101,67 @@ type PaymentMethod = 'stripe' | 'stripe_klarna';
 
 const stripePromise = loadStripe('pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr');
 
-const StripeCheckoutForm: FC<{ amount: number }> = ({ amount }) => {
+const StripeCheckoutForm: FC<{
+    amount: number;
+    items: CartItem[];
+    shippingAddress: ShippingDetails;
+    billingAddress: BillingDetails;
+}> = ({ amount, items, shippingAddress, billingAddress }) => {
+    const dispatch = useAppDispatch();
     const stripe = useStripe();
     const elements = useElements();
+    const navigate = useNavigate();
+    const { discountAmount = 0, appliedCoupon, } = useAppSelector(state => state.cart);
+
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const [orderResponse, setOrderResponse] = useState<string | null>(null);
 
-    // Dummy token for testing
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5M2ZhNTcxM2JlNGUzMTRiNmM2NzA1NiIsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQHNwYWFsaXRhLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MTIzNzc1MCwiZXhwIjoxNzcxMjQxMzUwfQ.9CRPwA5WKKaQuLAicNI1KayaUV-7o5-yGS06lkbEaSw";
-    // Dummy productId for testing
-    const productId = "1";
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+
         if (!stripe || !elements) return;
+
         setProcessing(true);
         setError(null);
-        setOrderResponse(null);
-        // 1. Create order and get clientSecret from backend
-        const orderRes = await fetch("http://localhost:5000/api/orders/", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                items: [
-                    {
-                        productId: "698c34caa15147e1fa89768b",
-                        qty: 1
-                    }
-                ],
+
+        try {
+
+            const payload = {
+                items,
                 totalAmount: amount,
-                shippingAddress: "123 Main St, City"
-            })
-        });
-        const orderData = await orderRes.json();
-        setOrderResponse(JSON.stringify(orderData, null, 2));
-        if (!orderData.clientSecret) {
-            setProcessing(false);
-            setError('No clientSecret returned from backend');
-            return;
-        }
-        // 2. Confirm payment with Stripe
-        const result = await stripe.confirmCardPayment(orderData.clientSecret, {
-            payment_method: {
-                card: elements.getElement(CardElement)!,
-            },
-        });
-        if (result.error) {
-            setProcessing(false);
-            setError(result.error.message || 'Payment failed');
-        } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+                shippingAddress,
+                billingAddress,
+                coupon: {
+                    code: appliedCoupon,
+                    discountAmount: discountAmount,
+                    freeShippingAmount: 0
+                }
+            };
+
+            const orderResponse = await orderPlaced(payload);
+
+            if (!orderResponse?.success) {
+                throw new Error("Order creation failed");
+            }
+
+            toast.success("Order placed successfully 🎉");
             setSuccess(true);
-            setProcessing(false);
-        } else {
+            dispatch(clearCart());
+            navigate(`/checkout/order-received/${orderResponse.data._id}`, {
+                state: orderResponse.data
+            });
+
+
+        } catch (err: any) {
+            setError(err.message);
+            toast.error("Failed to place order");
+        } finally {
             setProcessing(false);
         }
     };
+
 
     return (
         <div style={{ marginTop: 16 }}>
@@ -176,7 +177,7 @@ const StripeCheckoutForm: FC<{ amount: number }> = ({ amount }) => {
             </button>
             {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
             {success && <div style={{ color: 'green', marginTop: 8 }}>Payment successful!</div>}
-            {orderResponse && <div style={{ marginTop: 8, wordBreak: 'break-all' }}><strong>Order API Response:</strong> {orderResponse}</div>}
+            {/* {orderResponse && <div style={{ marginTop: 8, wordBreak: 'break-all' }}><strong>Order API Response:</strong> {orderResponse}</div>} */}
         </div>
     );
 };
@@ -206,9 +207,10 @@ const Checkout: FC = () => {
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
 
     const cartTotal = useMemo((): number => {
-        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+        return cartItems.reduce((total, item) => total + item.price * item.qty, 0);
     }, [cartItems]);
 
+    console.log(cartItems)
     useEffect(() => {
         if (user) {
             setBillingDetails(user?.billing || null);
@@ -218,7 +220,7 @@ const Checkout: FC = () => {
 
 
     const calculateTotal = useCallback((): number => {
-        return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+        return cartItems.reduce((total, item) => total + (item.price * item.qty), 0);
     }, [cartItems]);
 
     const handleBillingChange = useCallback((field: keyof BillingDetails, value: string): void => {
@@ -254,6 +256,7 @@ const Checkout: FC = () => {
         }
     }, [paymentMethod]);
 
+    //Coupon Applay
     const handleApplyCoupon = useCallback(async () => {
         if (!couponCode.trim()) {
             toast.info('Please enter a coupon code');
@@ -266,7 +269,7 @@ const Checkout: FC = () => {
             const payload = cartItems.map(item => ({
                 productId: item.id,
                 price: item.price,
-                qty: item.quantity,
+                qty: item.qty,
                 category: item.category || '',
             }));
 
@@ -344,10 +347,7 @@ const Checkout: FC = () => {
         },
         [loginData]
     );
-    // console.log(discountAmount);
-    // console.log(totalAfterDiscount);
-    // console.log(appliedCoupon);
-    // console.log(cartItems);
+
     const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
         <div className="woocommerce-info cart-empty" style={{ justifyContent: 'flex-start' }} role="status">
             <span>
@@ -647,7 +647,7 @@ const Checkout: FC = () => {
                                     <button
                                         type="button"
                                         className="button shopButton"
-                                        onClick={handleRemoveCoupon}                                     
+                                        onClick={handleRemoveCoupon}
                                         aria-label="Remove coupon"
                                     >
                                         {isApplyingCoupon ? 'Removing...' : 'Remove coupon'}
@@ -803,13 +803,13 @@ const Checkout: FC = () => {
                                                 <tr key={item.id} className="cart_item">
                                                     <td className="product-name">
                                                         {item.name}&nbsp;
-                                                        <strong className="product-quantity">×&nbsp;{item.quantity}</strong>
+                                                        <strong className="product-quantity">×&nbsp;{item.qty}</strong>
                                                     </td>
                                                     <td className="product-total">
                                                         <span className="woocommerce-Price-amount amount">
                                                             <bdi>
                                                                 <span className="woocommerce-Price-currencySymbol">$</span>
-                                                                {(item.price * item.quantity).toFixed(2)}
+                                                                {(item.price * item.qty).toFixed(2)}
                                                             </bdi>
                                                         </span>
                                                     </td>
@@ -881,7 +881,12 @@ const Checkout: FC = () => {
                                                         <div className="payment_box payment_method_stripe">
                                                             <p>Secure payment via Stripe</p>
                                                             <Elements stripe={stripePromise}>
-                                                                <StripeCheckoutForm amount={calculateTotal()} />
+                                                                <StripeCheckoutForm
+                                                                    amount={(calculateTotal() - discountAmount)}
+                                                                    items={cartItems}
+                                                                    shippingAddress={shippingDetails}
+                                                                    billingAddress={billingDetails}
+                                                                />
                                                             </Elements>
                                                         </div>
                                                     )}

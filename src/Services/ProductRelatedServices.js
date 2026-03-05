@@ -53,9 +53,18 @@ export const getRelatedProducts = async (id) => {
 
 export const applyCoupon = async (data) => {
   try {
-     let url = `${COUPON_API_BASE}`;
-    return await requests.post(url, data);
+    const url = `${COUPON_API_BASE}`;
+    const response = await requests.post(url, data);
+    return response;
   } catch (error) {
-    return { success: false, error: error.message || 'Failed to fetch products' };
+    console.log(error);
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to apply coupon",
+    };
   }
-}
+};

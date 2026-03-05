@@ -27,6 +27,7 @@ import LostPassword from './Pages/MyAccount/LostPassword';
 import { ToastContainer } from 'react-toastify';
 
 import ProtectedRoute from './ProtectedRoute';
+import OrderReceived from './Pages/CartAndCheckout/OrderReceived';
 
 // NotFound Component
 const NotFound: FC = () => (
@@ -65,6 +66,7 @@ const App: FC = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/order-received/:orderId" element={<OrderReceived />} />
             <Route
               path="/my-account/*"
               element={

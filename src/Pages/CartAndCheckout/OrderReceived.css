@@ -1,0 +1,24 @@
+.success-order {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.shopping-text {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #000;
+}
+
+.border-dashed {
+    border-right: 1px dashed #ccc;
+}
+
+.tableBorder{
+    border: 1px solid #ccc;
+}
+.table thead th {
+    border-bottom: none;
+}

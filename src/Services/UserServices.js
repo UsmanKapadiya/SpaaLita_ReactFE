@@ -13,15 +13,6 @@ export const userLogin = async (data) => {
     }
 };
 
-export const getUserOrder = async (page, itemPerPage) => {
-    try {
-        let url = `${ORDER_API_BASE}?page=${page}&limit=${itemPerPage}`;
-        return await requests.get(url);
-    } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
-    }
-};
-
 export const updateUserAddress = async (id,data) => {
     try {
         let url = `${USER_API_BASE}/${id}/addresses`
@@ -40,4 +31,21 @@ export const updateUser = async (id,data) => {
     }
 };
 
+export const getUserOrder = async (page, itemPerPage) => {
+    try {
+        let url = `${ORDER_API_BASE}?page=${page}&limit=${itemPerPage}`;
+        return await requests.get(url);
+    } catch (error) {
+        return { success: false, error: error.message || 'Failed to fetch products' };
+    }
+};
+
+export const orderPlaced = async (data) => {
+    try {
+        let url = `${ORDER_API_BASE}`
+        return await requests.post(url, data);
+    } catch (error) {
+        return { success: false, error: error.message || 'Failed to fetch products' };
+    }
+};
 

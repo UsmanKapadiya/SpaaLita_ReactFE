@@ -16,18 +16,18 @@ const Cart: FC = () => {
 
   const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
   const { discountAmount, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
-  const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
+
   const cartTotal = useMemo((): number => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cartItems.reduce((total, item) => total + item.price * item.qty, 0);
   }, [cartItems]);
 
 
   const updateQuantity = useCallback(
     (id: string, newQuantity: number): void => {
       if (newQuantity < 1 || newQuantity > 99 || isNaN(newQuantity)) return;
-      dispatch(updateCartQuantity({ id, quantity: newQuantity }));
+      dispatch(updateCartQuantity({ id, qty: newQuantity }));
     },
     [dispatch]
   );
@@ -53,7 +53,7 @@ const Cart: FC = () => {
       const payload = cartItems.map(item => ({
         productId: item.id,
         price: item.price,
-        qty: item.quantity,
+        qty: item.qty,
         category: item.category || '',
       }));
 
@@ -63,11 +63,12 @@ const Cart: FC = () => {
         shippingAmount: 50, // replace with dynamic shipping if needed
       };
 
-      const response = await applyCoupon(data);
-      console.log('API response:', response);
 
+      const response = await applyCoupon(data);
+      console.log(response);
       if (response.success) {
-        toast.success(response.message || 'Coupon applied successfully!');
+        toast.success(response.message || "Coupon applied successfully!");
+
         dispatch(
           applyCouponToCart({
             couponCode: response.data.couponCode,
@@ -76,17 +77,17 @@ const Cart: FC = () => {
             totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
           })
         );
-
       } else {
-        toast.error(response.message || 'Failed to apply coupon');
+        console.log(response)
+        toast.error(response.message || "Failed to apply coupon 1");
       }
-    } catch (error: any) {
-      console.error(error);
-      console.log(error)
 
-      // Correctly extract the server message from the error response
+    } catch (error: any) {
+      console.log(error);
       const serverMessage =
-        error?.response?.message || error?.response?.error || 'Error applying coupon';
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error applying coupon 2";
 
       toast.error(serverMessage);
 
@@ -130,6 +131,7 @@ const Cart: FC = () => {
             </button>
           </p>
         </div>
+
       </main>
     );
   }
@@ -217,7 +219,7 @@ const Cart: FC = () => {
                           type="number"
                           id={`quantity-${item.id}`}
                           className="input-text qty text"
-                          value={item.quantity}
+                          value={item.qty}
                           onChange={e => handleQuantityChange(e, item.id)}
                           min={1}
                           max={99}
@@ -230,7 +232,7 @@ const Cart: FC = () => {
                       <span className="woocommerce-Price-amount amount">
                         <bdi>
                           <span className="woocommerce-Price-currencySymbol">$</span>
-                          {(item.price * item.quantity).toFixed(2)}
+                          {(item.price * item.qty).toFixed(2)}
                         </bdi>
                       </span>
                     </td>
@@ -238,7 +240,7 @@ const Cart: FC = () => {
                 ))}
 
                 {/* Coupon Row */}
-                {isUserLogin && (
+                {/* {isUserLogin && ( */}
                 <tr>
                   <td colSpan={6} className="actions">
                     <div className="coupon">
@@ -282,8 +284,8 @@ const Cart: FC = () => {
                       )}
                     </div>
                   </td>
-                </tr>   
-                )}
+                </tr>
+                {/* )} */}
               </tbody>
             </table>
           </form>
@@ -327,7 +329,7 @@ const Cart: FC = () => {
                       <span className="woocommerce-Price-amount amount">
                         <bdi>
                           <span className="woocommerce-Price-currencySymbol">$</span>
-                          {totalAfterDiscount.toFixed(2)}
+                          {totalAfterDiscount ? totalAfterDiscount.toFixed(2) : cartTotal.toFixed(2)}
                         </bdi>
                       </span>
                     </strong>
