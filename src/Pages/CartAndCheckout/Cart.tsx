@@ -16,6 +16,7 @@ const Cart: FC = () => {
 
   const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
   const { discountAmount, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
+  const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
   const cartTotal = useMemo((): number => {
@@ -237,6 +238,7 @@ const Cart: FC = () => {
                 ))}
 
                 {/* Coupon Row */}
+                {isUserLogin && (
                 <tr>
                   <td colSpan={6} className="actions">
                     <div className="coupon">
@@ -281,6 +283,7 @@ const Cart: FC = () => {
                     </div>
                   </td>
                 </tr>   
+                )}
               </tbody>
             </table>
           </form>
