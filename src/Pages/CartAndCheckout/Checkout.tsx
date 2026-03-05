@@ -16,6 +16,7 @@ interface CartItem {
     name: string;
     price: number;
     quantity: number;
+    category?: string;
 }
 
 interface BillingDetails {
@@ -70,30 +71,6 @@ const CANADIAN_PROVINCES: Province[] = [
     { value: 'YT', label: 'Yukon Territory' }
 ];
 
-const INITIAL_BILLING_DETAILS: BillingDetails = {
-    firstName: 'sss',
-    lastName: 'Doe',
-    address1: '123 Test St',
-    address2: '',
-    country: 'CA',
-    state: 'ON',
-    city: 'Toronto',
-    postcode: 'M1M1M1',
-    phone: '1234567890',
-    email: 'john.doe@example.com'
-};
-
-const INITIAL_SHIPPING_DETAILS: ShippingDetails = {
-    firstName: 'John',
-    lastName: 'Doe',
-    address1: '123 Test St',
-    address2: '',
-    state: 'ON',
-    city: 'Toronto',
-    country: 'CA',
-    postcode: 'M1M1M1',
-    giftCard: ''
-};
 const emptyBilling: BillingDetails = {
     firstName: '',
     lastName: '',
@@ -208,10 +185,11 @@ const Checkout: FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
-    const { discountAmount = 0, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
-    const [showLogin, setShowLogin] = useState<boolean>(false);
+
     const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
     const user = useAppSelector((state) => state.auth.user);
+    const { discountAmount = 0, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
+    const [showLogin, setShowLogin] = useState<boolean>(false);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
     const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
@@ -220,18 +198,16 @@ const Checkout: FC = () => {
     const [newsletter, setNewsletter] = useState<boolean>(false);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
     const [rememberMe, setRememberMe] = useState<boolean>(false);
-
     const [loginData, setLoginData] = useState<LoginData>({
         username: '',
         password: ''
     });
-
     const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
 
     const cartTotal = useMemo((): number => {
         return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-      }, [cartItems]);
+    }, [cartItems]);
 
     useEffect(() => {
         if (user) {
@@ -333,6 +309,11 @@ const Checkout: FC = () => {
 
     }, [couponCode]);
 
+    const handleRemoveCoupon = () => {
+        dispatch(removeCoupon());
+        setCouponCode('');
+    };
+
     const handleLogin = useCallback(
         async (e: FormEvent<HTMLFormElement>): Promise<void> => {
             e.preventDefault();
@@ -363,10 +344,10 @@ const Checkout: FC = () => {
         },
         [loginData]
     );
-    console.log(discountAmount);
-    console.log(totalAfterDiscount);
-    console.log(appliedCoupon);
-    console.log(cartItems);
+    // console.log(discountAmount);
+    // console.log(totalAfterDiscount);
+    // console.log(appliedCoupon);
+    // console.log(cartItems);
     const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
         <div className="woocommerce-info cart-empty" style={{ justifyContent: 'flex-start' }} role="status">
             <span>
@@ -633,9 +614,10 @@ const Checkout: FC = () => {
                         // Show applied coupon info
                         renderInfoBox(
                             'Coupon Applied',
-                            true, // maybe no toggle needed
+                            true,
                             `Your applied coupon: ${appliedCoupon}`,
-                            () => dispatch(removeCoupon()) // optional: remove on click
+                            () => setShowCoupon(!showCoupon)
+                            //dispatch(removeCoupon()) // optional: remove on click
                         )
                     ) : (
                         // Show input info when no coupon
@@ -657,20 +639,30 @@ const Checkout: FC = () => {
                                     className="input-text form-control loginInput"
                                     placeholder="Coupon code"
                                     id="coupon_code"
-                                    value={couponCode}
+                                    value={appliedCoupon ? appliedCoupon : couponCode}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setCouponCode(e.target.value)}
                                     aria-label="Coupon code"
                                 />
-
-                                <button
-                                    type="button"
-                                    className="button shopButton"
-                                    onClick={handleApplyCoupon}
-                                    disabled={isApplyingCoupon || !couponCode.trim()}
-                                    aria-label="Apply coupon"
-                                >
-                                    {isApplyingCoupon ? 'Applying...' : 'Apply coupon'}
-                                </button>
+                                {appliedCoupon ? (
+                                    <button
+                                        type="button"
+                                        className="button shopButton"
+                                        onClick={handleRemoveCoupon}                                     
+                                        aria-label="Remove coupon"
+                                    >
+                                        {isApplyingCoupon ? 'Removing...' : 'Remove coupon'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="button shopButton"
+                                        onClick={handleApplyCoupon}
+                                        disabled={isApplyingCoupon || !couponCode.trim()}
+                                        aria-label="Apply coupon"
+                                    >
+                                        {isApplyingCoupon ? 'Applying...' : 'Apply coupon'}
+                                    </button>
+                                )}
                             </div>
                         </form>
                     )}
@@ -845,7 +837,7 @@ const Checkout: FC = () => {
                                                     <td>
                                                         <span className="woocommerce-Price-amount amount">
                                                             <bdi>
-                                                                <span className="woocommerce-Price-currencySymbol">-</span>
+                                                                <span className="woocommerce-Price-currencySymbol"> - </span>
                                                                 {discountAmount.toFixed(2)}
                                                             </bdi>
                                                         </span>
