@@ -280,7 +280,7 @@ const Cart: FC = () => {
                       )}
                     </div>
                   </td>
-                </tr>s      
+                </tr>   
               </tbody>
             </table>
           </form>
