@@ -106,7 +106,9 @@ const StripeCheckoutForm: FC<{
     items: CartItem[];
     shippingAddress: ShippingDetails;
     billingAddress: BillingDetails;
-}> = ({ amount, items, shippingAddress, billingAddress }) => {
+    isUserlogin: boolean;
+    createAccount: boolean
+}> = ({ amount, items, shippingAddress, billingAddress, isUserlogin, createAccount }) => {
     const dispatch = useAppDispatch();
     const stripe = useStripe();
     const elements = useElements();
@@ -117,7 +119,7 @@ const StripeCheckoutForm: FC<{
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-
+    console.log(createAccount)
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
@@ -128,7 +130,7 @@ const StripeCheckoutForm: FC<{
 
         try {
 
-            const payload = {
+            const payload: any = {
                 items,
                 totalAmount: amount,
                 shippingAddress,
@@ -140,6 +142,18 @@ const StripeCheckoutForm: FC<{
                 }
             };
 
+            if (!isUserlogin) {
+                payload.guestInfo = {
+                    name: billingAddress.firstName,
+                    email: billingAddress.email,
+                    phone: billingAddress.phone
+                };
+
+                if (createAccount) {
+                    payload.createAccount = true;
+                }
+            }
+            console.log(payload)
             const orderResponse = await orderPlaced(payload);
 
             if (!orderResponse?.success) {
@@ -148,11 +162,12 @@ const StripeCheckoutForm: FC<{
 
             toast.success("Order placed successfully 🎉");
             setSuccess(true);
+
             dispatch(clearCart());
+
             navigate(`/checkout/order-received/${orderResponse.data._id}`, {
                 state: orderResponse.data
             });
-
 
         } catch (err: any) {
             setError(err.message);
@@ -886,6 +901,8 @@ const Checkout: FC = () => {
                                                                     items={cartItems}
                                                                     shippingAddress={shippingDetails}
                                                                     billingAddress={billingDetails}
+                                                                    isUserlogin={isUserLogin}
+                                                                    createAccount={createAccount}
                                                                 />
                                                             </Elements>
                                                         </div>
