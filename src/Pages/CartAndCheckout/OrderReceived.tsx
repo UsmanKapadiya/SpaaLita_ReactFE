@@ -23,7 +23,7 @@ const OrderReceived = () => {
             </div>
         );
     }
-
+    console.log(order);
     return (
         <div className="container py-5">
 
@@ -65,7 +65,7 @@ const OrderReceived = () => {
 
                     <div className="flex-fill border-end border-dashed d-flex flex-column text-start px-3">
                         <strong>Email</strong>
-                        <p className="mb-0">{order.user?.email}</p>
+                        <p className="mb-0">{order?.user ? order.user?.email : order.guestInfo?.email}</p>
                     </div>
 
                     <div className="flex-fill border-end border-dashed d-flex flex-column text-start px-3">
@@ -97,7 +97,7 @@ const OrderReceived = () => {
                             {order.items.map((item: any) => (
                                 <tr key={item._id} className="align-middle border-bottom">
                                     <td className="d-flex align-items-center gap-2">
-                                        <span>{item.productName}</span>
+                                        <span>{item.name}</span>
                                         <span className="text-muted ml-1 mr-1">×</span>
                                         <span>{item.qty ?? 1}</span>
                                     </td>
