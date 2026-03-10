@@ -76,7 +76,7 @@
 
 .custom-image-gallery .image-gallery-left-nav,
 .custom-image-gallery .image-gallery-right-nav {
-    background: transparent;
+    background: rgba(0, 123, 255, 0.8);
     color: #370202 !important;
     border: none;
     border-radius: 50%;
@@ -131,11 +131,15 @@
     transition: all 0.3s ease;
 }
 
-
+.custom-image-gallery .image-gallery-left-nav:hover,
+.custom-image-gallery .image-gallery-right-nav:hover {
+    background: rgba(0, 123, 255, 1);
+    transform: scale(1.1);
+}
 
 /* Play Button */
 .custom-image-gallery .image-gallery-play-button {
-    background: transparent;
+    background: rgba(0, 123, 255, 0.8);
     color: white;
     border: none;
     border-radius: 50%;
@@ -145,18 +149,24 @@
     transition: all 0.3s ease;
 }
 
-
+.custom-image-gallery .image-gallery-play-button:hover {
+    background: rgba(0, 123, 255, 1);
+    transform: scale(1.1);
+}
 
 /* Fullscreen Button */
 .custom-image-gallery .image-gallery-fullscreen-button {
-    background: transparent;
+    background: rgba(0, 123, 255, 0.8);
     color: white;
     border: none;
     border-radius: 5px;
     padding: 8px 12px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    top: 0;
+}
+
+.custom-image-gallery .image-gallery-fullscreen-button:hover {
+    background: rgba(0, 123, 255, 1);
 }
 
 /* Index Display */
@@ -206,24 +216,6 @@
 .loading-spinner p {
     font-size: 1.2rem;
     color: #666;
-}
-
-/* Error State */
-.error-state {
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Loading State */
-.loading-state {
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Responsive Design */
@@ -280,54 +272,5 @@
     .custom-image-gallery .image-gallery-thumbnail img {
         height: 50px;
         width: 75px;
-    }
-}
-
-/* Improve navigation button accessibility */
-.image-gallery-icon {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-    padding: 0.5rem;
-}
-
-.image-gallery-icon:disabled {
-    cursor: not-allowed;
-    opacity: 0.3;
-}
-
-.image-gallery-icon:hover:not(:disabled) {
-    opacity: 0.8;
-}
-
-.image-gallery-icon:focus-visible {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-
-.ArrowLeftIcon,
-.ArrowRightIcon,
-.fullScreenButton {
-    display: block;
-    width: 24px;
-    height: 24px;
-}
-
-@media (max-width: 768px) {
-    .gallery-container {
-        padding: 1rem 0 2rem;
-    }
-
-    .image-gallery-icon {
-        padding: 0.25rem;
-    }
-
-    .ArrowLeftIcon,
-    .ArrowRightIcon,
-    .fullScreenButton {
-        width: 20px;
-        height: 20px;
     }
 }
