@@ -22,7 +22,7 @@
     "js-cookie": "^3.0.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-image-gallery": "^2.0.5",
+    "react-image-gallery": "^1.2.11",
     "react-inner-image-zoom": "^4.0.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
