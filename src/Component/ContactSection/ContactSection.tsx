@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { contactSubmit } from '../../Services/ContactServices'
+import { toast } from 'react-toastify';
+
 
 const ContactSection = ({ topPadding, normalFont }) => {
     const [formData, setFormData] = useState({
@@ -18,11 +21,37 @@ const ContactSection = ({ topPadding, normalFont }) => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission here
-        // Form submitted successfully
+        try {
+            const response = await contactSubmit(formData);
+
+            if (response?.success) {
+                toast.success(response?.message);
+
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    subject: '',
+                    message: ''
+                });
+
+            } else {
+                toast.error(response?.message || "Something went wrong");
+            }
+
+        } catch (error: any) {
+            const serverMessage =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                "Error submitting contact form";
+
+            toast.error(serverMessage);
+        }
     };
+
 
     return (
         <div className="container my-5">
