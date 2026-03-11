@@ -1,14 +1,16 @@
-.cartIconColor{
-    color: var(--light-gray) !important;
-    font-size: 15px;
+.cartIconColor {
+  color: var(--light-gray) !important;
+  font-size: 15px;
 }
 
-.badge{
-    background-color: aqua !important;
+.badge {
+  background-color: aqua !important;
 }
-li span{
-    font-size: 13pt !important;
+
+li span {
+  font-size: 13pt !important;
 }
+
 .navbar-nav li {
   margin: 0 1em;
   cursor: pointer;
@@ -16,4 +18,38 @@ li span{
 
 .navbar-nav.user-logged-in li {
   margin: 0 0.9em;
+}
+
+/* / */
+.hide-menu {
+  display: none;
+}
+
+.show-menu {
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .hide-menu {
+    display: block !important;
+  }
+
+  .show-menu {
+    display: block !important;
+  }
+}
+
+@media (max-width: 991px) {
+
+  #menu-desktop-menu {
+    flex-direction: column;
+    align-items: flex-start;
+    background: white;
+    padding: 15px;
+  }
+
+  #menu-desktop-menu li {
+    width: 100%;
+  }
+
 }

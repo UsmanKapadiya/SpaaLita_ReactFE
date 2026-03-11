@@ -11,17 +11,25 @@ import './Header.css'
 const Header: FC = () => {
   const navigate = useNavigate();
   const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
-  // Memoize cart count calculation for performance
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const cartItemsCount = useAppSelector(state =>
     state.cart.items.reduce((total, item) => total + item.qty, 0)
   );
 
-  // Memoize navigation handler to prevent unnecessary re-renders
+  const toggleMenu = () => {
+    setMenuOpen(prev => !prev);
+  };
+
+  // const handleNavigation = useCallback((path: string) => {
+  //   navigate(path);
+  // }, [navigate]);
+
   const handleNavigation = useCallback((path: string) => {
     navigate(path);
+    setMenuOpen(false);
   }, [navigate]);
 
-  // Memoize badge styles to prevent recreation on each render
   const badgeStyles = useMemo(() => ({
     '& .MuiBadge-badge': {
       backgroundColor: '#000',
@@ -40,16 +48,35 @@ const Header: FC = () => {
           </div>
         </div>
         <nav className="navbar navbar-expand-lg navbar-light pb-4">
-          <button className="navbar-toggler" data-toggle="collapse" data-target="#menubar" aria-controls="menubar" aria-expanded="false" aria-label="Toggle navigation" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+          {/* <button
+            className="navbar-toggler"
+            data-toggle="collapse"
+            data-target="#menubar"
+            aria-controls="menubar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
             <div className="animated-icon3"><span></span><span></span><span></span></div>
+          </button> */}
+          <button
+            className="navbar-toggler"
+            onClick={toggleMenu}
+            aria-label="Toggle navigation"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <div className={`animated-icon3 ${menuOpen ? "open" : ""}`}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </button>
-
-          <div className="collapse navbar-collapse" id="menubar">
+          {/* <div className="collapse navbar-collapse" id="menubar"> */}
+          <div className={`navbar-collapse ${menuOpen ? "show-menu" : "hide-menu"}`} id="menubar">
             {/* <ul id="menu-desktop-menu" className="navbar-nav w-100 justify-content-center"> */}
-              <ul
-                id="menu-desktop-menu"
-                className={`navbar-nav w-100 justify-content-center ${isUserLogin ? 'user-logged-in' : ''}`}
-              >
+            <ul
+              id="menu-desktop-menu"
+              className={`navbar-nav w-100 justify-content-center ${isUserLogin ? 'user-logged-in' : ''}`}
+            >
               <li id="menu-item-17492" className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-17492"><span onClick={() => handleNavigation('/')} style={{ cursor: 'pointer' }}>Home</span></li>
               <li id="menu-item-14584" className="menu-item menu-item-type-custom menu-item-object-custom menu-item-14584"><a href="https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&amp;pId=1033567" target="_blank" rel="noopener noreferrer">Book NOW!</a></li>
               <li id="menu-item-1929" className="menu-item menu-item-type-post_type menu-item-object-page current-menu-item page_item page-item-209 current_page_item menu-item-has-children menu-item-1929"><span onClick={() => handleNavigation('/services')} style={{ cursor: 'pointer' }} aria-current="page">Services</span>
