@@ -13,7 +13,7 @@ const Header: FC = () => {
   const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
   // Memoize cart count calculation for performance
   const cartItemsCount = useAppSelector(state =>
-    state.cart.items.reduce((total, item) => total + item.quantity, 0)
+    state.cart.items.reduce((total, item) => total + item.qty, 0)
   );
 
   // Memoize navigation handler to prevent unnecessary re-renders
