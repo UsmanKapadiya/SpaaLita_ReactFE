@@ -31,7 +31,10 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
-    const imageUrl = giftCard.productImages?.[0]?.src || 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+    const imageUrl = giftCard.productImages?.[0]
+        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/products/${giftCard.productImages[0]}`
+        : 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+
 
     const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -59,10 +62,18 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
             <div onClick={handleProductClick} className="clickable">
-                <img
+                 <img
                     src={imageUrl}
                     alt={giftCard.productName}
                     className="attachment-woocommerce_thumbnail size-woocommerce_thumbnail"
+                    style={{
+                        width: '180px',
+                        height: '180px',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        display: 'block',
+                        margin: '0 auto',
+                    }}
                 />
             </div>
             <div className="product-title clickable" onClick={handleProductClick}>

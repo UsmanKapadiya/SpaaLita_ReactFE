@@ -11,6 +11,9 @@ import { addToCart } from '../../store/cartSlice';
 import { getRelatedProducts, getGiftCardRelatedProducts } from '../../Services/ProductRelatedServices'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
+
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/';
+const uploadsFolder = 'uploads/products/';
 interface Product {
     _id: string;
     productName: string;
@@ -58,7 +61,7 @@ const ProductDetails: FC = () => {
 
 
     const fetchRelatedProducts = async () => {
-        if (!itemName) return; // important: prevent API call with undefined
+        if (!itemName) return;
 
         try {
             setLoading(true);
@@ -217,8 +220,16 @@ const ProductDetails: FC = () => {
 
 
 
-    const mainImage = currentProduct?.images?.[selectedImageIndex] || currentProduct?.image || null;
-    const thumbnailImages = currentProduct?.images || [];
+
+
+    const mainImage =
+        currentProduct?.productImages?.[selectedImageIndex]
+            ? `${baseUrl}${uploadsFolder}${currentProduct.productImages[selectedImageIndex]}`
+            : null;
+    const thumbnailImages = currentProduct?.productImages?.map(img => `${baseUrl}${uploadsFolder}${img}`) || [];
+    const formattedMainImage = mainImage ? { src: mainImage } : null;
+    const formattedThumbnails = thumbnailImages.map(img => ({ src: img }));
+
     const isGiftCard = sourceFromState === 'giftCard' || currentProduct?.title?.toLowerCase().includes('gift card');
 
     return (
@@ -238,8 +249,8 @@ const ProductDetails: FC = () => {
                 <div className="row mt-5">
                     <div className="col-lg-7 col-md-12">
                         <ProductImageGallery
-                            mainImage={mainImage}
-                            thumbnailImages={thumbnailImages}
+                            mainImage={formattedMainImage}
+                            thumbnailImages={formattedThumbnails}
                             selectedImageIndex={selectedImageIndex}
                             onImageSelect={setSelectedImageIndex}
                         />
@@ -341,7 +352,7 @@ const ProductDetails: FC = () => {
                         <div className="tab-pane fade show active" id="content_description" role="tabpanel" aria-labelledby="content_description">
                             <h2>Description</h2>
                             <p>
-                                 <div
+                                <div
                                     dangerouslySetInnerHTML={{
                                         __html: currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
                                             .replace(/&lt;/g, '<')
@@ -350,7 +361,7 @@ const ProductDetails: FC = () => {
                                             .replace(/&nbsp;/g, ' ')
                                     }}
                                 />
-                                </p>
+                            </p>
                         </div>
                     </div>
                 </div>
