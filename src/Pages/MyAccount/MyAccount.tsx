@@ -57,6 +57,7 @@ const MyAccount: FC = () => {
         if (path.includes('/account-details')) return 'account-details';
         if (path.includes('/submissions')) return 'submissions';
         if (path.includes('/lost-password')) return 'lost-password';
+        // if (path.includes('/reset-password/:token')) return 'reset-password/:token'
         return 'dashboard';
     }, [location.pathname]);
 

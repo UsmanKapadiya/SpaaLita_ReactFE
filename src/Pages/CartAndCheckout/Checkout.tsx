@@ -119,7 +119,6 @@ const StripeCheckoutForm: FC<{
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    console.log(createAccount)
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
@@ -343,19 +342,20 @@ const Checkout: FC = () => {
                 }
                 const response = await userLogin(payload);
                 console.log(response);
-                const { token, user } = response.data;
-                setBillingDetails(user.billing || null);
-                setShippingDetails(user.shipping || null);
-                dispatch(login({ user: user, token: token }));
-                toast.success(response?.message || "Logged in successfully!");
-
-                // Optional: navigate
-                // navigate("/dashboard");
-
+                if (response?.success === true) {
+                    const { token, user } = response.data;
+                    setBillingDetails(user.billing || null);
+                    setShippingDetails(user.shipping || null);
+                    dispatch(login({ user: user, token: token }));
+                    toast.success(response?.message || "Logged in successfully!");
+                }
+                else {
+                    toast.error(response?.message || "Logged in successfully!");
+                }
             } catch (err: any) {
-                //   setError(
-                //     err.response?.data?.message || "Login failed. Try again."
-                //   );
+                toast.error(
+                    err.response?.message || "Login failed. Try again."
+                );
             } finally {
                 //   setLoading(false);
             }

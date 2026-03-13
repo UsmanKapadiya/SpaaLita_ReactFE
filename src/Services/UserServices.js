@@ -9,7 +9,14 @@ export const userLogin = async (data) => {
         let url = `${USER_API_BASE}/login`
         return await requests.post(url, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch login",
+    };
+
     }
 };
 
@@ -49,3 +56,20 @@ export const orderPlaced = async (data) => {
     }
 };
 
+export const forgotPassword = async (data) => {
+    try {
+        let url = `${USER_API_BASE}/forgot-password`
+        return await requests.post(url, data);
+    } catch (error) {
+        return { success: false, error: error.message || 'Failed to fetch products' };
+    }
+};
+
+export const resetPassword = async (token, data) => {
+    try {
+        let url = `${USER_API_BASE}/reset-password/${token}`
+        return await requests.post(url, data);
+    } catch (error) {
+        return { success: false, error: error.message || 'Failed to fetch products' };
+    }
+};
