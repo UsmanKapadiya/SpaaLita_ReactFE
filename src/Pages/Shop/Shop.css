@@ -1,0 +1,10 @@
+.sale-price {
+  color: green;
+  font-weight: 600;
+}
+
+.regular-price {
+  margin-left: 8px;
+  text-decoration: line-through;
+  color: #888;
+}

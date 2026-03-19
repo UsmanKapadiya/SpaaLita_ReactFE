@@ -8,7 +8,7 @@ import ProductImageGallery from '../../Component/ProductImageGallery/ProductImag
 import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
-import { getRelatedProducts, getGiftCardRelatedProducts } from '../../Services/ProductRelatedServices'
+import { getRelatedProducts, getGiftCardRelatedProducts, getProductById } from '../../Services/ProductRelatedServices'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
 
@@ -41,7 +41,7 @@ type ProductSource = "shop" | "giftCard";
 interface LocationState {
     source?: ProductSource;
     allProducts?: Product[];
-    currentProduct?: Product;
+    productData?: Product;
 }
 const ProductDetails: FC = () => {
     const navigate = useNavigate();
@@ -57,8 +57,33 @@ const ProductDetails: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [relatedProducts, setRelatedProducts] = useState([])
+    const [productData, setProductData] = useState<Product | null>(currentProduct || null);
+    console.log(itemName);
+    const fetchProductDetails = async () => {
+        if (!itemName) return;
 
+        try {
+            setLoading(true);
+            let response;
+            if (sourceFromState === 'shop') {
+                response = await getProductById(itemName);
+            } else {
+                response = await getGiftCardById(itemName);
+            }
 
+            if (!response?.success || !response?.data) {
+                throw new Error("Product not found");
+            }
+
+            setProductData(response.data);
+
+        } catch (err) {
+            console.error(err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchRelatedProducts = async () => {
         if (!itemName) return;
@@ -99,6 +124,7 @@ const ProductDetails: FC = () => {
 
     useEffect(() => {
         if (!itemName) return;
+        fetchProductDetails();
         fetchRelatedProducts();
     }, [sourceFromState, itemName]);
 
@@ -151,11 +177,20 @@ const ProductDetails: FC = () => {
 
     const addProductToCart = useCallback(
         (product: Product, qty: number) => {
+            // Determine sale price safely from the product argument
+            const salePrice = product.sale_price ? Number(product.sale_price) : null;
+            const regularPrice = Number(product.price);
+
+            const finalPrice =
+                salePrice && !isNaN(salePrice) && salePrice > 0
+                    ? salePrice
+                    : regularPrice;
+
             dispatch(
                 addToCart({
                     id: product._id?.toString() || '',
                     name: product.productName,
-                    price: product.price,
+                    price: finalPrice,
                     quantity: qty,
                     image:
                         product.images?.[0]?.src ||
@@ -175,7 +210,8 @@ const ProductDetails: FC = () => {
                 {
                     _id: product.id,
                     productName: product.productName,
-                    price: Number(product.price),
+                    price: Number(product.price),      // regular price
+                    sale_price: product.sale_price,    // optional, if exists
                     images: [{ src: product.image }],
                 } as any,
                 1
@@ -188,11 +224,11 @@ const ProductDetails: FC = () => {
         (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
 
-            if (!currentProduct) return;
+            if (!productData) return;
 
-            addProductToCart(currentProduct, quantity);
+            addProductToCart(productData, quantity);
         },
-        [currentProduct, quantity, addProductToCart]
+        [productData, quantity, addProductToCart]
     );
 
 
@@ -207,8 +243,8 @@ const ProductDetails: FC = () => {
     const handleChange = (e) => {
         let value = parseInt(e.target.value, 10);
 
-        if (value > currentProduct.qty) {
-            value = currentProduct.qty;
+        if (value > productData.qty) {
+            value = productData.qty;
         }
 
         if (value < 1 || isNaN(value)) {
@@ -220,28 +256,63 @@ const ProductDetails: FC = () => {
 
 
 
-
-
     const mainImage =
-        currentProduct?.productImages?.[selectedImageIndex]
-            ? `${baseUrl}${uploadsFolder}${currentProduct.productImages[selectedImageIndex]}`
-            : null;
-    const thumbnailImages = currentProduct?.productImages?.map(img => `${baseUrl}${uploadsFolder}${img}`) || [];
+        productData?.productImages?.[selectedImageIndex]
+    // ? `${baseUrl}${uploadsFolder}${productData.productImages[selectedImageIndex]}`
+    // : null;
+    const thumbnailImages = productData?.productImages || [];
+    // const thumbnailImages = productData?.productImages?.map(img => `${baseUrl}${uploadsFolder}${img}`) || [];
     const formattedMainImage = mainImage ? { src: mainImage } : null;
     const formattedThumbnails = thumbnailImages.map(img => ({ src: img }));
 
-    const isGiftCard = sourceFromState === 'giftCard' || currentProduct?.title?.toLowerCase().includes('gift card');
+    const isGiftCard = sourceFromState === 'giftCard' || productData?.title?.toLowerCase().includes('gift card');
+
+
+    const mainCategory = productData?.categories?.[0];
+    const subCategory = productData?.categories?.[1];
+
+    const salePrice = Number(productData.sale_price);
+    const regularPrice = Number(productData.regular_price);
 
     return (
         <div className="container py-5">
             <nav className="woocommerce-breadcrumb" aria-label="Breadcrumb">
-                <span onClick={handleShopClick} style={{ cursor: 'pointer' }}>Shop</span>&nbsp;/&nbsp;
-                {isGiftCard && (
+                <span onClick={handleShopClick} style={{ cursor: 'pointer' }}>
+                    Shop
+                </span>
+
+                {mainCategory && (
                     <>
-                        <span onClick={() => navigate('/giftcard')} style={{ cursor: 'pointer' }}>Gift Card</span>&nbsp;/&nbsp;
+                        &nbsp;/&nbsp;
+                        <span
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/category/${mainCategory.slug}`)}
+                        >
+                            {mainCategory.name}
+                        </span>
                     </>
                 )}
-                <span>{currentProduct?.category}</span> / <span>{currentProduct?.productName}</span>
+
+                {subCategory && (
+                    <>
+                        &nbsp;/&nbsp;
+                        <span
+                            style={{ cursor: 'pointer' }}
+                            onClick={() =>
+                                navigate(`/category/${mainCategory?.slug}/${subCategory.slug}`)
+                            }
+                        >
+                            {subCategory.name}
+                        </span>
+                    </>
+                )}
+
+                {productData?.productName && (
+                    <>
+                        &nbsp;/&nbsp;
+                        <span>{productData.productName}</span>
+                    </>
+                )}
             </nav>
 
             <div className="woocommerce-notices-wrapper"></div>
@@ -263,11 +334,17 @@ const ProductDetails: FC = () => {
                                 onPrevious={handlePreviousProduct}
                                 onNext={handleNextProduct}
                             />
-                            <h4 className="product_title entry-title">{currentProduct?.productName}</h4>
+                            <h4 className="product_title entry-title">{productData?.productName}</h4>
                             <div className="woocommerce-product-details__short-description">
+                                <div className='pt-2'>
+                                    <p>{mainCategory.name}</p>
+                                </div>
+                                <div>
+                                    <p>SKU:{productData.sku}</p>
+                                </div>
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
+                                        __html: productData?.short_description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
                                             .replace(/&lt;/g, '<')
                                             .replace(/&gt;/g, '>')
                                             .replace(/&amp;/g, '&')
@@ -275,7 +352,29 @@ const ProductDetails: FC = () => {
                                     }}
                                 />
                             </div>
-                            <p className="price"><span className="woocommerce-Price-amount amount"><bdi><span className="woocommerce-Price-currencySymbol">{currentProduct?.currency || '$'}</span>{currentProduct?.price?.toFixed(2)}</bdi></span></p>
+                            <p className="price">
+                                {/* <span className="woocommerce-Price-amount amount">
+                                    <bdi>
+                                        <span className="woocommerce-Price-currencySymbol">
+                                            {productData?.currency || '$'}
+                                        </span>
+                                        {productData?.price?.toFixed(2)}
+                                    </bdi>
+                                </span> */}
+
+                                {salePrice > 0 ? (
+                                    <>
+                                        <bdi className="sale-price">
+                                            ${salePrice.toFixed(2)}
+                                        </bdi>
+                                        <span className="regular-price">
+                                            ${regularPrice.toFixed(2)}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <bdi>${regularPrice.toFixed(2)}</bdi>
+                                )}
+                            </p>
 
 
                             <form className="cart" onSubmit={handleFormSubmit} method="post" encType="multipart/form-data" id="fpf-add-to-cart-form">
@@ -296,7 +395,7 @@ const ProductDetails: FC = () => {
                                         className="input-text qty text"
                                         value={quantity}
                                         min="1"
-                                        max={currentProduct.qty}
+                                        max={productData.qty}
                                         step="1"
                                         onChange={handleChange}
                                     />
@@ -331,7 +430,7 @@ const ProductDetails: FC = () => {
                     </div>
                 </div>
             </div>
-            {currentProduct?.description && (
+            {productData?.description && (
                 <div className="w-100 my-5 pt-5">
                     <ul className="nav nav-tabs" role="tablist">
                         <li className="nav-item">
@@ -354,7 +453,7 @@ const ProductDetails: FC = () => {
                             <p>
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: currentProduct?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
+                                        __html: productData?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
                                             .replace(/&lt;/g, '<')
                                             .replace(/&gt;/g, '>')
                                             .replace(/&amp;/g, '&')
