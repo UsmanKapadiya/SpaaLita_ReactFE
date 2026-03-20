@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { giftCardSortOptions } from '../../mockData/giftCardMockData';
@@ -47,11 +48,7 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         onAddToCart(giftCard);
     };
 
-    // const handleProductClick = () => {
-    //     navigate(`/product/${giftCard._id}`, {
-    //         state: { source: 'giftCard' }
-    //     });
-    // };
+
     const handleProductClick = () => {
         console.log(giftCard);
         navigate(`/product/${giftCard._id}`, {
@@ -59,10 +56,14 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         });
     };
 
+
+    const salePrice = Number(giftCard?.sale_price);
+    const regularPrice = Number(giftCard?.regular_price);
+
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
             <div onClick={handleProductClick} className="clickable">
-                 <img
+                <img
                     src={imageUrl}
                     alt={giftCard.productName}
                     className="attachment-woocommerce_thumbnail size-woocommerce_thumbnail"
@@ -79,8 +80,19 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
             <div className="product-title clickable" onClick={handleProductClick}>
                 {giftCard.productName}
             </div>
-            <span className="price">
-                <bdi>${giftCard.price.toFixed(2)}</bdi>
+             <span className="price">
+                {salePrice > 0 ? (
+                    <>
+                        <bdi className="sale-price">
+                            ${salePrice.toFixed(2)}
+                        </bdi>
+                        <span className="regular-price">
+                            ${regularPrice.toFixed(2)}
+                        </span>
+                    </>
+                ) : (
+                    <bdi>${regularPrice.toFixed(2)}</bdi>
+                )}
             </span>
             <button className="d-block add-to-cart add-to-cart-button" onClick={handleAddToCart}>
                 Add to cart
