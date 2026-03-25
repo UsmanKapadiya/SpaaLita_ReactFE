@@ -10,7 +10,7 @@ import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage'
 import { getAllProducts } from '../../Services/ProductRelatedServices'
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-
+import './Shop.css'
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 import Pagination from '../../Component/Pagination/Pagination';
 import { current } from '@reduxjs/toolkit';
@@ -38,8 +38,8 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
 
     // Use first image from filenames array
     const imageUrl = giftCard.productImages?.[0]
-        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/products/${giftCard.productImages[0]}`
-        : 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+    // ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/products/${giftCard.productImages[0]}`
+    // : 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
 
     const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -58,6 +58,8 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         });
     };
 
+    const salePrice = Number(giftCard.sale_price);
+    const regularPrice = Number(giftCard.regular_price);
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
             <div onClick={handleProductClick} className="clickable">
@@ -78,8 +80,20 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
             <div className="product-title clickable" onClick={handleProductClick}>
                 {giftCard.productName}
             </div>
+
             <span className="price">
-                <bdi>${giftCard.price.toFixed(2)}</bdi>
+                {salePrice > 0 ? (
+                    <>
+                        <bdi className="sale-price">
+                            ${salePrice.toFixed(2)}
+                        </bdi>
+                        <span className="regular-price">
+                            ${regularPrice.toFixed(2)}
+                        </span>
+                    </>
+                ) : (
+                    <bdi>${regularPrice.toFixed(2)}</bdi>
+                )}
             </span>
             <button className="d-block add-to-cart add-to-cart-button" onClick={handleAddToCart}>
                 Add to cart

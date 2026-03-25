@@ -41,6 +41,17 @@ export const getAllProducts = async (page, itemPerPage, sorting) => {
   }
 };
 
+export const getProductById = async (id) => {
+  try {
+    let url = `${PRODUCT_API_BASE}/${id}`;
+    return await requests.get(url);
+  } catch (error) {
+    return { success: false, error: error.message || 'Failed to fetch products' };
+  }
+};
+
+
+
 export const getRelatedProducts = async (id) => {
   console.log(id)
   try {
