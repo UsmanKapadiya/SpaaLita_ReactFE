@@ -8,12 +8,11 @@ import ProductImageGallery from '../../Component/ProductImageGallery/ProductImag
 import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
-import { getRelatedProducts, getGiftCardRelatedProducts, getProductById } from '../../Services/ProductRelatedServices'
+import { getRelatedProducts, getGiftCardRelatedProducts, getProductById, getGiftCardById } from '../../Services/ProductRelatedServices'
+import { getProductPricing } from '../../utils/productPricing';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
 
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/';
-const uploadsFolder = 'uploads/products/';
 interface Product {
     _id: string;
     productName: string;
@@ -54,22 +53,21 @@ const ProductDetails: FC = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
     const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
     const [quantity, setQuantity] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(!currentProduct);
     const [error, setError] = useState(false);
     const [relatedProducts, setRelatedProducts] = useState([])
     const [productData, setProductData] = useState<Product | null>(currentProduct || null);
-    console.log(itemName);
+    // Opened from the gift card page -> /giftcards API; otherwise (shop or a direct link) -> /products API
+    const isGiftCardSource = sourceFromState === 'giftCard';
+
     const fetchProductDetails = async () => {
         if (!itemName) return;
 
         try {
             setLoading(true);
-            let response;
-            if (sourceFromState === 'shop') {
-                response = await getProductById(itemName);
-            } else {
-                response = await getGiftCardById(itemName);
-            }
+            const response = isGiftCardSource
+                ? await getGiftCardById(itemName)
+                : await getProductById(itemName);
 
             if (!response?.success || !response?.data) {
                 throw new Error("Product not found");
@@ -92,12 +90,9 @@ const ProductDetails: FC = () => {
             setLoading(true);
             setError("");
 
-            let response;
-            if (sourceFromState === 'shop') {
-                response = await getRelatedProducts(itemName);
-            } else {
-                response = await getGiftCardRelatedProducts(itemName);
-            }
+            const response = isGiftCardSource
+                ? await getGiftCardRelatedProducts(itemName)
+                : await getRelatedProducts(itemName);
 
             if (!response.success || !response.data?.length) {
                 throw new Error("No related products found.");
@@ -106,8 +101,8 @@ const ProductDetails: FC = () => {
                 id: item._id,
                 slug: item._id,
                 productName: item.productName,
-                price: item.price,
-                image: item.productImages?.[0]?.src || ImageNotFound,
+                price: getProductPricing(item).price,
+                image: item.productImages?.[0] || ImageNotFound,
                 alt: item.productName,
                 category: item.category
 
@@ -128,7 +123,8 @@ const ProductDetails: FC = () => {
         fetchRelatedProducts();
     }, [sourceFromState, itemName]);
 
-    const currentDataArray = AllProducts
+    // Product list from the shop page (empty when the product link is opened directly)
+    const currentDataArray = AllProducts || [];
     const currentIndex = useMemo(() =>
         currentDataArray.findIndex((product: any) => product._id === itemName),
         [currentDataArray, itemName]
@@ -155,6 +151,7 @@ const ProductDetails: FC = () => {
     }, [navigate, sourceFromState, AllProducts]);
 
     const navigateToProduct = useCallback((product: any) => {
+        if (!product) return;
         navigate(`/product/${product._id}`, {
             state: { source: sourceFromState, allProducts: AllProducts, currentProduct: product }
         });
@@ -177,22 +174,14 @@ const ProductDetails: FC = () => {
 
     const addProductToCart = useCallback(
         (product: Product, qty: number) => {
-            // Determine sale price safely from the product argument
-            const salePrice = product.sale_price ? Number(product.sale_price) : null;
-            const regularPrice = Number(product.price);
-
-            const finalPrice =
-                salePrice && !isNaN(salePrice) && salePrice > 0
-                    ? salePrice
-                    : regularPrice;
-
             dispatch(
                 addToCart({
                     id: product._id?.toString() || '',
                     name: product.productName,
-                    price: finalPrice,
-                    quantity: qty,
+                    price: getProductPricing(product).price,
+                    qty,
                     image:
+                        product.productImages?.[0] ||
                         product.images?.[0]?.src ||
                         product.image?.src ||
                         ImageNotFound,
@@ -254,14 +243,20 @@ const ProductDetails: FC = () => {
         setQuantity(value);
     };
 
+    if (!productData) {
+        return (
+            <div className="container py-5 text-center">
+                <p>{loading ? 'Loading product...' : 'Product not found.'}</p>
+                {!loading && error && (
+                    <button className="button shopButton" onClick={handleShopClick}>Return to shop</button>
+                )}
+            </div>
+        );
+    }
 
-
-    const mainImage =
-        productData?.productImages?.[selectedImageIndex]
-    // ? `${baseUrl}${uploadsFolder}${productData.productImages[selectedImageIndex]}`
-    // : null;
-    const thumbnailImages = productData?.productImages || [];
-    // const thumbnailImages = productData?.productImages?.map(img => `${baseUrl}${uploadsFolder}${img}`) || [];
+    // productImages are full URLs (resolved in ProductRelatedServices)
+    const mainImage = productData.productImages?.[selectedImageIndex];
+    const thumbnailImages = productData.productImages || [];
     const formattedMainImage = mainImage ? { src: mainImage } : null;
     const formattedThumbnails = thumbnailImages.map(img => ({ src: img }));
 
@@ -271,8 +266,7 @@ const ProductDetails: FC = () => {
     const mainCategory = productData?.categories?.[0];
     const subCategory = productData?.categories?.[1];
 
-    const salePrice = Number(productData.sale_price);
-    const regularPrice = Number(productData.regular_price);
+    const { salePrice, regularPrice } = getProductPricing(productData);
 
     return (
         <div className="container py-5">
@@ -337,7 +331,7 @@ const ProductDetails: FC = () => {
                             <h4 className="product_title entry-title">{productData?.productName}</h4>
                             <div className="woocommerce-product-details__short-description">
                                 <div className='pt-2'>
-                                    <p>{mainCategory.name}</p>
+                                    <p>{mainCategory?.name}</p>
                                 </div>
                                 <div>
                                     <p>SKU:{productData.sku}</p>

@@ -1,8 +1,10 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 import { store } from '../store/store';
+import { logout } from '../store/authSlice';
+import { API_BASE_URL } from '../utils/apiConfig';
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || `http://localhost:5000/api/`,
+  baseURL: API_BASE_URL,
   timeout: 50000,
   headers: {
     Accept: 'application/json',
@@ -19,7 +21,6 @@ instance.interceptors.request.use(
     if (token && !config.headers['Authorization']) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    console.log(token)
     return config;
   },
   function (error) {
@@ -58,16 +59,10 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401 Unauthorized
-    if (error.response && error.response.status === 401) {
-      // Clear authentication data
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      Cookies.remove('authToken');
-      Cookies.remove('userToken');
-
-      // Redirect to login
-      // window.location.href = '/';
+    // 401 on a request that carried a token: the JWT expired or is invalid,
+    // so end the session (a wrong-password login also answers 401, without a token)
+    if (error.response?.status === 401 && error.config?.headers?.Authorization) {
+      store.dispatch(logout());
     }
     
     // Handle network errors
@@ -82,7 +77,19 @@ instance.interceptors.response.use(
 const responseBody = (response) => response.data;
 
 /**
- * Retry logic for failed requests
+ * Failed-call result for the service functions: the backend's
+ * {"success": false, "message": "..."} body, or a fallback message.
+ */
+export const toErrorResult = (error, fallback) => ({
+  success: false,
+  status: error?.response?.status,
+  message: error?.response?.data?.message || error?.message || fallback,
+  error: error?.message || fallback,
+});
+
+/**
+ * Retry logic for failed GET requests (writes are never retried, so an
+ * order or payment is not created twice)
  */
 const retryRequest = async (fn, retries = 2, delay = 1000) => {
   try {
@@ -102,10 +109,8 @@ const requests = {
       instance.get(url, { params, headers }).then(responseBody)
     ),
 
-  post: (url, body) => 
-    retryRequest(() => 
-      instance.post(url, body).then(responseBody)
-    ),
+  post: (url, body) =>
+    instance.post(url, body).then(responseBody),
 
   uploadPosts: (url, body) =>
     instance.post(url, body, {
@@ -130,15 +135,11 @@ const requests = {
     }).then(responseBody);
   },
 
-  put: (url, body) => 
-    retryRequest(() => 
-      instance.put(url, body).then(responseBody)
-    ),
+  put: (url, body) =>
+    instance.put(url, body).then(responseBody),
 
-  patch: (url, body) => 
-    retryRequest(() => 
-      instance.patch(url, body).then(responseBody)
-    ),
+  patch: (url, body) =>
+    instance.patch(url, body).then(responseBody),
 
   delete: (url, body) =>
     instance.delete(url, { data: body }).then(responseBody),

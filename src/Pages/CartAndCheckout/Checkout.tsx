@@ -1,4 +1,4 @@
-import type { FC, FormEvent, ChangeEvent } from 'react';
+import type { FC, FormEvent, ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -16,6 +16,7 @@ interface CartItem {
     name: string;
     price: number;
     qty: number;
+    image?: string;
     category?: string;
 }
 
@@ -99,16 +100,34 @@ const emptyShipping: ShippingDetails = {
 
 type PaymentMethod = 'stripe' | 'stripe_klarna';
 
-const stripePromise = loadStripe('pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr');
+// Must belong to the same Stripe account as STRIPE_SECRET_KEY in the backend .env
+const stripePromise = loadStripe(
+    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
+    'pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr'
+);
+
+const OBJECT_ID = /^[0-9a-f]{24}$/i;
+
+// Orders store addresses as {name, address, zip, email, phone, ...}. The form keys
+// (address1, postcode, giftCard) are sent as well: the backend uses them to save the
+// addresses on the account it creates for a guest who ticks "Create an account".
+const toOrderAddress = (address: Partial<BillingDetails & ShippingDetails>, contact: BillingDetails) => ({
+    ...address,
+    name: `${address.firstName || ''} ${address.lastName || ''}`.trim(),
+    address: [address.address1, address.address2].filter(Boolean).join(', '),
+    zip: address.postcode || '',
+    email: address.email || contact.email || '',
+    phone: address.phone || contact.phone || '',
+});
 
 const StripeCheckoutForm: FC<{
-    amount: number;
+    subtotal: number;
     items: CartItem[];
     shippingAddress: ShippingDetails;
     billingAddress: BillingDetails;
     isUserlogin: boolean;
     createAccount: boolean
-}> = ({ amount, items, shippingAddress, billingAddress, isUserlogin, createAccount }) => {
+}> = ({ subtotal, items, shippingAddress, billingAddress, isUserlogin, createAccount }) => {
     const dispatch = useAppDispatch();
     const stripe = useStripe();
     const elements = useElements();
@@ -118,32 +137,52 @@ const StripeCheckoutForm: FC<{
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    // Order created by a previous attempt whose payment failed: retrying the same
+    // checkout pays that order again instead of creating a duplicate
+    const [pendingOrder, setPendingOrder] = useState<{ key: string; order: any; clientSecret: string } | null>(null);
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         if (!stripe || !elements) return;
+
+        // The button does not submit the checkout form, so run its required-field checks here
+        const form = e.currentTarget.form;
+        if (form && !form.reportValidity()) return;
+
+        const card = elements.getElement(CardElement);
+        if (!card) return;
 
         setProcessing(true);
         setError(null);
 
         try {
-
             const payload: any = {
-                items,
-                totalAmount: amount,
-                shippingAddress,
-                billingAddress,
-                coupon: {
+                items: items.map(item => ({
+                    // links the order line to the product record (only real ids are sent)
+                    ...(OBJECT_ID.test(item.id) && { productId: item.id }),
+                    name: item.name,
+                    price: item.price,
+                    qty: item.qty,
+                    image: item.image,
+                })),
+                // Before discount: the backend subtracts coupon.discountAmount itself
+                totalAmount: subtotal,
+                shippingAddress: toOrderAddress(shippingAddress, billingAddress),
+                billingAddress: toOrderAddress(billingAddress, billingAddress),
+            };
+
+            if (appliedCoupon) {
+                payload.coupon = {
                     code: appliedCoupon,
                     discountAmount: discountAmount,
                     freeShippingAmount: 0
-                }
-            };
+                };
+            }
 
             if (!isUserlogin) {
                 payload.guestInfo = {
-                    name: billingAddress.firstName,
+                    name: `${billingAddress.firstName} ${billingAddress.lastName}`.trim(),
                     email: billingAddress.email,
                     phone: billingAddress.phone
                 };
@@ -152,25 +191,55 @@ const StripeCheckoutForm: FC<{
                     payload.createAccount = true;
                 }
             }
-            console.log(payload)
-            const orderResponse = await orderPlaced(payload);
 
-            if (!orderResponse?.success) {
-                throw new Error("Order creation failed");
+            const key = JSON.stringify(payload);
+            let current = pendingOrder?.key === key ? pendingOrder : null;
+
+            if (!current) {
+                const orderResponse = await orderPlaced(payload);
+
+                if (!orderResponse?.success || !orderResponse.clientSecret) {
+                    throw new Error(orderResponse?.message || "Order creation failed");
+                }
+
+                current = { key, order: orderResponse.data, clientSecret: orderResponse.clientSecret };
+                setPendingOrder(current);
+            }
+
+            // Charge the card with the PaymentIntent the backend created for this order
+            const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(current.clientSecret, {
+                payment_method: {
+                    card,
+                    billing_details: {
+                        name: `${billingAddress.firstName} ${billingAddress.lastName}`.trim(),
+                        email: billingAddress.email,
+                        phone: billingAddress.phone,
+                    },
+                },
+            });
+
+            if (paymentError) {
+                throw new Error(paymentError.message || "Payment failed");
+            }
+
+            if (paymentIntent?.status !== 'succeeded') {
+                throw new Error(`Payment ${paymentIntent?.status || 'failed'}`);
             }
 
             toast.success("Order placed successfully 🎉");
             setSuccess(true);
+            setPendingOrder(null);
 
             dispatch(clearCart());
+            dispatch(removeCoupon());
 
-            navigate(`/checkout/order-received/${orderResponse.data._id}`, {
-                state: orderResponse.data
+            navigate(`/checkout/order-received/${current.order._id}`, {
+                state: current.order
             });
 
         } catch (err: any) {
             setError(err.message);
-            toast.error("Failed to place order");
+            toast.error(err.message || "Failed to place order");
         } finally {
             setProcessing(false);
         }
@@ -224,11 +293,10 @@ const Checkout: FC = () => {
         return cartItems.reduce((total, item) => total + item.price * item.qty, 0);
     }, [cartItems]);
 
-    console.log(cartItems)
     useEffect(() => {
         if (user) {
-            setBillingDetails(user?.billing || null);
-            setShippingDetails(user?.shipping || null);
+            setBillingDetails({ ...emptyBilling, ...user.billing });
+            setShippingDetails({ ...emptyShipping, ...user.shipping });
         }
     }, [user])
 
@@ -341,16 +409,14 @@ const Checkout: FC = () => {
                     password: loginData?.password
                 }
                 const response = await userLogin(payload);
-                console.log(response);
                 if (response?.success === true) {
+                    // the saved addresses are copied into the form when the user is stored
                     const { token, user } = response.data;
-                    setBillingDetails(user.billing || null);
-                    setShippingDetails(user.shipping || null);
                     dispatch(login({ user: user, token: token }));
                     toast.success(response?.message || "Logged in successfully!");
                 }
                 else {
-                    toast.error(response?.message || "Logged in successfully!");
+                    toast.error(response?.message || "Login failed. Try again.");
                 }
             } catch (err: any) {
                 toast.error(
@@ -897,7 +963,7 @@ const Checkout: FC = () => {
                                                             <p>Secure payment via Stripe</p>
                                                             <Elements stripe={stripePromise}>
                                                                 <StripeCheckoutForm
-                                                                    amount={(calculateTotal() - discountAmount)}
+                                                                    subtotal={calculateTotal()}
                                                                     items={cartItems}
                                                                     shippingAddress={shippingDetails}
                                                                     billingAddress={billingDetails}

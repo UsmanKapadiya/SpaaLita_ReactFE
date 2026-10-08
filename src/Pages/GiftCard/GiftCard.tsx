@@ -8,6 +8,7 @@ import { sortProducts, type SortOption } from '../../utils/sortProducts';
 import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
 import { getAllGiftCard } from '../../Services/ProductRelatedServices'
+import { getProductPricing } from '../../utils/productPricing';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 import Pagination from '../../Component/Pagination/Pagination';
 
@@ -32,9 +33,10 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
+    // productImages are already full URLs (resolved in ProductRelatedServices)
     const imageUrl = giftCard.productImages?.[0]
-        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/products/${giftCard.productImages[0]}`
-        : 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+        || 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+    const { salePrice, regularPrice, price } = getProductPricing(giftCard);
 
 
     const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -42,7 +44,7 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         dispatch(addToCart({
             id: giftCard._id,
             name: giftCard.productName,
-            price: giftCard.price,
+            price,
             image: imageUrl
         }));
         onAddToCart(giftCard);
@@ -56,9 +58,6 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         });
     };
 
-
-    const salePrice = Number(giftCard?.sale_price);
-    const regularPrice = Number(giftCard?.regular_price);
 
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">

@@ -63,8 +63,8 @@ const Addresses: FC = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [billingLoading, setBillingLoading] = useState<boolean>(false)
     useEffect(() => {
-        setBillingDetails(user.billing || null);
-        setShippingDetails(user.shipping || null);
+        setBillingDetails({ ...emptyBilling, ...user?.billing });
+        setShippingDetails({ ...emptyShipping, ...user?.shipping });
     }, [user])
 
     const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -84,9 +84,18 @@ const Addresses: FC = () => {
                 shipping: shippingDetails,
             }
             const res = await updateUserAddress(user?.id, payload );
-    
+
+            if (!res?.success) {
+                toast.error(res?.message || "Failed to update addresses");
+                return;
+            }
+
             toast.success(res.message);
-            dispatch(updateUserAddresses(payload));
+            // keep what the server saved
+            dispatch(updateUserAddresses({
+                billing: res.data?.billing || payload.billing,
+                shipping: res.data?.shipping || payload.shipping,
+            }));
             setEditingBilling(false);
             setEditingShipping(false);
         } catch (err: any) {

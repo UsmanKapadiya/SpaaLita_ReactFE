@@ -6,11 +6,15 @@ const OrderDetails: FC = () => {
     const location = useLocation();
     const order = location.state?.order;
 
+    // An order may have no saved address (null / "" from the API)
+    const shippingAddress = order?.shippingAddress || {};
+    const billingAddress = order?.billingAddress || {};
+
     if (!order) {
         return (
             <div>
                 <p>No order data found.</p>
-                <button onClick={() => navigate("/orders")}>Back to Orders</button>
+                <button onClick={() => navigate("/my-account/orders")}>Back to Orders</button>
             </div>
         );
     }
@@ -26,10 +30,10 @@ const OrderDetails: FC = () => {
                 <div className="shipping-address" style={{ flex: 1 }}>
                     <h3>Shipping Address</h3>
                     <p>
-                        {order.shippingAddress.name}<br />
-                        {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip}<br />
-                        {order.shippingAddress.country}<br />
-                        {order.shippingAddress.phone} | {order.shippingAddress.email}
+                        {shippingAddress.name}<br />
+                        {shippingAddress.address}, {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zip}<br />
+                        {shippingAddress.country}<br />
+                        {shippingAddress.phone} | {shippingAddress.email}
                     </p>
                 </div>
 
@@ -37,10 +41,10 @@ const OrderDetails: FC = () => {
                 <div className="billing-address" style={{ flex: 1 }}>
                     <h3>Billing Address</h3>
                     <p>
-                        {order.billingAddress.name}<br />
-                        {order.billingAddress.address}, {order.billingAddress.city}, {order.billingAddress.state} {order.billingAddress.zip}<br />
-                        {order.billingAddress.country}<br />
-                        {order.billingAddress.phone} | {order.billingAddress.email}
+                        {billingAddress.name}<br />
+                        {billingAddress.address}, {billingAddress.city}, {billingAddress.state} {billingAddress.zip}<br />
+                        {billingAddress.country}<br />
+                        {billingAddress.phone} | {billingAddress.email}
                     </p>
                 </div>
             </div>

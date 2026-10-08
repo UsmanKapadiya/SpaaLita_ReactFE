@@ -12,13 +12,22 @@ const initialState: AuthState = {
   token: null,
 };
 
+// The login response identifies the user as `id`, the user endpoints as `_id`,
+// and omits addresses that were never saved; keep one consistent shape.
+const normalizeUser = (user: any) => user && {
+  ...user,
+  id: user.id ?? user._id,
+  billing: user.billing ?? {},
+  shipping: user.shipping ?? {},
+};
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     login: (state, action: PayloadAction<{ user: any; token: string }>) => {
       state.isLoggedIn = true;
-      state.user = action.payload.user;
+      state.user = normalizeUser(action.payload.user);
       state.token = action.payload.token;
     },
     logout: (state) => {

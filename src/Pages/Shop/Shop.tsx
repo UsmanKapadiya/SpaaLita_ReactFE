@@ -8,6 +8,8 @@ import { sortProducts, type SortOption } from '../../utils/sortProducts';
 import { CART_MESSAGE_TIMEOUT } from '../../utils/constants';
 import AddToCartMessage from '../../Component/AddToCartMessage/AddToCartMessage';
 import { getAllProducts } from '../../Services/ProductRelatedServices'
+import { getProductPricing } from '../../utils/productPricing';
+import ImageNotFound from '../../assets/images/productImageNotFound.png';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import './Shop.css'
@@ -36,17 +38,16 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
-    // Use first image from filenames array
-    const imageUrl = giftCard.productImages?.[0]
-    // ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/products/${giftCard.productImages[0]}`
-    // : 'https://spaalita.ca/wp-content/uploads/2021/06/ezgif.com-gif-maker-1-180x180.jpg';
+    // productImages are already full URLs (resolved in ProductRelatedServices)
+    const imageUrl = giftCard.productImages?.[0] || ImageNotFound;
+    const { salePrice, regularPrice, price } = getProductPricing(giftCard);
 
     const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         dispatch(addToCart({
             id: giftCard._id,
             name: giftCard.productName,
-            price: giftCard.price,
+            price,
             image: imageUrl
         }));
         onAddToCart(giftCard);
@@ -58,8 +59,6 @@ const GiftCardItem: React.FC<GiftCardItemProps> = ({ giftCard, allProducts, onAd
         });
     };
 
-    const salePrice = Number(giftCard.sale_price);
-    const regularPrice = Number(giftCard.regular_price);
     return (
         <li className="col-lg-4 col-md-6 col-sm-6 text-center">
             <div onClick={handleProductClick} className="clickable">

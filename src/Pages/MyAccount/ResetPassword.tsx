@@ -34,6 +34,8 @@ const ResetPassword: FC = () => {
                 setTimeout(() => {
                     navigate("/my-account");
                 }, 2000);
+            } else {
+                setMessage(response?.message || "Something went wrong");
             }
 
         } catch (error: any) {

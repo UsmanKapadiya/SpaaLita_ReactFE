@@ -52,17 +52,20 @@ const AccountDetails: FC = () => {
 
             const res = await updateUser(user.id, payload);
 
-                console.log(res)
-            dispatch(login({user: res.data, token: token}));
+            if (!res?.success) {
+                toast.error(res?.message || "Update failed");
+                return;
+            }
 
-            toast.success("Account updated successfully");
+            dispatch(login({ user: { ...user, ...res.data }, token: token }));
+
+            toast.success(res.message || "Account updated successfully");
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Update failed");
         } finally {
             setLoading(false);
         }
     };
-    console.log(user);
     return (
         <div className="">
             <form

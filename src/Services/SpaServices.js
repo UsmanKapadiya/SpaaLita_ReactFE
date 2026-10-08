@@ -1,15 +1,19 @@
-import requests from "./api.js";
+import requests, { toErrorResult } from "./api.js";
+import { resolveImageUrl } from "../utils/apiConfig";
 
 const API_BASE = '/services';
 
 export const getServicesByName = async (searchTerm) => {
   try {
     let url = `${API_BASE}?page=${1}&limit=${1}`;
-    const params = [];
-    if (searchTerm) params.push(`search=${encodeURIComponent(searchTerm)}`);
-    if (params.length) url += `&${params.join('&')}`;
-    return await requests.get(url);
+    if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
+    const response = await requests.get(url);
+    if (!response?.success || !Array.isArray(response.data)) return response;
+    return {
+      ...response,
+      data: response.data.map((item) => ({ ...item, serviceImage: resolveImageUrl(item.serviceImage, 'services') })),
+    };
   } catch (error) {
-    return { success: false, error: error.message || 'Failed to fetch products' };
+    return toErrorResult(error, 'Failed to fetch services');
   }
 };

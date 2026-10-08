@@ -1,12 +1,17 @@
-import requests from "./api.js";
+import requests, { toErrorResult } from "./api.js";
+import { resolveImageUrl } from "../utils/apiConfig";
 
 const API_BASE = '/gallery';
 
 export const getAllGallery = async () => {
   try {
-    let url = `${API_BASE}`;
-    return await requests.get(url);
+    const response = await requests.get(API_BASE);
+    if (!response?.success || !Array.isArray(response.data)) return response;
+    return {
+      ...response,
+      data: response.data.map((item) => ({ ...item, url: resolveImageUrl(item.url, 'gallery') })),
+    };
   } catch (error) {
-    return { success: false, error: error.message || 'Failed to fetch products' };
+    return toErrorResult(error, 'Failed to fetch gallery');
   }
 };

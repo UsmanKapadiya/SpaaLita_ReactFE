@@ -21,7 +21,6 @@ const LostPassword: FC = () => {
                     userName: !userLogin.includes("@") ? userLogin : undefined,
             }
             let response = await forgotPassword(payload );
-            console.log(response);
            if (response?.success === true) {
 
             toast.success(response?.message);
@@ -32,6 +31,8 @@ const LostPassword: FC = () => {
             const token = resetLink.split("/").pop();
 
              navigate(`/my-account/reset-password/${token}`);
+        } else {
+            setMessage(response?.message || "Something went wrong");
         }
          
         } catch (error: any) {

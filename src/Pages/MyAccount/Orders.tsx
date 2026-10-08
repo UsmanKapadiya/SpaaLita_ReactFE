@@ -22,8 +22,11 @@ const Orders: FC = () => {
         try {
             setLoading(true);
             const response = await getUserOrder(page, itemPerPage);
-            setOrders(response?.data);
-            setPagination(response.pagination);
+            if (!response?.success) {
+                throw new Error(response?.message || "Failed to load orders");
+            }
+            setOrders(response.data || []);
+            if (response.pagination) setPagination(response.pagination);
         } catch (err: any) {
             setError(err.message || "Failed to load orders");
         } finally {
@@ -75,7 +78,7 @@ const Orders: FC = () => {
                                         scope="row"
                                     >
                                         <a
-                                            onClick={() => navigate(`/orders/${order._id}`)}
+                                            onClick={() => navigate(`/my-account/orders/${order._id}`, { state: { order } })}
                                             style={{ cursor: "pointer" }}
                                         >
                                             #{order._id.slice(-6)} {/* Short order number */}
@@ -133,6 +136,8 @@ const Orders: FC = () => {
                         />
                     )}
                 </div>
+            ) : error ? (
+                <div className="woocommerce-info" role="alert">{error}</div>
             ) : (
                 <div className="woocommerce-info" role="status">
                     <span>

@@ -1,4 +1,4 @@
-import requests from "./api.js";
+import requests, { toErrorResult } from "./api.js";
 
 const USER_API_BASE = '/users';
 const ORDER_API_BASE = '/orders'
@@ -6,70 +6,56 @@ const ORDER_API_BASE = '/orders'
 
 export const userLogin = async (data) => {
     try {
-        let url = `${USER_API_BASE}/login`
-        return await requests.post(url, data);
+        return await requests.post(`${USER_API_BASE}/login`, data);
     } catch (error) {
-        return {
-      success: false,
-      message:
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to fetch login",
-    };
-
+        return toErrorResult(error, "Failed to fetch login");
     }
 };
 
-export const updateUserAddress = async (id,data) => {
+export const updateUserAddress = async (id, data) => {
     try {
-        let url = `${USER_API_BASE}/${id}/addresses`
-        return await requests.put(url, data);
+        return await requests.put(`${USER_API_BASE}/${id}/addresses`, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to update addresses');
     }
 };
 
-export const updateUser = async (id,data) => {
+export const updateUser = async (id, data) => {
     try {
-        let url = `${USER_API_BASE}/${id}`
-        return await requests.put(url, data);
+        return await requests.put(`${USER_API_BASE}/${id}`, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to update account');
     }
 };
 
 export const getUserOrder = async (page, itemPerPage) => {
     try {
-        let url = `${ORDER_API_BASE}?page=${page}&limit=${itemPerPage}`;
-        return await requests.get(url);
+        return await requests.get(`${ORDER_API_BASE}?page=${page}&limit=${itemPerPage}`);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to fetch orders');
     }
 };
 
 export const orderPlaced = async (data) => {
     try {
-        let url = `${ORDER_API_BASE}`
-        return await requests.post(url, data);
+        return await requests.post(ORDER_API_BASE, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to place order');
     }
 };
 
 export const forgotPassword = async (data) => {
     try {
-        let url = `${USER_API_BASE}/forgot-password`
-        return await requests.post(url, data);
+        return await requests.post(`${USER_API_BASE}/forgot-password`, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to request a password reset');
     }
 };
 
 export const resetPassword = async (token, data) => {
     try {
-        let url = `${USER_API_BASE}/reset-password/${token}`
-        return await requests.post(url, data);
+        return await requests.post(`${USER_API_BASE}/reset-password/${token}`, data);
     } catch (error) {
-        return { success: false, error: error.message || 'Failed to fetch products' };
+        return toErrorResult(error, 'Failed to reset password');
     }
 };
