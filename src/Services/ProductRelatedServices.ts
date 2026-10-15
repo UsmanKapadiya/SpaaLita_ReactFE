@@ -1,12 +1,12 @@
-import requests, { toErrorResult } from "./api.js";
-import { resolveImageUrl } from "../utils/apiConfig";
+import requests, { toErrorResult, type ApiResponse } from './api';
+import { resolveImageUrl } from '../utils/apiConfig';
 
 const GIFTCARD_API_BASE = '/giftcards';
 const PRODUCT_API_BASE = '/products';
-const COUPON_API_BASE = '/coupon/apply'
+const COUPON_API_BASE = '/coupon/apply';
 
 // Shop sort options -> sort keys of the backend catalogue endpoints
-const SORT_PARAMS = {
+const SORT_PARAMS: Record<string, string> = {
   menu_order: 'recommended',
   popularity: 'popular',
   date: 'latest',
@@ -15,22 +15,24 @@ const SORT_PARAMS = {
 };
 
 // productImages arrive as file names or full URLs; make them all loadable URLs
-const withImageUrls = (item) =>
-  item ? { ...item, productImages: (item.productImages || []).map((img) => resolveImageUrl(img, 'products')) } : item;
+const withImageUrls = (item: any) =>
+  item ? { ...item, productImages: (item.productImages || []).map((img: string) => resolveImageUrl(img, 'products')) } : item;
 
-const withImageUrlsData = (response) => {
+const withImageUrlsData = (response: ApiResponse): ApiResponse => {
   if (!response?.success) return response;
   const data = Array.isArray(response.data) ? response.data.map(withImageUrls) : withImageUrls(response.data);
   return { ...response, data };
 };
 
-const catalogueUrl = (base, page, itemPerPage, sorting) => {
+const catalogueUrl = (base: string, page: number, itemPerPage: number, sorting?: string) => {
   let url = `${base}?page=${page}&limit=${itemPerPage}`;
   if (sorting) url += `&sort=${encodeURIComponent(SORT_PARAMS[sorting] || sorting)}`;
   return url;
 };
 
-export const getAllGiftCard = async (page, itemPerPage, sorting) => {
+// Gift cards
+
+export const getAllGiftCard = async (page: number, itemPerPage: number, sorting?: string) => {
   try {
     return withImageUrlsData(await requests.get(catalogueUrl(GIFTCARD_API_BASE, page, itemPerPage, sorting)));
   } catch (error) {
@@ -38,7 +40,7 @@ export const getAllGiftCard = async (page, itemPerPage, sorting) => {
   }
 };
 
-export const getGiftCardById = async (id) => {
+export const getGiftCardById = async (id: string) => {
   try {
     return withImageUrlsData(await requests.get(`${GIFTCARD_API_BASE}/${id}`));
   } catch (error) {
@@ -46,7 +48,7 @@ export const getGiftCardById = async (id) => {
   }
 };
 
-export const getGiftCardRelatedProducts = async (id) => {
+export const getGiftCardRelatedProducts = async (id: string) => {
   try {
     return withImageUrlsData(await requests.get(`${GIFTCARD_API_BASE}/${id}/related`));
   } catch (error) {
@@ -54,10 +56,9 @@ export const getGiftCardRelatedProducts = async (id) => {
   }
 };
 
+// Products
 
-//Products
-
-export const getAllProducts = async (page, itemPerPage, sorting) => {
+export const getAllProducts = async (page: number, itemPerPage: number, sorting?: string) => {
   try {
     return withImageUrlsData(await requests.get(catalogueUrl(PRODUCT_API_BASE, page, itemPerPage, sorting)));
   } catch (error) {
@@ -65,7 +66,7 @@ export const getAllProducts = async (page, itemPerPage, sorting) => {
   }
 };
 
-export const getProductById = async (id) => {
+export const getProductById = async (id: string) => {
   try {
     return withImageUrlsData(await requests.get(`${PRODUCT_API_BASE}/${id}`));
   } catch (error) {
@@ -73,7 +74,7 @@ export const getProductById = async (id) => {
   }
 };
 
-export const getRelatedProducts = async (id) => {
+export const getRelatedProducts = async (id: string) => {
   try {
     return withImageUrlsData(await requests.get(`${PRODUCT_API_BASE}/${id}/related`));
   } catch (error) {
@@ -81,7 +82,9 @@ export const getRelatedProducts = async (id) => {
   }
 };
 
-export const applyCoupon = async (data) => {
+// Coupons
+
+export const applyCoupon = async (data: unknown) => {
   try {
     return await requests.post(COUPON_API_BASE, data);
   } catch (error) {

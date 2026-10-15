@@ -1,9 +1,6 @@
-
-
-
 import { useState, type FC, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { forgotPassword } from '../../Services/UserServices.js'
+import { forgotPassword } from '../../Services/UserServices';
 import './MyAccount.css';
 import { toast } from 'react-toastify';
 
@@ -24,7 +21,7 @@ const LostPassword: FC = () => {
            if (response?.success === true) {
 
             toast.success(response?.message);
-            setMessage(response.message);
+            setMessage(response.message ?? '');
 
             // Extract token from resetLink
             const resetLink = response.resetLink;

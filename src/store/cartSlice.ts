@@ -7,7 +7,7 @@ export interface CartItem {
     price: number;
     qty: number;
     image: string;
-    category:string;
+    category?: string;
 }
 
 interface CartState {
@@ -32,7 +32,7 @@ const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        addToCart: (state, action: PayloadAction<Omit<CartItem, 'quantity'> & { qty?: number }>) => {
+        addToCart: (state, action: PayloadAction<Omit<CartItem, 'qty'> & { qty?: number }>) => {
             const existingItem = state.items.find(item => item.id === action.payload.id);
 
             if (existingItem) {

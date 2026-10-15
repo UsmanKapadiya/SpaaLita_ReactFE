@@ -1,132 +1,119 @@
-//@ts-nocheck
-import type { FC } from 'react';
+import type { ChangeEvent, FC, FormEvent } from 'react';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ImageNotFound from '../../assets/images/productImageNotFound.png';
 import ProductNavigation from '../../Component/ProductNavigation/ProductNavigation';
 import ProductImageGallery from '../../Component/ProductImageGallery/ProductImageGallery';
-import RelatedProducts from '../../Component/RelatedProducts/RelatedProducts';
+import RelatedProducts, { type RelatedProduct } from '../../Component/RelatedProducts/RelatedProducts';
+import type { ProductSource } from '../../Component/ProductCatalog/ProductCatalog';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
-import { getRelatedProducts, getGiftCardRelatedProducts, getProductById, getGiftCardById } from '../../Services/ProductRelatedServices'
+import { getRelatedProducts, getGiftCardRelatedProducts, getProductById, getGiftCardById } from '../../Services/ProductRelatedServices';
 import { getProductPricing } from '../../utils/productPricing';
 import '../../Component/AddToCartMessage/AddToCartMessage.css';
 
+interface Category {
+    name: string;
+    slug: string;
+}
 
 interface Product {
     _id: string;
     productName: string;
     description?: string;
-    price: number;
-    currency?: string;
-    qty: number;
-    category?: string;
+    short_description?: string;
+    sku?: string;
+    price?: number | string;
+    regular_price?: number | string;
+    sale_price?: number | string;
+    qty?: number;
+    categories?: Category[];
+    productImages?: string[];
     images?: { src: string }[];
     image?: { src: string };
 }
 
-interface RelatedProduct {
-    id: string;
-    slug: string;
-    productName: string;
-    price: number | string;
-    image: string;
-    alt: string;
-    category?: string;
-}
-
-type ProductSource = "shop" | "giftCard";
-
 interface LocationState {
     source?: ProductSource;
     allProducts?: Product[];
-    productData?: Product;
+    currentProduct?: Product;
 }
+
+const DEFAULT_DESCRIPTION = 'Purchase one of our products securely online and we will send it directly to you or your loved one!';
+
 const ProductDetails: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const { itemName } = useParams<{ itemName: string }>(); //id Get here
-    const sourceFromState = (location.state as LocationState)?.source;
-    const AllProducts = (location.state as LocationState)?.allProducts;
-    const currentProduct = (location.state as LocationState)?.currentProduct;
+    const { itemName } = useParams<{ itemName: string }>(); // product id
+    const { source: sourceFromState, allProducts, currentProduct } = (location.state as LocationState | null) ?? {};
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
     const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(!currentProduct);
     const [error, setError] = useState(false);
-    const [relatedProducts, setRelatedProducts] = useState([])
+    const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
     const [productData, setProductData] = useState<Product | null>(currentProduct || null);
-    // Opened from the gift card page -> /giftcards API; otherwise (shop or a direct link) -> /products API
-    const isGiftCardSource = sourceFromState === 'giftCard';
-
-    const fetchProductDetails = async () => {
-        if (!itemName) return;
-
-        try {
-            setLoading(true);
-            const response = isGiftCardSource
-                ? await getGiftCardById(itemName)
-                : await getProductById(itemName);
-
-            if (!response?.success || !response?.data) {
-                throw new Error("Product not found");
-            }
-
-            setProductData(response.data);
-
-        } catch (err) {
-            console.error(err);
-            setError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchRelatedProducts = async () => {
-        if (!itemName) return;
-
-        try {
-            setLoading(true);
-            setError("");
-
-            const response = isGiftCardSource
-                ? await getGiftCardRelatedProducts(itemName)
-                : await getRelatedProducts(itemName);
-
-            if (!response.success || !response.data?.length) {
-                throw new Error("No related products found.");
-            }
-            const formattedProducts = response.data.map((item: any) => ({
-                id: item._id,
-                slug: item._id,
-                productName: item.productName,
-                price: getProductPricing(item).price,
-                image: item.productImages?.[0] || ImageNotFound,
-                alt: item.productName,
-                category: item.category
-
-            }));
-
-            setRelatedProducts(formattedProducts);
-
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load related products.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
         if (!itemName) return;
+        // Opened from the gift card page -> /giftcards API; otherwise (shop or a direct link) -> /products API
+        const isGiftCardSource = sourceFromState === 'giftCard';
+
+        const fetchProductDetails = async () => {
+            try {
+                setLoading(true);
+                const response = isGiftCardSource
+                    ? await getGiftCardById(itemName)
+                    : await getProductById(itemName);
+
+                if (!response?.success || !response?.data) {
+                    throw new Error("Product not found");
+                }
+
+                setProductData(response.data);
+            } catch (err) {
+                console.error(err);
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchRelatedProducts = async () => {
+            try {
+                const response = isGiftCardSource
+                    ? await getGiftCardRelatedProducts(itemName)
+                    : await getRelatedProducts(itemName);
+
+                if (!response.success || !response.data?.length) return;
+
+                setRelatedProducts(response.data.map((item: any) => ({
+                    id: item._id,
+                    slug: item._id,
+                    productName: item.productName,
+                    price: getProductPricing(item).price,
+                    image: item.productImages?.[0] || ImageNotFound,
+                    alt: item.productName,
+                    category: item.category
+                })));
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
         fetchProductDetails();
         fetchRelatedProducts();
     }, [sourceFromState, itemName]);
 
+    useEffect(() => {
+        setIsAddedToCart(false);
+    }, [itemName]);
+
     // Product list from the shop page (empty when the product link is opened directly)
-    const currentDataArray = AllProducts || [];
+    const currentDataArray = useMemo(() => allProducts || [], [allProducts]);
     const currentIndex = useMemo(() =>
-        currentDataArray.findIndex((product: any) => product._id === itemName),
+        currentDataArray.findIndex((product) => product._id === itemName),
         [currentDataArray, itemName]
     );
 
@@ -137,26 +124,19 @@ const ProductDetails: FC = () => {
         navigate('/shop');
     }, [navigate]);
 
-
-    const handleProductClick = useCallback((product: any) => {
+    const handleProductClick = useCallback((product: RelatedProduct) => {
         navigate(`/product/${product.id}`, {
-            state: {
-                source: sourceFromState,
-                allProducts: AllProducts,
-                currentProduct: product
-            }
+            state: { source: sourceFromState, allProducts, currentProduct: product }
         });
+    }, [navigate, sourceFromState, allProducts]);
 
-
-    }, [navigate, sourceFromState, AllProducts]);
-
-    const navigateToProduct = useCallback((product: any) => {
+    const navigateToProduct = useCallback((product?: Product) => {
         if (!product) return;
         navigate(`/product/${product._id}`, {
-            state: { source: sourceFromState, allProducts: AllProducts, currentProduct: product }
+            state: { source: sourceFromState, allProducts, currentProduct: product }
         });
         setSelectedImageIndex(0);
-    }, [navigate, sourceFromState]);
+    }, [navigate, sourceFromState, allProducts]);
 
     const handlePreviousProduct = useCallback(() => {
         const product = currentIndex > 0
@@ -199,10 +179,9 @@ const ProductDetails: FC = () => {
                 {
                     _id: product.id,
                     productName: product.productName,
-                    price: Number(product.price),      // regular price
-                    sale_price: product.sale_price,    // optional, if exists
+                    price: Number(product.price),
                     images: [{ src: product.image }],
-                } as any,
+                },
                 1
             );
         },
@@ -210,7 +189,7 @@ const ProductDetails: FC = () => {
     );
 
     const handleFormSubmit = useCallback(
-        (e: React.FormEvent<HTMLFormElement>) => {
+        (e: FormEvent<HTMLFormElement>) => {
             e.preventDefault();
 
             if (!productData) return;
@@ -220,20 +199,16 @@ const ProductDetails: FC = () => {
         [productData, quantity, addProductToCart]
     );
 
-
     const handleViewCart = useCallback(() => {
         navigate('/cart');
     }, [navigate]);
 
-    useEffect(() => {
-        setIsAddedToCart(false);
-    }, [itemName]);
-
-    const handleChange = (e) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         let value = parseInt(e.target.value, 10);
+        const maxQty = productData?.qty;
 
-        if (value > productData.qty) {
-            value = productData.qty;
+        if (maxQty !== undefined && value > maxQty) {
+            value = maxQty;
         }
 
         if (value < 1 || isNaN(value)) {
@@ -260,11 +235,8 @@ const ProductDetails: FC = () => {
     const formattedMainImage = mainImage ? { src: mainImage } : null;
     const formattedThumbnails = thumbnailImages.map(img => ({ src: img }));
 
-    const isGiftCard = sourceFromState === 'giftCard' || productData?.title?.toLowerCase().includes('gift card');
-
-
-    const mainCategory = productData?.categories?.[0];
-    const subCategory = productData?.categories?.[1];
+    const mainCategory = productData.categories?.[0];
+    const subCategory = productData.categories?.[1];
 
     const { salePrice, regularPrice } = getProductPricing(productData);
 
@@ -338,11 +310,7 @@ const ProductDetails: FC = () => {
                                 </div>
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: productData?.short_description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
-                                            .replace(/&lt;/g, '<')
-                                            .replace(/&gt;/g, '>')
-                                            .replace(/&amp;/g, '&')
-                                            .replace(/&nbsp;/g, ' ')
+                                        __html: productData.short_description || DEFAULT_DESCRIPTION
                                     }}
                                 />
                             </div>
@@ -447,11 +415,7 @@ const ProductDetails: FC = () => {
                             <p>
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: productData?.description || 'Purchase one of our products securely online and we will send it directly to you or your loved one!'
-                                            .replace(/&lt;/g, '<')
-                                            .replace(/&gt;/g, '>')
-                                            .replace(/&amp;/g, '&')
-                                            .replace(/&nbsp;/g, ' ')
+                                        __html: productData.description || DEFAULT_DESCRIPTION
                                     }}
                                 />
                             </p>

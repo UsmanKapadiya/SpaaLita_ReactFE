@@ -60,8 +60,7 @@ const Addresses: FC = () => {
     const [editingShipping, setEditingShipping] = useState<boolean>(false);
     const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
-    const [loading, setLoading] = useState<boolean>(false)
-    const [billingLoading, setBillingLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false);
     useEffect(() => {
         setBillingDetails({ ...emptyBilling, ...user?.billing });
         setShippingDetails({ ...emptyShipping, ...user?.shipping });
@@ -266,9 +265,9 @@ const Addresses: FC = () => {
                                             type="button"
                                             className="btn-save-address"
                                             onClick={handleSave}
-                                            disabled={billingLoading}
+                                            disabled={loading}
                                         >
-                                            {billingLoading ? "Saving..." : "Save Addresses"}
+                                            {loading ? "Saving..." : "Save Addresses"}
                                         </button>
                                         <button
                                             type="button"

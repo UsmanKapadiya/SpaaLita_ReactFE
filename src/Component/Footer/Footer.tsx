@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import './Footer.css';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import { CONTACT_INFO } from '../../utils/constants';
 
 const Footer: FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -41,9 +42,9 @@ const Footer: FC = () => {
       <div className='container'>
         <div className="row mb-5">
           <div className="col-lg-5 m-auto text-center">
-            <h6 className="my-2">spaalitaoffice@shaw.ca</h6>
-            <h6>(250) 478-2252</h6>
-            <h6 className="mt-3">101-745 Goldstream Ave,Victoria,BC,V9B 2X4</h6>
+            <h6 className="my-2">{CONTACT_INFO.EMAIL}</h6>
+            <h6>{CONTACT_INFO.PHONE}</h6>
+            <h6 className="mt-3">{CONTACT_INFO.ADDRESS}</h6>
             <h6>©2026 by Spa A'lita.</h6>
           </div>
         </div>

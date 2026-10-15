@@ -1,8 +1,5 @@
-import type { FC, FormEvent } from 'react';
-import { useState, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import './MyAccount.css';
 import Dashboard from './Dashboard';
 import Orders from './Orders';
@@ -12,98 +9,32 @@ import Addresses from './Addresses';
 import PaymentMethods from './PaymentMethods';
 import AccountDetails from './AccountDetails';
 import Submissions from './Submissions';
-import LostPassword from './LostPassword';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
 
-type TabType = 'dashboard' | 'orders' | 'OrdersDetails' | 'downloads' | 'addresses' | 'payment-methods' | 'account-details' | 'submissions' | 'lost-password';
+// Sidebar entries; `path` is relative to /my-account
+const ACCOUNT_TABS = [
+    { label: 'Dashboard', path: '' },
+    { label: 'Orders', path: '/orders' },
+    { label: 'Downloads', path: '/downloads' },
+    { label: 'Addresses', path: '/addresses' },
+    { label: 'Payment methods', path: '/payment-methods' },
+    { label: 'Account Details', path: '/account-details' },
+    { label: 'Submissions', path: '/submissions' },
+];
+
+const getActiveTab = (pathname: string): string | null => {
+    const path = pathname.replace(/^\/my-account/, '').replace(/\/$/, '');
+    if (path.startsWith('/orders/')) return null; // order details: no tab highlighted
+    return ACCOUNT_TABS.find(tab => tab.path === path)?.path ?? '';
+};
 
 const MyAccount: FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const location = useLocation();
     const user = useAppSelector((state) => state.auth.user);
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [showLostPassword, setShowLostPassword] = useState<boolean>(false);
-
-    const handleLogout = useCallback((): void => {
-        dispatch(logout());
-        setIsLoggedIn(false);
-    }, [dispatch]);
-
-    const handleLogin = useCallback((e: FormEvent<HTMLFormElement>): void => {
-        e.preventDefault();
-        // TODO: Implement actual login API call with proper authentication
-        setIsLoggedIn(true);
-        navigate('/my-account');
-    }, [navigate]);
-
-    const handleResetPassword = useCallback((e: FormEvent<HTMLFormElement>): void => {
-        e.preventDefault();
-        // TODO: Implement actual password reset API call
-        setShowLostPassword(false);
-    }, []);
-
-    const getActiveTab = useCallback((): TabType => {
-        const path = location.pathname;
-
-        if (path === '/my-account' || path === '/my-account/') return 'dashboard';
-        if (path === '/my-account/orders') return 'orders'; // main orders list
-        if (path.startsWith('/my-account/orders/')) return 'OrdersDetails'; // order details page
-        if (path.includes('/downloads')) return 'downloads';
-        if (path.includes('/addresses')) return 'addresses';
-        if (path.includes('/payment-methods')) return 'payment-methods';
-        if (path.includes('/account-details')) return 'account-details';
-        if (path.includes('/submissions')) return 'submissions';
-        if (path.includes('/lost-password')) return 'lost-password';
-        // if (path.includes('/reset-password/:token')) return 'reset-password/:token'
-        return 'dashboard';
-    }, [location.pathname]);
-
-    const activeTab = useMemo(() => getActiveTab(), [getActiveTab]);
-    if (!isLoggedIn) {
-        return (
-            <div className="my-account-page">
-                <div className="container py-5">
-                    <div className="woocommerce">
-                        <div className="woocommerce-notices-wrapper"></div>
-
-                        <h2>Login</h2>
-
-                        <form className="woocommerce-form woocommerce-form-login login w-50" method="post" onSubmit={handleLogin}>
-                            <p className="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-                                <label htmlFor="username">Username or email address&nbsp;<span className="required">*</span></label>
-                                <input type="text" className="woocommerce-Input woocommerce-Input--text input-text form-control" name="username" id="username" autoComplete="username" defaultValue="" />
-                                <input type="hidden" name="wfls-email-verification" id="wfls-email-verification" value="" />
-                            </p>
-                            <p className="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-                                <label htmlFor="password">Password&nbsp;<span className="required">*</span></label>
-                                <span className="password-input" style={{ position: 'relative' }}>
-                                    <input className="woocommerce-Input woocommerce-Input--text input-text form-control" type={showPassword ? "text" : "password"} name="password" id="password" autoComplete="current-password" />
-                                    <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </span>
-                                </span>
-                            </p>
-
-                            <p className="form-row">
-                                <label className="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__rememberme">
-                                    <input className="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <span>Remember me</span>
-                                </label>
-                                <input type="hidden" id="woocommerce-login-nonce" name="woocommerce-login-nonce" value="fbc26dfa8c" />
-                                <input type="hidden" name="_wp_http_referer" value="/my-account/" />
-                                <button type="submit" className="woocommerce-Button wc-forward woocommerce-form-login__submit p-2" name="login" value="Log in">Log in</button>
-                            </p>
-                            <p className="woocommerce-LostPassword lost_password">
-                                <span onClick={() => navigate('/my-account/lost-password')} style={{ cursor: 'pointer' }}>Lost your password?</span>
-                            </p>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const activeTab = getActiveTab(location.pathname);
 
     return (
         <div className="my-account-page">
@@ -112,29 +43,14 @@ const MyAccount: FC = () => {
                     <div className="col-lg-2 mb-4">
                         <nav className="account-navigation" aria-label="Account pages">
                             <ul>
-                                <li className={activeTab === 'dashboard' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account')}>Dashboard</span>
-                                </li>
-                                <li className={activeTab === 'orders' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/orders')}>Orders</span>
-                                </li>
-                                <li className={activeTab === 'downloads' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/downloads')}>Downloads</span>
-                                </li>
-                                <li className={activeTab === 'addresses' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/addresses')}>Addresses</span>
-                                </li>
-                                <li className={activeTab === 'payment-methods' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/payment-methods')}>Payment methods</span>
-                                </li>
-                                <li className={activeTab === 'account-details' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/account-details')}>Account Details</span>
-                                </li>
-                                <li className={activeTab === 'submissions' ? 'is-active' : ''}>
-                                    <span onClick={() => navigate('/my-account/submissions')}>Submissions</span>
-                                </li>
+                                {ACCOUNT_TABS.map(tab => (
+                                    <li key={tab.label} className={activeTab === tab.path ? 'is-active' : ''}>
+                                        <span onClick={() => navigate(`/my-account${tab.path}`)}>{tab.label}</span>
+                                    </li>
+                                ))}
                                 <li>
-                                    <span onClick={handleLogout} className="logout-link">Logout</span>
+                                    {/* ProtectedRoute sends the logged-out user to the home page */}
+                                    <span onClick={() => dispatch(logout())} className="logout-link">Logout</span>
                                 </li>
                             </ul>
                         </nav>

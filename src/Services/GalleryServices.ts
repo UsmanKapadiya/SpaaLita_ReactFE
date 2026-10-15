@@ -1,5 +1,5 @@
-import requests, { toErrorResult } from "./api.js";
-import { resolveImageUrl } from "../utils/apiConfig";
+import requests, { toErrorResult } from './api';
+import { resolveImageUrl } from '../utils/apiConfig';
 
 const API_BASE = '/gallery';
 

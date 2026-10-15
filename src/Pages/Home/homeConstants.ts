@@ -1,5 +1,6 @@
 import Logo from '../../assets/images/SpaAlita_logo.png'
 import HomeBanner from '../../assets/images/home-banner.jpg'
+import { GOOGLE_MAPS_EMBED } from '../../utils/constants';
 
 // Storage keys
 export const STORAGE_KEYS = {
@@ -11,10 +12,8 @@ export const HOME_URLS = {
   LOGO: Logo,
   BANNER: HomeBanner,
   MONTHLY_SPECIAL: 'https://spaalita.ca/wp-content/uploads/2026/01/2026-FebSpecials-1024x1024.png',
-  GOOGLE_MAPS_EMBED: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyDv4daZyOfRCdRf1YtyD6hUHNe5Aeep-BM&q=101-745 Goldstream Ave,Victoria,BC,V9B 2X4',
+  GOOGLE_MAPS_EMBED,
 } as const;
-
-
 
 export const BUSINESS_HOURS = [
   { day: 'Monday', hours: '9:00 AM - 7:30 PM' },

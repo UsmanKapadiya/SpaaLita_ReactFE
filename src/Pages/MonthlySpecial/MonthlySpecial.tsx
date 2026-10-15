@@ -1,11 +1,9 @@
-//@ts-nocheck
 import { useState, useEffect, useMemo, type FC } from 'react';
-import { fetchMonthlySpecial } from '../../mockData/monthlySpecialMockData';
 import BookNowButton from '../../Component/BookNowButton/BookNowButton';
 import LoadingSpinner from '../../Component/LoadingSpinner/LoadingSpinner';
 import ErrorMessage from '../../Component/ErrorMessage/ErrorMessage';
 import { MONTHLY_BOOK_NOW_URL } from '../../utils/constants';
-import { getAllMonthlySpecial } from '../../Services/HomeServices'
+import { getAllMonthlySpecial } from '../../Services/HomeServices';
 import './MonthlySpecial.css';
 
 interface MonthlySpecialItem {

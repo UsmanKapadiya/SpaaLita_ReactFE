@@ -1,12 +1,11 @@
-
 import { useState, type FC, type FormEvent } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { resetPassword } from '../../Services/UserServices.js'
+import { resetPassword } from '../../Services/UserServices';
 
 const ResetPassword: FC = () => {
 
-    const { token } = useParams();
+    const { token = '' } = useParams();
     const navigate = useNavigate();
 
     const [password, setPassword] = useState("");
@@ -29,7 +28,7 @@ const ResetPassword: FC = () => {
 
             if (response?.success) {
                 toast.success(response.message);
-                setMessage(response.message);
+                setMessage(response.message ?? '');
 
                 setTimeout(() => {
                     navigate("/my-account");

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import type { MouseEventHandler } from 'react';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
@@ -7,35 +8,35 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { getAllGallery } from '../../Services/GalleryServices';
 import './Gallery.css';
 
+interface GalleryImage {
+    original: string;
+    originalAlt: string;
+}
+
+type NavHandler = MouseEventHandler<SVGSVGElement>;
 
 const Gallery = () => {
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState<GalleryImage[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchGalleryItem = async () => {
-        try {
-            setLoading(true);
-            const response = await getAllGallery();
-            console.log(response);
-
-            if (response.success && response.data) {
-                // Map API data to gallery format
-                const galleryImages = response.data.map((item: any) => ({
-                    original: item.url ? item.url : '',
-                    originalAlt: 'Spa A\'lita Home Banner',
-                }));
-
-                setImages(galleryImages);
-            }
-        } catch (err: any) {
-            console.warn(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchGalleryItem();
+        const fetchGalleryItems = async () => {
+            try {
+                const response = await getAllGallery();
+
+                if (response.success && response.data) {
+                    setImages(response.data.map((item: { url?: string }) => ({
+                        original: item.url || '',
+                        originalAlt: 'Spa A\'lita Home Banner',
+                    })));
+                }
+            } catch (err) {
+                console.warn(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchGalleryItems();
     }, []);
 
     if (loading) {
@@ -59,14 +60,14 @@ const Gallery = () => {
                     lazyLoad={true}
                     thumbnailPosition="bottom"
                     showPlayButton={false}
-                    renderLeftNav={(onClick, _disabled) => (
+                    renderLeftNav={(onClick: NavHandler) => (
                         <ArrowBackIosIcon className="ArrowLeftIcon" onClick={onClick} />
                     )}
-                    renderRightNav={(onClick, _disabled) => (
+                    renderRightNav={(onClick: NavHandler) => (
                         <ArrowForwardIosIcon className="ArrowRightIcon" onClick={onClick} />
                     )}
-                    renderFullscreenButton={(onClick, isFullscreen) => (
-                        <OpenInFullIcon className="fullScreenButton" onClick={onClick} isFullscreen={isFullscreen} />
+                    renderFullscreenButton={(onClick: NavHandler) => (
+                        <OpenInFullIcon className="fullScreenButton" onClick={onClick} />
                     )}
                     useBrowserFullscreen={true}
                     autoPlay={false}

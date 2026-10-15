@@ -1,14 +1,20 @@
-import { FC, useState, useMemo, useCallback, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
+import type { FC, ChangeEvent, FormEvent } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { applyCoupon } from '../../Services/ProductRelatedServices'
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { applyCouponToCart, removeCoupon } from '../../store/cartSlice'
+import { toast } from 'react-toastify';
 import ClearIcon from '@mui/icons-material/Clear';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
-import { removeFromCart, updateQuantity as updateCartQuantity, type CartItem } from '../../store/cartSlice';
+import { applyCoupon } from '../../Services/ProductRelatedServices';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  applyCouponToCart,
+  removeCoupon,
+  removeFromCart,
+  updateQuantity as updateCartQuantity,
+  type CartItem,
+} from '../../store/cartSlice';
+import { buildCouponRequest, toAppliedCoupon } from '../../utils/coupon';
 import './Cart.css';
-import { toast } from 'react-toastify';
-
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,10 +25,10 @@ import Button from '@mui/material/Button';
 const Cart: FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const debounceRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const cartItems = useAppSelector((state): CartItem[] => state.cart.items);
-  const { discountAmount, totalAfterDiscount, appliedCoupon } = useAppSelector(state => state.cart);
+  const { discountAmount = 0, totalAfterDiscount, appliedCoupon } = useAppSelector(state => state.cart);
 
   const [couponCode, setCouponCode] = useState<string>('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
@@ -70,30 +76,10 @@ const Cart: FC = () => {
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const payload = cartItems.map(item => ({
-          productId: item.id,
-          price: item.price,
-          qty: item.qty,
-          category: item.category || '',
-        }));
-
-        const data = {
-          couponCode: appliedCoupon,
-          cartItems: payload,
-          shippingAmount: 50,
-        };
-
-        const response = await applyCoupon(data);
+        const response = await applyCoupon(buildCouponRequest(appliedCoupon, cartItems));
 
         if (response.success) {
-          dispatch(
-            applyCouponToCart({
-              couponCode: response.data.couponCode,
-              discountAmount: response.data.discountAmount || 0,
-              freeShippingAmount: response.data.freeShippingAmount || 0,
-              totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
-            })
-          );
+          dispatch(applyCouponToCart(toAppliedCoupon(response.data, cartTotal)));
         } else {
           toast.error(response?.message || 'Coupon no longer valid');
           dispatch(removeCoupon());
@@ -135,31 +121,11 @@ const Cart: FC = () => {
     try {
       setIsApplyingCoupon(true);
 
-      const payload = cartItems.map(item => ({
-        productId: item.id,
-        price: item.price,
-        qty: item.qty,
-        category: item.category || '',
-      }));
-
-      const data = {
-        couponCode: couponCode.trim(),
-        cartItems: payload,
-        shippingAmount: 50,
-      };
-
-      const response = await applyCoupon(data);
+      const response = await applyCoupon(buildCouponRequest(couponCode.trim(), cartItems));
 
       if (response.success) {
         toast.success(response.message || 'Coupon applied successfully!');
-        dispatch(
-          applyCouponToCart({
-            couponCode: response.data.couponCode,
-            discountAmount: response.data.discountAmount || 0,
-            freeShippingAmount: response.data.freeShippingAmount || 0,
-            totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
-          })
-        );
+        dispatch(applyCouponToCart(toAppliedCoupon(response.data, cartTotal)));
       } else {
         toast.error(response.message || 'Failed to apply coupon');
       }

@@ -3,17 +3,12 @@ import PhoneEnabledOutlinedIcon from '@mui/icons-material/PhoneEnabledOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 
 import './OrderReceived.css'
-import { useCallback } from "react";
 
 const OrderReceived = () => {
     const navigate = useNavigate();
     const { orderId } = useParams();
     const location = useLocation();
     const order: any = location.state;
-
-    const calculateTotal = useCallback((): number => {
-        return order?.items.reduce((total, item) => total + (item.price * item.qty), 0);
-    }, [order]);
 
     if (!order) {
         return (
@@ -23,7 +18,10 @@ const OrderReceived = () => {
             </div>
         );
     }
-    console.log(order);
+
+    const subtotal: number = order.items.reduce((total: number, item: any) => total + (item.price * item.qty), 0);
+    const discountAmount: number = order.coupon?.discountAmount || 0;
+
     return (
         <div className="container py-5">
 
@@ -115,21 +113,21 @@ const OrderReceived = () => {
                                     <span className="woocommerce-Price-amount amount">
                                         <bdi>
                                             <span className="woocommerce-Price-currencySymbol">$</span>
-                                            {calculateTotal().toFixed(2)}
+                                            {subtotal.toFixed(2)}
                                         </bdi>
                                     </span>
                                 </td>
                             </tr>
 
                             {/* Discount (only show if applied) */}
-                            {order.coupon?.discountAmount > 0 && (
+                            {discountAmount > 0 && (
                                 <tr className="cart-discount">
                                     <th>Discount</th>
                                     <td>
                                         <span className="woocommerce-Price-amount amount">
                                             <bdi>
                                                 <span className="woocommerce-Price-currencySymbol"> - </span>
-                                                {order.coupon?.discountAmount.toFixed(2)}
+                                                {discountAmount.toFixed(2)}
                                             </bdi>
                                         </span>
                                     </td>
@@ -144,7 +142,7 @@ const OrderReceived = () => {
                                         <span className="woocommerce-Price-amount amount">
                                             <bdi>
                                                 <span className="woocommerce-Price-currencySymbol">$</span>
-                                                {(calculateTotal() - order.coupon?.discountAmount).toFixed(2)}
+                                                {(subtotal - discountAmount).toFixed(2)}
                                             </bdi>
                                         </span>
                                     </strong>

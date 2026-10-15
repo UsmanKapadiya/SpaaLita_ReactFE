@@ -17,7 +17,6 @@ const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose, monthlySpecialUrl 
     }
   };
 
-
   return (
     <>
       <div className="modal-backdrop fade show" />
@@ -46,10 +45,7 @@ const WelcomeModal: FC<WelcomeModalProps> = ({ show, onClose, monthlySpecialUrl 
                 onClick={onClose}
                 aria-label="Close modal"
               >
-                <CloseIcon 
-                  onClick={onClose}
-                  // style={{ fontSize: '1.5rem', color: '#404040', cursor: 'pointer' }} 
-                />
+                <CloseIcon />
               </button>
 
             </div>

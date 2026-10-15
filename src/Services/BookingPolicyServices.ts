@@ -1,4 +1,4 @@
-import requests, { toErrorResult } from "./api.js";
+import requests, { toErrorResult } from './api';
 
 const API_BASE = '/booking-policies';
 

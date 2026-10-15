@@ -4,21 +4,14 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
-import { userLogin, orderPlaced } from '../../Services/UserServices'
+import { userLogin, orderPlaced } from '../../Services/UserServices';
 import './Cart.css';
-import { applyCoupon } from '../../Services/ProductRelatedServices'
+import { applyCoupon } from '../../Services/ProductRelatedServices';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/authSlice';
 import { toast } from 'react-toastify';
-import { applyCouponToCart, clearCart, removeCoupon } from '../../store/cartSlice';
-interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    qty: number;
-    image?: string;
-    category?: string;
-}
+import { applyCouponToCart, clearCart, removeCoupon, type CartItem } from '../../store/cartSlice';
+import { buildCouponRequest, toAppliedCoupon } from '../../utils/coupon';
 
 interface BillingDetails {
     firstName: string;
@@ -260,7 +253,6 @@ const StripeCheckoutForm: FC<{
             </button>
             {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
             {success && <div style={{ color: 'green', marginTop: 8 }}>Payment successful!</div>}
-            {/* {orderResponse && <div style={{ marginTop: 8, wordBreak: 'break-all' }}><strong>Order API Response:</strong> {orderResponse}</div>} */}
         </div>
     );
 };
@@ -272,7 +264,7 @@ const Checkout: FC = () => {
 
     const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
     const user = useAppSelector((state) => state.auth.user);
-    const { discountAmount = 0, totalAfterDiscount, appliedCoupon, } = useAppSelector(state => state.cart);
+    const { discountAmount = 0, appliedCoupon } = useAppSelector(state => state.cart);
     const [showLogin, setShowLogin] = useState<boolean>(false);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
@@ -298,12 +290,7 @@ const Checkout: FC = () => {
             setBillingDetails({ ...emptyBilling, ...user.billing });
             setShippingDetails({ ...emptyShipping, ...user.shipping });
         }
-    }, [user])
-
-
-    const calculateTotal = useCallback((): number => {
-        return cartItems.reduce((total, item) => total + (item.price * item.qty), 0);
-    }, [cartItems]);
+    }, [user]);
 
     const handleBillingChange = useCallback((field: keyof BillingDetails, value: string): void => {
         setBillingDetails(prev => ({ ...prev, [field]: value }));
@@ -338,7 +325,6 @@ const Checkout: FC = () => {
         }
     }, [paymentMethod]);
 
-    //Coupon Applay
     const handleApplyCoupon = useCallback(async () => {
         if (!couponCode.trim()) {
             toast.info('Please enter a coupon code');
@@ -348,51 +334,21 @@ const Checkout: FC = () => {
         try {
             setIsApplyingCoupon(true);
 
-            const payload = cartItems.map(item => ({
-                productId: item.id,
-                price: item.price,
-                qty: item.qty,
-                category: item.category || '',
-            }));
-
-            const data = {
-                couponCode: couponCode.trim(),
-                cartItems: payload,
-                shippingAmount: 50, // replace with dynamic shipping if needed
-            };
-
-            const response = await applyCoupon(data);
-            console.log('API response:', response);
+            const response = await applyCoupon(buildCouponRequest(couponCode.trim(), cartItems));
 
             if (response.success) {
                 toast.success(response.message || 'Coupon applied successfully!');
-                dispatch(
-                    applyCouponToCart({
-                        couponCode: response.data.couponCode,
-                        discountAmount: response.data.discountAmount || 0,
-                        freeShippingAmount: response.data.freeShippingAmount || 0,
-                        totalAfterDiscount: response.data.totalAfterDiscount || cartTotal,
-                    })
-                );
-
+                dispatch(applyCouponToCart(toAppliedCoupon(response.data, cartTotal)));
             } else {
                 toast.error(response.message || 'Failed to apply coupon');
             }
         } catch (error: any) {
             console.error(error);
-            console.log(error)
-
-            // Correctly extract the server message from the error response
-            const serverMessage =
-                error?.response?.message || error?.response?.error || 'Error applying coupon';
-
-            toast.error(serverMessage);
-
+            toast.error(error?.response?.data?.message || error?.message || 'Error applying coupon');
         } finally {
             setIsApplyingCoupon(false);
         }
-
-    }, [couponCode]);
+    }, [couponCode, cartItems, cartTotal, dispatch]);
 
     const handleRemoveCoupon = () => {
         dispatch(removeCoupon());
@@ -404,29 +360,23 @@ const Checkout: FC = () => {
             e.preventDefault();
 
             try {
-                let payload = {
-                    email: loginData?.username,
-                    password: loginData?.password
-                }
-                const response = await userLogin(payload);
+                const response = await userLogin({
+                    email: loginData.username,
+                    password: loginData.password
+                });
                 if (response?.success === true) {
                     // the saved addresses are copied into the form when the user is stored
                     const { token, user } = response.data;
-                    dispatch(login({ user: user, token: token }));
+                    dispatch(login({ user, token }));
                     toast.success(response?.message || "Logged in successfully!");
-                }
-                else {
+                } else {
                     toast.error(response?.message || "Login failed. Try again.");
                 }
             } catch (err: any) {
-                toast.error(
-                    err.response?.message || "Login failed. Try again."
-                );
-            } finally {
-                //   setLoading(false);
+                toast.error(err.response?.data?.message || "Login failed. Try again.");
             }
         },
-        [loginData]
+        [loginData, dispatch]
     );
 
     const renderInfoBox = (message: string, showButton: boolean, buttonText: string, onClick: () => void) => (
@@ -711,7 +661,10 @@ const Checkout: FC = () => {
                     )}
 
                     {showCoupon && (
-                        <form className="checkout_coupon woocommerce-form-coupon my-3" onSubmit={handleApplyCoupon}>
+                        <form
+                            className="checkout_coupon woocommerce-form-coupon my-3"
+                            onSubmit={(e) => { e.preventDefault(); handleApplyCoupon(); }}
+                        >
                             <p>If you have a coupon code, please apply it below.</p>
                             <div className="d-flex gap-2">
                                 <input
@@ -905,7 +858,7 @@ const Checkout: FC = () => {
                                                     <span className="woocommerce-Price-amount amount">
                                                         <bdi>
                                                             <span className="woocommerce-Price-currencySymbol">$</span>
-                                                            {calculateTotal().toFixed(2)}
+                                                            {cartTotal.toFixed(2)}
                                                         </bdi>
                                                     </span>
                                                 </td>
@@ -934,7 +887,7 @@ const Checkout: FC = () => {
                                                         <span className="woocommerce-Price-amount amount">
                                                             <bdi>
                                                                 <span className="woocommerce-Price-currencySymbol">$</span>
-                                                                {(calculateTotal() - discountAmount).toFixed(2)}
+                                                                {(cartTotal - discountAmount).toFixed(2)}
                                                             </bdi>
                                                         </span>
                                                     </strong>
@@ -963,7 +916,7 @@ const Checkout: FC = () => {
                                                             <p>Secure payment via Stripe</p>
                                                             <Elements stripe={stripePromise}>
                                                                 <StripeCheckoutForm
-                                                                    subtotal={calculateTotal()}
+                                                                    subtotal={cartTotal}
                                                                     items={cartItems}
                                                                     shippingAddress={shippingDetails}
                                                                     billingAddress={billingDetails}

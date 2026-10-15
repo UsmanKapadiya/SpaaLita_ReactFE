@@ -4,7 +4,7 @@ import ImageNotFound from '../../assets/images/productImageNotFound.png';
 
 interface ImageData {
     src: string;
-    alt: string;
+    alt?: string;
 }
 
 interface ProductImageGalleryProps {

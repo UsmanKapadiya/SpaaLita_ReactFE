@@ -35,7 +35,9 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
     },
-    
+    updateUserProfile: (state, action: PayloadAction<any>) => {
+      state.user = normalizeUser({ ...state.user, ...action.payload });
+    },
     updateUserAddresses: (state, action: PayloadAction<{ billing?: any; shipping?: any }>) => {
       if (state.user) {
         if (action.payload.billing) state.user.billing = action.payload.billing;
@@ -45,5 +47,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout, updateUserAddresses } = authSlice.actions;
+export const { login, logout, updateUserProfile, updateUserAddresses } = authSlice.actions;
 export default authSlice.reducer;

@@ -1,20 +1,18 @@
-import type { FC, FormEvent } from 'react';
+import type { ChangeEvent, FC, FormEvent } from 'react';
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { updateUser } from '../../Services/UserServices';
 import { toast } from 'react-toastify';
-import { login } from '../../store/authSlice';
+import { updateUserProfile } from '../../store/authSlice';
 
 const AccountDetails: FC = () => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
-    const token = useAppSelector((state) => state.auth.token);
     const [showCurrentPassword, setShowCurrentPassword] = useState<boolean>(false);
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false)
 
     const [accountData, setAccountData] = useState({
         firstName: user?.firstName || "",
@@ -27,7 +25,7 @@ const AccountDetails: FC = () => {
         newsletterOption: "",
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setAccountData((prev) => ({
             ...prev,
@@ -36,12 +34,10 @@ const AccountDetails: FC = () => {
     };
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         try {
-            setLoading(true);
-
             const payload = {
                 firstName: accountData.firstName,
                 lastName: accountData.lastName,
@@ -57,13 +53,11 @@ const AccountDetails: FC = () => {
                 return;
             }
 
-            dispatch(login({ user: { ...user, ...res.data }, token: token }));
+            dispatch(updateUserProfile(res.data));
 
             toast.success(res.message || "Account updated successfully");
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Update failed");
-        } finally {
-            setLoading(false);
         }
     };
     return (

@@ -1,7 +1,6 @@
-// RelatedProducts.tsx
 import type { FC } from 'react';
 
-interface RelatedProduct {
+export interface RelatedProduct {
     id: string;          // _id from API
     slug: string;        // can use _id if slug is missing
     productName: string;

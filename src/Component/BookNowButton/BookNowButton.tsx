@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { FRESHA_BOOK_NOW_URL } from '../../utils/constants';
 
 interface BookNowButtonProps {
     text?: string;
@@ -11,7 +12,7 @@ interface BookNowButtonProps {
 
 const BookNowButton: FC<BookNowButtonProps> = ({ 
     text = 'BOOK NOW!', 
-    url = 'https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&pId=1033567',
+    url = FRESHA_BOOK_NOW_URL,
     className = '',
     marginTop = 'mt-0',
     marginBottom = 'mb-0',

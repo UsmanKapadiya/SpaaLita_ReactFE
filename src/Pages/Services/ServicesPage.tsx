@@ -37,7 +37,7 @@ const ServicesPage: FC = () => {
 
         {/* Services Grid */}
         <div className="services-grid">
-          {SERVICES_LIST.map((service, index) => (
+          {SERVICES_LIST.map((service) => (
             <div key={service.link} className={`service-item ${service.backgroundClass}`}>
               <div className={`service-content`}>
                 <div className="service-image">

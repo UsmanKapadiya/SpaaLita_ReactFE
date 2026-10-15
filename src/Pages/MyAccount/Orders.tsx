@@ -4,13 +4,13 @@ import { getUserOrder } from '../../Services/UserServices';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import Pagination from '../../Component/Pagination/Pagination';
 
+const ORDERS_PER_PAGE = 10;
+
 const Orders: FC = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState<Number>(1);
-    const itemPerPage = 10;
+    const [page, setPage] = useState<number>(1);
     const [pagination, setPagination] = useState({
         total: 0,
         page: 1,
@@ -18,28 +18,21 @@ const Orders: FC = () => {
         totalPages: 1
     });
 
-    const fetchOrders = async (page: Number, itemPerPage: Number) => {
-        try {
-            setLoading(true);
-            const response = await getUserOrder(page, itemPerPage);
-            if (!response?.success) {
-                throw new Error(response?.message || "Failed to load orders");
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await getUserOrder(page, ORDERS_PER_PAGE);
+                if (!response?.success) {
+                    throw new Error(response?.message || "Failed to load orders");
+                }
+                setOrders(response.data || []);
+                if (response.pagination) setPagination(response.pagination);
+            } catch (err: any) {
+                setError(err.message || "Failed to load orders");
             }
-            setOrders(response.data || []);
-            if (response.pagination) setPagination(response.pagination);
-        } catch (err: any) {
-            setError(err.message || "Failed to load orders");
-        } finally {
-            setLoading(false);
-        }
-    };
-    useEffect(() => {
-        fetchOrders(page, itemPerPage);
-    }, []);
-
-    useEffect(() => {
-        fetchOrders(page, itemPerPage);
-    }, [page, itemPerPage,]);
+        };
+        fetchOrders();
+    }, [page]);
 
     return (
         <div className="account-orders">
@@ -132,7 +125,7 @@ const Orders: FC = () => {
                         <Pagination
                             currentPage={pagination.page}
                             totalPages={pagination.totalPages}
-                            onPageChange={(newPage) => setPage(newPage)}
+                            onPageChange={setPage}
                         />
                     )}
                 </div>

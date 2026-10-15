@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const OrderDetails: FC = () => {
@@ -68,7 +68,7 @@ const OrderDetails: FC = () => {
                             </th>
                         </tr>
                     </thead>
-                        <tbody>
+                    <tbody>
                         {order.items.map((item: any) => (
                             <tr key={item._id}>
                                 <td>{item.productName || item.name}</td>
@@ -79,11 +79,9 @@ const OrderDetails: FC = () => {
                         ))}
                     </tbody>
                 </table>
-                </div>
-
-                {/* <button onClick={() => navigate("/orders")}>Back to Orders</button> */}
             </div>
-            );
+        </div>
+    );
 };
 
-            export default OrderDetails;
+export default OrderDetails;

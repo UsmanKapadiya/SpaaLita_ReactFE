@@ -1,19 +1,27 @@
+import type { ChangeEvent, FormEvent } from 'react';
 import { useState } from 'react';
-import { contactSubmit } from '../../Services/ContactServices'
 import { toast } from 'react-toastify';
+import { contactSubmit } from '../../Services/ContactServices';
+import { CONTACT_INFO } from '../../utils/constants';
 
+interface ContactSectionProps {
+    topPadding: string;
+    normalFont: boolean;
+}
 
-const ContactSection = ({ topPadding, normalFont }) => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        subject: '',
-        message: ''
-    });
+const EMPTY_FORM = {
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    subject: '',
+    message: ''
+};
 
-    const handleInputChange = (e) => {
+const ContactSection = ({ topPadding, normalFont }: ContactSectionProps) => {
+    const [formData, setFormData] = useState(EMPTY_FORM);
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -21,27 +29,17 @@ const ContactSection = ({ topPadding, normalFont }) => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const response = await contactSubmit(formData);
 
             if (response?.success) {
                 toast.success(response?.message);
-
-                setFormData({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    address: '',
-                    subject: '',
-                    message: ''
-                });
-
+                setFormData(EMPTY_FORM);
             } else {
                 toast.error(response?.message || "Something went wrong");
             }
-
         } catch (error: any) {
             const serverMessage =
                 error?.response?.data?.message ||
@@ -52,19 +50,18 @@ const ContactSection = ({ topPadding, normalFont }) => {
         }
     };
 
-
     return (
         <div className="container my-5">
             <div className="row">
                 <div className="col-md-6 d-flex align-items-center justify-content-center">
                     <div className={`text-center ${topPadding}`}>
                         <h1 className="text-uppercase">Contact US</h1>
-                        <h6 className="mt-4">101-745 Goldstream Ave,Victoria,BC,V9B 2X4</h6>
-                        <h5 className="my-4">spaalitaoffice@shaw.ca</h5>
+                        <h6 className="mt-4">{CONTACT_INFO.ADDRESS}</h6>
+                        <h5 className="my-4">{CONTACT_INFO.EMAIL}</h5>
                         {normalFont ? (
-                            <h6 className="">(250) 478-2252</h6>
+                            <h6 className="">{CONTACT_INFO.PHONE}</h6>
                         ) : (
-                            <h3 className="font-weight-bold">(250) 478-2252</h3>
+                            <h3 className="font-weight-bold">{CONTACT_INFO.PHONE}</h3>
                         )}
                     </div>
                 </div>
@@ -174,8 +171,8 @@ const ContactSection = ({ topPadding, normalFont }) => {
                         </form>
                     </div>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 
