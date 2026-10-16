@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { storage } from '../../utils/storage';
 import { getAllMonthlySpecial } from '../../Services/HomeServices'
+import { resolveImageUrl } from '../../utils/apiConfig';
 interface UseWelcomeModalReturn {
   showModal: boolean;
   closeModal: () => void;
@@ -25,7 +26,8 @@ export const useWelcomeModal = (storageKey: string): UseWelcomeModalReturn => {
         if (response.success === true) {
           const data = response.data;
           if (data.length > 0) {
-            setMonthlySpecialUrl(data[0].image);
+            // "/uploads/monthlySpecial/..." paths are served by the API host
+            setMonthlySpecialUrl(resolveImageUrl(data[0].image));
           };
         }
       } catch (error) {

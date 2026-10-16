@@ -119,8 +119,9 @@ const StripeCheckoutForm: FC<{
     shippingAddress: ShippingDetails;
     billingAddress: BillingDetails;
     isUserlogin: boolean;
-    createAccount: boolean
-}> = ({ subtotal, items, shippingAddress, billingAddress, isUserlogin, createAccount }) => {
+    createAccount: boolean;
+    newsletter: boolean;
+}> = ({ subtotal, items, shippingAddress, billingAddress, isUserlogin, createAccount, newsletter }) => {
     const dispatch = useAppDispatch();
     const stripe = useStripe();
     const elements = useElements();
@@ -164,6 +165,11 @@ const StripeCheckoutForm: FC<{
                 shippingAddress: toOrderAddress(shippingAddress, billingAddress),
                 billingAddress: toOrderAddress(billingAddress, billingAddress),
             };
+
+            // "Yes, I'm ok with ... newsletter" checkbox: subscribes the customer's email
+            if (newsletter) {
+                payload.newsletter = true;
+            }
 
             if (appliedCoupon) {
                 payload.coupon = {
@@ -922,6 +928,7 @@ const Checkout: FC = () => {
                                                                     billingAddress={billingDetails}
                                                                     isUserlogin={isUserLogin}
                                                                     createAccount={createAccount}
+                                                                    newsletter={newsletter}
                                                                 />
                                                             </Elements>
                                                         </div>

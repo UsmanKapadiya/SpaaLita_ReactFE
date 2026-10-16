@@ -3,17 +3,28 @@ import { useCallback, useState } from 'react';
 import './Footer.css';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import { toast } from 'react-toastify';
 import { CONTACT_INFO } from '../../utils/constants';
+import { subscribeNewsletter } from '../../Services/NewsletterServices';
 
 const Footer: FC = () => {
   const [email, setEmail] = useState<string>('');
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const handleNewsletterSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
+  const handleNewsletterSubmit = useCallback(async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    // TODO: Implement newsletter subscription logic
-    console.log('Newsletter subscription requested for:', email);
-    // Reset form after submission
-    setEmail('');
+    setSubmitting(true);
+
+    const res = await subscribeNewsletter(email.trim());
+
+    setSubmitting(false);
+
+    if (res?.success) {
+      toast.success(res.message || 'Thank you for subscribing to our newsletter');
+      setEmail('');
+    } else {
+      toast.error(res?.message || 'Failed to subscribe to the newsletter');
+    }
   }, [email]);
 
   return (
@@ -33,7 +44,7 @@ const Footer: FC = () => {
             />
           </div>
           <div>
-            <button type="submit" className="newsletter-btn" disabled={!email.trim()}>
+            <button type="submit" className="newsletter-btn" disabled={!email.trim() || submitting}>
               Submit
             </button>
           </div>

@@ -22,7 +22,7 @@ const AccountDetails: FC = () => {
         passwordCurrent: "",
         passwordNew: "",
         passwordConfirm: "",
-        newsletterOption: "",
+        newsletterOption: user?.newsletterOption || "",
     });
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +37,11 @@ const AccountDetails: FC = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        if (accountData.passwordNew && accountData.passwordNew !== accountData.passwordConfirm) {
+            toast.error("New password and confirm password do not match");
+            return;
+        }
+
         try {
             const payload = {
                 firstName: accountData.firstName,
@@ -44,6 +49,12 @@ const AccountDetails: FC = () => {
                 userName: accountData.displayName,
                 email: accountData.email,
                 newsletterOption: accountData.newsletterOption,
+                // Password change (only when a new password was entered)
+                ...(accountData.passwordNew && {
+                    passwordCurrent: accountData.passwordCurrent,
+                    passwordNew: accountData.passwordNew,
+                    passwordConfirm: accountData.passwordConfirm,
+                }),
             };
 
             const res = await updateUser(user.id, payload);
@@ -54,6 +65,7 @@ const AccountDetails: FC = () => {
             }
 
             dispatch(updateUserProfile(res.data));
+            setAccountData((prev) => ({ ...prev, passwordCurrent: "", passwordNew: "", passwordConfirm: "" }));
 
             toast.success(res.message || "Account updated successfully");
         } catch (error: any) {

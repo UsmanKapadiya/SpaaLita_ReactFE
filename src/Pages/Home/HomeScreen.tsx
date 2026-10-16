@@ -17,7 +17,7 @@ const HomeScreen: FC = () => {
   return (
     <div className="home-screen">
       <WelcomeModal show={showModal} onClose={closeModal} monthlySpecialUrl={monthlySpecialUrl} />
-      <div>
+      <div className='text-center'>
         <img
           src={HOME_URLS.BANNER}
           alt="Spaalita Banner"

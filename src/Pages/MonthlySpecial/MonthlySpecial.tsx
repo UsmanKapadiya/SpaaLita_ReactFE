@@ -4,6 +4,7 @@ import LoadingSpinner from '../../Component/LoadingSpinner/LoadingSpinner';
 import ErrorMessage from '../../Component/ErrorMessage/ErrorMessage';
 import { MONTHLY_BOOK_NOW_URL } from '../../utils/constants';
 import { getAllMonthlySpecial } from '../../Services/HomeServices';
+import { resolveImageUrl } from '../../utils/apiConfig';
 import './MonthlySpecial.css';
 
 interface MonthlySpecialItem {
@@ -91,7 +92,7 @@ const MonthlySpecial: FC = () => {
       <figure className="wp-block-gallery is-layout-flex">
         <figure className="wp-block-image size-large text-center">
           <img
-            src={specialData.image}
+            src={resolveImageUrl(specialData.image)}
             alt={`${specialData.month} Monthly Special`}
             className="monthlySpecial-img img-fluid"
             loading="lazy"
