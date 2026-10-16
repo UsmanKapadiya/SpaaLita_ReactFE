@@ -64,7 +64,6 @@ const ProductImageGallery: FC<ProductImageGalleryProps> = ({
                             height={612}
                             width={459}
                             style={{ 
-                                width: '100%', 
                                 height: 'auto', 
                                 objectFit: 'contain',
                                 transform: isZoomed ? 'scale(2)' : 'scale(1)',

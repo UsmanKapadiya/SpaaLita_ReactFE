@@ -54,11 +54,11 @@ const ProductDetails: FC = () => {
     const [error, setError] = useState(false);
     const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
     const [productData, setProductData] = useState<Product | null>(currentProduct || null);
+    // Opened from the gift card page -> /giftcards API; otherwise (shop or a direct link) -> /products API
+    const isGiftCardSource = sourceFromState === 'giftCard';
 
     useEffect(() => {
         if (!itemName) return;
-        // Opened from the gift card page -> /giftcards API; otherwise (shop or a direct link) -> /products API
-        const isGiftCardSource = sourceFromState === 'giftCard';
 
         const fetchProductDetails = async () => {
             try {
@@ -104,7 +104,7 @@ const ProductDetails: FC = () => {
 
         fetchProductDetails();
         fetchRelatedProducts();
-    }, [sourceFromState, itemName]);
+    }, [isGiftCardSource, itemName]);
 
     useEffect(() => {
         setIsAddedToCart(false);
@@ -343,8 +343,11 @@ const ProductDetails: FC = () => {
                                 <div className="fpf-fields before-add-to-cart">
                                     <input type="hidden" name="_fpf_nonce" value="68f4b39d79" form="fpf-add-to-cart-form" />
                                     <input type="hidden" name="_fpf_product_id" value="273" form="fpf-add-to-cart-form" />
-                                    <div className="fpf-field fpf-textarea">
-                                        <p className="form-row " id="fpf_3214519_field" data-priority=""><label htmlFor="fpf_3214519" className="">A message to the gift card recipient&nbsp;<span className="optional">(optional)</span></label><span className="woocommerce-input-wrapper"><textarea name="fpf_3214519" className="input-text fpf-input-field" id="fpf_3214519" placeholder="500" rows={2} cols={5} maxLength={500} form="fpf-add-to-cart-form"></textarea></span></p></div>
+                                    {/* Gift message is only for gift cards, not shop products */}
+                                    {isGiftCardSource && (
+                                        <div className="fpf-field fpf-textarea">
+                                            <p className="form-row " id="fpf_3214519_field" data-priority=""><label htmlFor="fpf_3214519" className="">A message to the gift card recipient&nbsp;<span className="optional">(optional)</span></label><span className="woocommerce-input-wrapper"><textarea name="fpf_3214519" className="input-text fpf-input-field" id="fpf_3214519" placeholder="500" rows={2} cols={5} maxLength={500} form="fpf-add-to-cart-form"></textarea></span></p></div>
+                                    )}
                                     <div className="fpf-totals">
                                         <dl id="fpf_totals"></dl>
                                     </div>
