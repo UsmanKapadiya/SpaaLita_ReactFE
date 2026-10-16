@@ -1,0 +1,109 @@
+/* "Categories" sidebar of the Shop and Gift Card pages.
+   The heading uses the theme's .bapf_head h3 style (title with a rule below). */
+
+.catalog-categories .bapf_head h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.catalog-categories__list,
+.catalog-categories__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.catalog-categories__children {
+  padding-left: 15px;
+}
+
+.catalog-categories__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.catalog-categories__link,
+.catalog-categories__link:hover,
+.catalog-categories__link:focus {
+  display: inline-block;
+  padding: 5px 0;
+  color: rgb(34, 34, 34);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.catalog-categories__link {
+  text-decoration: none;
+}
+
+.catalog-categories__children .catalog-categories__link {
+  color: rgb(64, 64, 64);
+  font-size: 15px;
+}
+
+/* The theme font has no bold weight, so the selection is underlined */
+.catalog-categories__link.is-active,
+.catalog-categories__children .catalog-categories__link.is-active {
+  color: #000;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Arrow buttons: override the theme's filled button style */
+.catalog-categories button.catalog-categories__expand,
+.catalog-categories button.catalog-categories__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: none;
+  border: 0;
+  color: rgb(34, 34, 34);
+  cursor: pointer;
+}
+
+.catalog-categories button.catalog-categories__expand:focus-visible,
+.catalog-categories button.catalog-categories__toggle:focus-visible,
+.catalog-categories__link:focus-visible {
+  box-shadow: 0 0 0 2px rgb(170, 188, 191);
+  border-radius: 2px;
+}
+
+.catalog-categories__expand svg,
+.catalog-categories__toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.catalog-categories__expand[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+
+.catalog-categories button.catalog-categories__toggle {
+  display: none;
+}
+
+/* Small screens: the sidebar sits above the products, collapsed by default */
+@media (max-width: 767px) {
+  .catalog-categories {
+    margin-bottom: 1.5rem;
+  }
+
+  .catalog-categories button.catalog-categories__toggle {
+    display: inline-flex;
+  }
+
+  .catalog-categories__toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+
+  .catalog-categories__body {
+    display: none;
+  }
+
+  .catalog-categories__body.is-open {
+    display: block;
+  }
+}

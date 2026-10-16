@@ -24,19 +24,39 @@ const withImageUrlsData = (response: ApiResponse): ApiResponse => {
   return { ...response, data };
 };
 
-const catalogueUrl = (base: string, page: number, itemPerPage: number, sorting?: string) => {
+const catalogueUrl = (base: string, page: number, itemPerPage: number, sorting?: string, category?: string) => {
   let url = `${base}?page=${page}&limit=${itemPerPage}`;
   if (sorting) url += `&sort=${encodeURIComponent(SORT_PARAMS[sorting] || sorting)}`;
+  // Category id: items in that category or any of its sub-categories
+  if (category) url += `&category=${encodeURIComponent(category)}`;
   return url;
 };
 
+/** Category in the shop sidebar: `count` items are listed when it is selected */
+export interface CatalogCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  count: number;
+  children: CatalogCategory[];
+}
+
 // Gift cards
 
-export const getAllGiftCard = async (page: number, itemPerPage: number, sorting?: string) => {
+export const getAllGiftCard = async (page: number, itemPerPage: number, sorting?: string, category?: string) => {
   try {
-    return withImageUrlsData(await requests.get(catalogueUrl(GIFTCARD_API_BASE, page, itemPerPage, sorting)));
+    return withImageUrlsData(await requests.get(catalogueUrl(GIFTCARD_API_BASE, page, itemPerPage, sorting, category)));
   } catch (error) {
     return toErrorResult(error, 'Failed to fetch gift cards');
+  }
+};
+
+/** Categories that contain gift cards (sidebar of the Gift Card page) */
+export const getGiftCardCategories = async (): Promise<ApiResponse<CatalogCategory[]>> => {
+  try {
+    return await requests.get(`${GIFTCARD_API_BASE}/categories`);
+  } catch (error) {
+    return toErrorResult(error, 'Failed to fetch gift card categories');
   }
 };
 
@@ -58,11 +78,20 @@ export const getGiftCardRelatedProducts = async (id: string) => {
 
 // Products
 
-export const getAllProducts = async (page: number, itemPerPage: number, sorting?: string) => {
+export const getAllProducts = async (page: number, itemPerPage: number, sorting?: string, category?: string) => {
   try {
-    return withImageUrlsData(await requests.get(catalogueUrl(PRODUCT_API_BASE, page, itemPerPage, sorting)));
+    return withImageUrlsData(await requests.get(catalogueUrl(PRODUCT_API_BASE, page, itemPerPage, sorting, category)));
   } catch (error) {
     return toErrorResult(error, 'Failed to fetch products');
+  }
+};
+
+/** Categories that contain products (sidebar of the Shop page) */
+export const getProductCategories = async (): Promise<ApiResponse<CatalogCategory[]>> => {
+  try {
+    return await requests.get(`${PRODUCT_API_BASE}/categories`);
+  } catch (error) {
+    return toErrorResult(error, 'Failed to fetch product categories');
   }
 };
 

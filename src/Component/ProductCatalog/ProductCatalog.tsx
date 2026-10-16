@@ -1,13 +1,15 @@
 import type { ChangeEvent, FC, MouseEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/cartSlice';
 import type { ApiResponse } from '../../Services/api';
+import type { CatalogCategory } from '../../Services/ProductRelatedServices';
 import { sortProducts, type SortOption } from '../../utils/sortProducts';
 import { CART_MESSAGE_TIMEOUT, PRODUCT_SORT_OPTIONS } from '../../utils/constants';
 import { getProductPricing } from '../../utils/productPricing';
 import AddToCartMessage from '../AddToCartMessage/AddToCartMessage';
+import CategorySidebar, { CATEGORY_PARAM } from '../CategorySidebar/CategorySidebar';
 import Pagination from '../Pagination/Pagination';
 
 /** Which listing a product was opened from; ProductDetails uses it to pick the API */
@@ -99,39 +101,93 @@ const CatalogItemCard: FC<CatalogItemCardProps> = ({ item, allProducts, source, 
 
 interface ProductCatalogProps {
     source: ProductSource;
-    fetchItems: (page: number, itemPerPage: number, sortBy: string) => Promise<ApiResponse>;
+    fetchItems: (page: number, itemPerPage: number, sortBy: string, category?: string) => Promise<ApiResponse>;
+    /** Categories shown in the sidebar (those that contain items of this listing) */
+    fetchCategories: () => Promise<ApiResponse<CatalogCategory[]>>;
+    /** Sidebar entry that shows every item, e.g. "All Products" */
+    allCategoriesLabel: string;
     itemPerPage: number;
     fallbackImage: string;
 }
 
-/** Paged, sortable product grid shared by the Shop and Gift Card pages */
-const ProductCatalog: FC<ProductCatalogProps> = ({ source, fetchItems, itemPerPage, fallbackImage }) => {
+interface CatalogPagination {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+}
+
+/** WooCommerce's result count text, e.g. "Showing 1–15 of 78 results" */
+const resultCountText = ({ total, page, limit }: CatalogPagination): string => {
+    if (total === 1) return 'Showing the single result';
+    if (total <= limit) return `Showing all ${total} results`;
+
+    const first = (page - 1) * limit + 1;
+    const last = Math.min(total, page * limit);
+    return `Showing ${first}–${last} of ${total} results`;
+};
+
+/** Paged, sortable product grid with a category sidebar, shared by the Shop and Gift Card pages */
+const ProductCatalog: FC<ProductCatalogProps> = ({
+    source,
+    fetchItems,
+    fetchCategories,
+    allCategoriesLabel,
+    itemPerPage,
+    fallbackImage,
+}) => {
+    const [searchParams] = useSearchParams();
+    // Selected category id from the URL (?category=...), null for all items
+    const category = searchParams.get(CATEGORY_PARAM) || null;
+
     const [items, setItems] = useState<CatalogItem[]>([]);
     const [sortBy, setSortBy] = useState<SortOption>('menu_order');
     const [addedItem, setAddedItem] = useState<CatalogItem | null>(null);
     const [showMessage, setShowMessage] = useState(false);
-    const [page, setPage] = useState(1);
-    const [pagination, setPagination] = useState({
+    const [loaded, setLoaded] = useState(false);
+    const [loadError, setLoadError] = useState('');
+    // The page number belongs to one category: choosing another starts again at page 1
+    const [paging, setPaging] = useState({ category, page: 1 });
+    const page = paging.category === category ? paging.page : 1;
+    const setPage = (nextPage: number) => setPaging({ category, page: nextPage });
+    const [pagination, setPagination] = useState<CatalogPagination>({
         total: 0,
         page: 1,
-        limit: 9,
+        limit: itemPerPage,
         pages: 1
     });
 
     useEffect(() => {
+        // Ignore responses that arrive after a newer request (e.g. quick category clicks)
+        let ignore = false;
+
         const loadItems = async () => {
             try {
-                const response = await fetchItems(page, itemPerPage, sortBy);
-                if (!response.success || !response.data?.length) return;
+                const response = await fetchItems(page, itemPerPage, sortBy, category ?? undefined);
+                if (ignore) return;
 
-                setItems(response.data);
-                if (response.pagination) setPagination(response.pagination);
+                if (!response.success) {
+                    setItems([]);
+                    setPagination({ total: 0, page: 1, limit: itemPerPage, pages: 0 });
+                    setLoadError(response.message || 'Failed to load products');
+                    return;
+                }
+
+                setItems(response.data ?? []);
+                setPagination(response.pagination ?? { total: response.data?.length ?? 0, page, limit: itemPerPage, pages: 1 });
+                setLoadError('');
             } catch (err) {
                 console.error(err);
+            } finally {
+                if (!ignore) setLoaded(true);
             }
         };
         loadItems();
-    }, [fetchItems, page, itemPerPage, sortBy]);
+
+        return () => {
+            ignore = true;
+        };
+    }, [fetchItems, page, itemPerPage, sortBy, category]);
 
     const availableItems = useMemo(() => {
         const available = items.filter(item => item.status === 'active');
@@ -153,9 +209,11 @@ const ProductCatalog: FC<ProductCatalogProps> = ({ source, fetchItems, itemPerPa
         <div className="container my-5">
             <div className="row">
                 <div className="col-md-3">
-                    <div>
-                        <div className="berocket_single_filter_widget berocket_single_filter_widget_26 bapf_wid_  bapf_mt_none" data-wid="" data-id="26"></div>
-                    </div>
+                    <CategorySidebar
+                        fetchCategories={fetchCategories}
+                        selectedId={category}
+                        allLabel={allCategoriesLabel}
+                    />
                 </div>
                 <div className="col-md-9">
                     <div className="shop">
@@ -164,25 +222,35 @@ const ProductCatalog: FC<ProductCatalogProps> = ({ source, fetchItems, itemPerPa
                             <AddToCartMessage itemTitle={addedItem.productName} />
                         )}
 
-                        <p className="woocommerce-result-count">
-                            Showing all {availableItems.length} results
-                        </p>
+                        {loaded && pagination.total > 0 && (
+                            <>
+                                <p className="woocommerce-result-count">
+                                    {resultCountText(pagination)}
+                                </p>
 
-                        <form className="woocommerce-ordering" method="get">
-                            <span className="pl-2">Sort By:</span>
-                            <select
-                                name="orderby"
-                                className="orderby"
-                                value={sortBy}
-                                onChange={handleSortChange}
-                            >
-                                {PRODUCT_SORT_OPTIONS.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </form>
+                                <form className="woocommerce-ordering" method="get" onSubmit={e => e.preventDefault()}>
+                                    <span className="pl-2">Sort By:</span>
+                                    <select
+                                        name="orderby"
+                                        className="orderby"
+                                        value={sortBy}
+                                        onChange={handleSortChange}
+                                    >
+                                        {PRODUCT_SORT_OPTIONS.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </form>
+                            </>
+                        )}
+
+                        {loaded && pagination.total === 0 && (
+                            <p className="woocommerce-info" role="status">
+                                {loadError || 'No products were found matching your selection.'}
+                            </p>
+                        )}
 
                         <div className="clear"></div>
 
