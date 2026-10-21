@@ -19,7 +19,11 @@ export const CONTACT_INFO = {
     PHONE: '(250) 478-2252',
 } as const;
 
-export const GOOGLE_MAPS_EMBED = `https://www.google.com/maps/embed/v1/place?key=AIzaSyDv4daZyOfRCdRf1YtyD6hUHNe5Aeep-BM&q=${CONTACT_INFO.ADDRESS}`;
+// Tidio live chat public key (Tidio panel > Settings > Developer).
+// VITE_TIDIO_PUBLIC_KEY overrides it; set it empty to turn the chat off.
+export const TIDIO_PUBLIC_KEY: string = import.meta.env.VITE_TIDIO_PUBLIC_KEY ?? 'cneaapzgdmlmbfrvw53tbevuh2bp7ce8';
+
+export const GOOGLE_MAPS_EMBED =`https://www.google.com/maps/embed/v1/place?key=AIzaSyDv4daZyOfRCdRf1YtyD6hUHNe5Aeep-BM&q=${CONTACT_INFO.ADDRESS}`;
 
 // Fresha online booking
 export const FRESHA_BOOK_NOW_URL = 'https://www.fresha.com/book-now/spa-alita-v6pl5cct/services?lid=1090026&pId=1033567';

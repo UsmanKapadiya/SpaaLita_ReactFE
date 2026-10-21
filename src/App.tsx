@@ -22,6 +22,7 @@ import ProtectedRoute from './Component/ProtectedRoute/ProtectedRoute';
 import OrderReceived from './Pages/CartAndCheckout/OrderReceived';
 import ResetPassword from './Pages/MyAccount/ResetPassword';
 import NotFound from './Pages/NotFound/NotFound';
+import TidioChat from './Component/TidioChat/TidioChat';
 
 const App: FC = () => {
   return (
@@ -74,6 +75,7 @@ const App: FC = () => {
         </main>
       </div>
       <ToastContainer />
+      <TidioChat />
     </Router>
   );
 };
