@@ -5,7 +5,7 @@
  * VITE_API_URL      - optional: host that serves uploaded files (/uploads/...).
  *                     Defaults to VITE_API_BASE_URL without the trailing /api.
  */
-export const API_BASE_URL: string = 'http://backend.spaalita.intellimanagement.com/';
+export const API_BASE_URL: string = 'https://backend.spaalita.intellimanagement.com/api/';
 
 export const API_ORIGIN: string = (
     import.meta.env.VITE_API_URL || API_BASE_URL.replace(/\/api\/?$/, '')
