@@ -26,3 +26,11 @@ h6 {
 .addToCartButton:hover {
   text-decoration: underline;
 }
+/* reCAPTCHA v3 badge: keep it fully visible, inset from the screen edge */
+.grecaptcha-badge {
+    right: 16px !important;
+    bottom: 16px !important;
+    width: 256px !important;
+    z-index: 1000;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25) !important;
+}

@@ -1,13 +1,26 @@
 import type { ChangeEvent, FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { contactSubmit } from '../../Services/ContactServices';
 import { CONTACT_INFO } from '../../utils/constants';
+
+declare global {
+    interface Window {
+        grecaptcha?: {
+            ready: (callback: () => void) => void;
+            execute: (siteKey: string, options: { action: string }) => Promise<string>;
+        };
+    }
+}
 
 interface ContactSectionProps {
     topPadding: string;
     normalFont: boolean;
 }
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const RECAPTCHA_SCRIPT_ID = 'google-recaptcha-v3-script';
+const RECAPTCHA_ACTION = 'contact_submit';
 
 const EMPTY_FORM = {
     name: '',
@@ -20,6 +33,50 @@ const EMPTY_FORM = {
 
 const ContactSection = ({ topPadding, normalFont }: ContactSectionProps) => {
     const [formData, setFormData] = useState(EMPTY_FORM);
+    const [recaptchaError, setRecaptchaError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!RECAPTCHA_SITE_KEY) {
+            setRecaptchaError('reCAPTCHA is not configured.');
+            return;
+        }
+
+        const handleScriptError = () => {
+            setRecaptchaError('Unable to load reCAPTCHA. Please try again later.');
+        };
+
+        if (!window.grecaptcha && !document.getElementById(RECAPTCHA_SCRIPT_ID)) {
+            const script = document.createElement('script');
+            script.id = RECAPTCHA_SCRIPT_ID;
+            script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+            script.async = true;
+            script.defer = true;
+            script.addEventListener('error', handleScriptError);
+            document.head.appendChild(script);
+        }
+
+        return () => {
+            document.getElementById(RECAPTCHA_SCRIPT_ID)?.removeEventListener('error', handleScriptError);
+        };
+    }, []);
+
+    const getRecaptchaToken = () =>
+        new Promise<string>((resolve, reject) => {
+            const grecaptcha = window.grecaptcha;
+            if (!RECAPTCHA_SITE_KEY || !grecaptcha) {
+                reject(new Error('reCAPTCHA is not ready'));
+                return;
+            }
+
+            grecaptcha.ready(() => {
+                try {
+                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION }).then(resolve, reject);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -31,24 +88,41 @@ const ContactSection = ({ topPadding, normalFont }: ContactSectionProps) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (submitting) return;
+        setSubmitting(true);
+
         try {
-            const response = await contactSubmit(formData);
+            let token: string;
+            try {
+                token = await getRecaptchaToken();
+                setRecaptchaError('');
+            } catch {
+                const message = 'reCAPTCHA verification failed. Please try again.';
+                setRecaptchaError(message);
+                toast.error(message);
+                return;
+            }
+
+            const response = await contactSubmit({ ...formData, 'g-recaptcha-response': token });
 
             if (response?.success) {
                 toast.success(response?.message);
                 setFormData(EMPTY_FORM);
             } else {
-                toast.error(response?.message || "Something went wrong");
+                toast.error(response?.message || 'Something went wrong');
             }
         } catch (error: any) {
             const serverMessage =
                 error?.response?.data?.message ||
                 error?.response?.data?.error ||
-                "Error submitting contact form";
+                'Error submitting contact form';
 
             toast.error(serverMessage);
+        } finally {
+            setSubmitting(false);
         }
     };
+
 
     return (
         <div className="container my-5">
@@ -166,7 +240,16 @@ const ContactSection = ({ topPadding, normalFont }: ContactSectionProps) => {
                             </div>
                             <div className="row">
                                 <div className="col-12">
-                                    <button type="submit" className="black-button w-100">
+                                    {recaptchaError && (
+                                        <div className="text-danger mb-3" role="alert">
+                                            {recaptchaError}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-12">
+                                    <button type="submit" className="black-button w-100" disabled={submitting}>
                                         Submit
                                     </button>
                                 </div>
