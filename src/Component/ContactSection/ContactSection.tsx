@@ -54,14 +54,17 @@ const ContactSection = ({ topPadding, normalFont }: ContactSectionProps) => {
         <div className="container my-5">
             <div className="row">
                 <div className="col-md-6 d-flex align-items-center justify-content-center">
-                    <div className={`text-center ${topPadding}`}>
+                    <div
+                        className={`text-center ${topPadding}`}
+                        style={{ fontFamily: 'Avenir-LT,Arial,Helvetica,sans-serif' }}
+                    >
                         <h1 className="text-uppercase">Contact US</h1>
                         <h6 className="mt-4">{CONTACT_INFO.ADDRESS}</h6>
                         <h5 className="my-4">{CONTACT_INFO.EMAIL}</h5>
                         {normalFont ? (
                             <h6 className="">{CONTACT_INFO.PHONE}</h6>
                         ) : (
-                            <h3 className="font-weight-bold">{CONTACT_INFO.PHONE}</h3>
+                            <h3 style={{fontWeight:480}}>{CONTACT_INFO.PHONE}</h3>
                         )}
                     </div>
                 </div>
