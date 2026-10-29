@@ -1,42 +1,19 @@
-import type { FC, FormEvent, ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { FC, FormEvent, ChangeEvent } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Elements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
-import { userLogin, orderPlaced } from '../../Services/UserServices';
+import { userLogin } from '../../Services/UserServices';
 import './Cart.css';
 import { applyCoupon } from '../../Services/ProductRelatedServices';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/authSlice';
 import { toast } from 'react-toastify';
-import { applyCouponToCart, clearCart, removeCoupon, type CartItem } from '../../store/cartSlice';
+import { applyCouponToCart, removeCoupon, type CartItem } from '../../store/cartSlice';
 import { buildCouponRequest, toAppliedCoupon } from '../../utils/coupon';
-
-interface BillingDetails {
-    firstName: string;
-    lastName: string;
-    address1: string;
-    address2: string;
-    country: string;
-    state: string;
-    city: string;
-    postcode: string;
-    phone: string;
-    email: string;
-}
-
-interface ShippingDetails {
-    firstName: string;
-    lastName: string;
-    address1: string;
-    address2: string;
-    state: string;
-    city: string;
-    country: string;
-    postcode: string;
-    giftCard: string;
-}
+import { stripePromise, type PaymentMethod } from '../../utils/payment';
+import { cartFingerprint, pendingKlarnaCheckout, type BillingDetails, type ShippingDetails } from './checkoutData';
+import { CardPaymentForm, KlarnaPaymentForm, type SubmitPayment } from './PaymentForms';
 
 interface LoginData {
     username: string;
@@ -91,178 +68,6 @@ const emptyShipping: ShippingDetails = {
 };
 
 
-type PaymentMethod = 'stripe' | 'stripe_klarna';
-
-// Must belong to the same Stripe account as STRIPE_SECRET_KEY in the backend .env
-const stripePromise = loadStripe(
-    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
-    'pk_test_51P3EWFSBmT8I69xuNp894I2VxHMSiezZJDzTmNLkoUB6mwEAUho9V1bRLo6hnwudpY98J5fQjRwxvqfL3OjVxElr00Kb3IzDhr'
-);
-
-const OBJECT_ID = /^[0-9a-f]{24}$/i;
-
-// Orders store addresses as {name, address, zip, email, phone, ...}. The form keys
-// (address1, postcode, giftCard) are sent as well: the backend uses them to save the
-// addresses on the account it creates for a guest who ticks "Create an account".
-const toOrderAddress = (address: Partial<BillingDetails & ShippingDetails>, contact: BillingDetails) => ({
-    ...address,
-    name: `${address.firstName || ''} ${address.lastName || ''}`.trim(),
-    address: [address.address1, address.address2].filter(Boolean).join(', '),
-    zip: address.postcode || '',
-    email: address.email || contact.email || '',
-    phone: address.phone || contact.phone || '',
-});
-
-const StripeCheckoutForm: FC<{
-    subtotal: number;
-    items: CartItem[];
-    shippingAddress: ShippingDetails;
-    billingAddress: BillingDetails;
-    isUserlogin: boolean;
-    createAccount: boolean;
-    newsletter: boolean;
-}> = ({ subtotal, items, shippingAddress, billingAddress, isUserlogin, createAccount, newsletter }) => {
-    const dispatch = useAppDispatch();
-    const stripe = useStripe();
-    const elements = useElements();
-    const navigate = useNavigate();
-    const { discountAmount = 0, appliedCoupon, } = useAppSelector(state => state.cart);
-
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
-    // Order created by a previous attempt whose payment failed: retrying the same
-    // checkout pays that order again instead of creating a duplicate
-    const [pendingOrder, setPendingOrder] = useState<{ key: string; order: any; clientSecret: string } | null>(null);
-
-    const handleSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-
-        if (!stripe || !elements) return;
-
-        // The button does not submit the checkout form, so run its required-field checks here
-        const form = e.currentTarget.form;
-        if (form && !form.reportValidity()) return;
-
-        const card = elements.getElement(CardElement);
-        if (!card) return;
-
-        setProcessing(true);
-        setError(null);
-
-        try {
-            const payload: any = {
-                items: items.map(item => ({
-                    // links the order line to the product record (only real ids are sent)
-                    ...(OBJECT_ID.test(item.id) && { productId: item.id }),
-                    name: item.name,
-                    price: item.price,
-                    qty: item.qty,
-                    image: item.image,
-                })),
-                // Before discount: the backend subtracts coupon.discountAmount itself
-                totalAmount: subtotal,
-                shippingAddress: toOrderAddress(shippingAddress, billingAddress),
-                billingAddress: toOrderAddress(billingAddress, billingAddress),
-            };
-
-            // "Yes, I'm ok with ... newsletter" checkbox: subscribes the customer's email
-            if (newsletter) {
-                payload.newsletter = true;
-            }
-
-            if (appliedCoupon) {
-                payload.coupon = {
-                    code: appliedCoupon,
-                    discountAmount: discountAmount,
-                    freeShippingAmount: 0
-                };
-            }
-
-            if (!isUserlogin) {
-                payload.guestInfo = {
-                    name: `${billingAddress.firstName} ${billingAddress.lastName}`.trim(),
-                    email: billingAddress.email,
-                    phone: billingAddress.phone
-                };
-
-                if (createAccount) {
-                    payload.createAccount = true;
-                }
-            }
-
-            const key = JSON.stringify(payload);
-            let current = pendingOrder?.key === key ? pendingOrder : null;
-
-            if (!current) {
-                const orderResponse = await orderPlaced(payload);
-
-                if (!orderResponse?.success || !orderResponse.clientSecret) {
-                    throw new Error(orderResponse?.message || "Order creation failed");
-                }
-
-                current = { key, order: orderResponse.data, clientSecret: orderResponse.clientSecret };
-                setPendingOrder(current);
-            }
-
-            // Charge the card with the PaymentIntent the backend created for this order
-            const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(current.clientSecret, {
-                payment_method: {
-                    card,
-                    billing_details: {
-                        name: `${billingAddress.firstName} ${billingAddress.lastName}`.trim(),
-                        email: billingAddress.email,
-                        phone: billingAddress.phone,
-                    },
-                },
-            });
-
-            if (paymentError) {
-                throw new Error(paymentError.message || "Payment failed");
-            }
-
-            if (paymentIntent?.status !== 'succeeded') {
-                throw new Error(`Payment ${paymentIntent?.status || 'failed'}`);
-            }
-
-            toast.success("Order placed successfully 🎉");
-            setSuccess(true);
-            setPendingOrder(null);
-
-            dispatch(clearCart());
-            dispatch(removeCoupon());
-
-            navigate(`/checkout/order-received/${current.order._id}`, {
-                state: current.order
-            });
-
-        } catch (err: any) {
-            setError(err.message);
-            toast.error(err.message || "Failed to place order");
-        } finally {
-            setProcessing(false);
-        }
-    };
-
-
-    return (
-        <div style={{ marginTop: 16 }}>
-            <CardElement options={{ hidePostalCode: true }} />
-            <button
-                type="button"
-                disabled={!stripe || processing || success}
-                className="button alt shopButton"
-                style={{ marginTop: 16 }}
-                onClick={handleSubmit}
-            >
-                {processing ? 'Processing...' : success ? 'Payment Successful' : 'Pay Now'}
-            </button>
-            {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-            {success && <div style={{ color: 'green', marginTop: 8 }}>Payment successful!</div>}
-        </div>
-    );
-};
-
 const Checkout: FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -271,32 +76,49 @@ const Checkout: FC = () => {
     const isUserLogin = useAppSelector(state => state.auth.isLoggedIn);
     const user = useAppSelector((state) => state.auth.user);
     const { discountAmount = 0, appliedCoupon } = useAppSelector(state => state.cart);
+    // A Klarna payment that was cancelled or declined (same tab, same cart): the
+    // checkout is filled in again, and retrying with Klarna pays the same order
+    const [resumedKlarna] = useState(() => {
+        const pending = pendingKlarnaCheckout.load();
+        return pending && pending.cart === cartFingerprint(cartItems) ? pending : null;
+    });
     const [showLogin, setShowLogin] = useState<boolean>(false);
     const [showCoupon, setShowCoupon] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string>('');
     const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
-    const [createAccount, setCreateAccount] = useState<boolean>(false);
+    const [createAccount, setCreateAccount] = useState<boolean>(resumedKlarna?.createAccount ?? false);
     const [copyBillingToShipping, setCopyBillingToShipping] = useState<boolean>(false);
-    const [newsletter, setNewsletter] = useState<boolean>(false);
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+    const [newsletter, setNewsletter] = useState<boolean>(resumedKlarna?.newsletter ?? false);
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(resumedKlarna ? 'klarna' : 'card');
     const [rememberMe, setRememberMe] = useState<boolean>(false);
     const [loginData, setLoginData] = useState<LoginData>({
         username: '',
         password: ''
     });
-    const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBilling);
-    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(emptyShipping);
+    const [billingDetails, setBillingDetails] = useState<BillingDetails>(resumedKlarna?.billingAddress ?? emptyBilling);
+    const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(resumedKlarna?.shippingAddress ?? emptyShipping);
+    // Submit function of the payment form shown (card or Klarna), used by "Place order"
+    const submitPaymentRef = useRef<SubmitPayment | null>(null);
 
     const cartTotal = useMemo((): number => {
         return cartItems.reduce((total, item) => total + item.price * item.qty, 0);
     }, [cartItems]);
 
     useEffect(() => {
-        if (user) {
+        // keeps the details of a resumed Klarna checkout
+        if (user && !resumedKlarna) {
             setBillingDetails({ ...emptyBilling, ...user.billing });
             setShippingDetails({ ...emptyShipping, ...user.shipping });
         }
-    }, [user]);
+    }, [user, resumedKlarna]);
+
+    useEffect(() => {
+        // The applied coupon is not kept across page loads (Klarna's redirect reloads the site)
+        if (resumedKlarna?.coupon && !appliedCoupon) {
+            dispatch(applyCouponToCart(resumedKlarna.coupon));
+        }
+        // only when the checkout opens
+    }, []);
 
     const handleBillingChange = useCallback((field: keyof BillingDetails, value: string): void => {
         setBillingDetails(prev => ({ ...prev, [field]: value }));
@@ -325,11 +147,21 @@ const Checkout: FC = () => {
 
     const handlePlaceOrder = useCallback((e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        // Stripe payment handled in StripeCheckoutForm
-        if (paymentMethod !== 'stripe') {
-            toast.success('Order placed successfully!')
-        }
-    }, [paymentMethod]);
+        // Pays with the selected payment method, like the button in its payment box
+        submitPaymentRef.current?.(e.currentTarget);
+    }, []);
+
+    // Shared by the card and Klarna payment forms
+    const paymentFormProps = {
+        subtotal: cartTotal,
+        items: cartItems,
+        shippingAddress: shippingDetails,
+        billingAddress: billingDetails,
+        isUserlogin: isUserLogin,
+        createAccount,
+        newsletter,
+        submitRef: submitPaymentRef,
+    };
 
     const handleApplyCoupon = useCallback(async () => {
         if (!couponCode.trim()) {
@@ -912,24 +744,16 @@ const Checkout: FC = () => {
                                                         type="radio"
                                                         className="input-radio"
                                                         name="payment_method"
-                                                        value="stripe"
-                                                        checked={paymentMethod === 'stripe'}
+                                                        value="card"
+                                                        checked={paymentMethod === 'card'}
                                                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentMethod(e.target.value as PaymentMethod)}
                                                     />
                                                     <label htmlFor="payment_method_stripe">Credit / Debit Card</label>
-                                                    {paymentMethod === 'stripe' && (
+                                                    {paymentMethod === 'card' && (
                                                         <div className="payment_box payment_method_stripe">
                                                             <p>Secure payment via Stripe</p>
                                                             <Elements stripe={stripePromise}>
-                                                                <StripeCheckoutForm
-                                                                    subtotal={cartTotal}
-                                                                    items={cartItems}
-                                                                    shippingAddress={shippingDetails}
-                                                                    billingAddress={billingDetails}
-                                                                    isUserlogin={isUserLogin}
-                                                                    createAccount={createAccount}
-                                                                    newsletter={newsletter}
-                                                                />
+                                                                <CardPaymentForm {...paymentFormProps} />
                                                             </Elements>
                                                         </div>
                                                     )}
@@ -940,14 +764,17 @@ const Checkout: FC = () => {
                                                         type="radio"
                                                         className="input-radio"
                                                         name="payment_method"
-                                                        value="stripe_klarna"
-                                                        checked={paymentMethod === 'stripe_klarna'}
+                                                        value="klarna"
+                                                        checked={paymentMethod === 'klarna'}
                                                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentMethod(e.target.value as PaymentMethod)}
                                                     />
                                                     <label htmlFor="payment_method_stripe_klarna">Klarna</label>
-                                                    {paymentMethod === 'stripe_klarna' && (
+                                                    {paymentMethod === 'klarna' && (
                                                         <div className="payment_box payment_method_stripe_klarna">
-                                                            <p>Secure payment via Klarna</p>
+                                                            <p>Pay in full or over time with Klarna. You will be redirected to Klarna to complete your purchase securely.</p>
+                                                            <Elements stripe={stripePromise}>
+                                                                <KlarnaPaymentForm {...paymentFormProps} />
+                                                            </Elements>
                                                         </div>
                                                     )}
                                                 </li>

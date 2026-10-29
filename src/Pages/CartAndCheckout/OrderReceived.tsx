@@ -1,16 +1,140 @@
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from 'react-toastify';
 import PhoneEnabledOutlinedIcon from '@mui/icons-material/PhoneEnabledOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import LoadingSpinner from '../../Component/LoadingSpinner/LoadingSpinner';
+import { useAppDispatch } from '../../store/hooks';
+import { clearCart, removeCoupon } from '../../store/cartSlice';
+import { paymentMethodLabel, stripePromise } from '../../utils/payment';
+import { pendingKlarnaCheckout } from './checkoutData';
 
 import './OrderReceived.css'
 
-const OrderReceived = () => {
+// PaymentIntent statuses of a payment that went through (or is being processed)
+const PAID_STATUSES = ['succeeded', 'processing', 'requires_capture'];
+
+// Messages for Klarna's failure codes (PaymentIntent last_payment_error.code)
+const KLARNA_FAILURES: Record<string, string> = {
+    payment_method_customer_decline: 'The Klarna payment was cancelled.',
+    payment_method_provider_decline: 'Klarna declined the payment. Please choose another payment method.',
+    payment_intent_payment_attempt_expired: 'The Klarna session expired before the payment was completed.',
+};
+
+const KLARNA_NOT_COMPLETED = 'Your Klarna payment was not completed. Please try again or choose another payment method.';
+
+/**
+ * Klarna sends the customer back to this page with ?payment_intent_client_secret=...
+ * The payment is checked with Stripe: when it went through, the cart is emptied
+ * and the order shown; otherwise the customer goes back to the (filled-in)
+ * checkout to try again.
+ */
+const useKlarnaReturn = (orderId?: string) => {
+    const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const clientSecret = new URLSearchParams(location.search).get('payment_intent_client_secret');
+    // Paid, but this tab does not have the order's details
+    const [confirmed, setConfirmed] = useState(false);
+
+    useEffect(() => {
+        if (!clientSecret || location.state) return;
+
+        let cancelled = false;
+
+        const verify = async () => {
+            let status: string | undefined;
+            let failureCode: string | undefined;
+
+            try {
+                const stripe = await stripePromise;
+                const result = await stripe?.retrievePaymentIntent(clientSecret);
+                status = result?.paymentIntent?.status;
+                failureCode = result?.paymentIntent?.last_payment_error?.code;
+            } catch (error) {
+                console.error('Could not check the Klarna payment', error);
+            }
+
+            if (cancelled) return;
+
+            if (status && PAID_STATUSES.includes(status)) {
+                const pending = pendingKlarnaCheckout.load();
+
+                pendingKlarnaCheckout.clear();
+                dispatch(clearCart());
+                dispatch(removeCoupon());
+                toast.success("Order placed successfully 🎉");
+
+                // Shows the order, and removes the payment details from the address bar
+                if (pending && orderId && pending.order?._id === orderId) {
+                    navigate(location.pathname, { replace: true, state: pending.order });
+                } else {
+                    setConfirmed(true);
+                    navigate(location.pathname, { replace: true });
+                }
+
+                return;
+            }
+
+            toast.error(status
+                ? (failureCode && KLARNA_FAILURES[failureCode]) || KLARNA_NOT_COMPLETED
+                : 'We could not confirm your Klarna payment. If you completed it, please contact us before paying again.');
+            navigate('/checkout', { replace: true });
+        };
+
+        verify();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [clientSecret, location.state, location.pathname, orderId, dispatch, navigate]);
+
+    return { checking: Boolean(clientSecret) && !location.state && !confirmed, confirmed };
+};
+
+const ReceivedNotice: FC = () => {
+    const navigate = useNavigate();
+
+    return (
+        <div
+            className="text-center mb-3 p-3 rounded"
+            style={{ backgroundColor: "#e6f9f0" }}
+        >
+            <h6
+                className="text-success success-order"
+            >
+                Thank you. Your order has been received.
+                <span className="shopping-text"
+                    onClick={() => navigate("/shop")}
+                >
+                    Continue Shopping
+                </span>
+            </h6>
+        </div>
+    );
+};
+
+const OrderReceived = () => {
     const { orderId } = useParams();
     const location = useLocation();
     const order: any = location.state;
+    const klarnaReturn = useKlarnaReturn(orderId);
 
     if (!order) {
+        if (klarnaReturn.checking) {
+            return <LoadingSpinner message="Confirming your Klarna payment..." />;
+        }
+
+        if (klarnaReturn.confirmed) {
+            return (
+                <div className="container py-5">
+                    <ReceivedNotice />
+                    <p className="text-center">Order ID: {orderId}</p>
+                </div>
+            );
+        }
+
         return (
             <div className="container py-5 text-center">
                 <h3>Order not found</h3>
@@ -25,21 +149,7 @@ const OrderReceived = () => {
     return (
         <div className="container py-5">
 
-            <div
-                className="text-center mb-3 p-3 rounded"
-                style={{ backgroundColor: "#e6f9f0" }}
-            >
-                <h6
-                    className="text-success success-order"
-                >
-                    Thank you. Your order has been received.
-                    <span className="shopping-text"
-                        onClick={() => navigate("/shop")}
-                    >
-                        Continue Shopping
-                    </span>
-                </h6>
-            </div>
+            <ReceivedNotice />
 
             {/* Order Summary */}
             <div className="p-2 mb-4" style={{ overflowX: "auto" }}>
@@ -73,7 +183,7 @@ const OrderReceived = () => {
 
                     <div className="flex-fill d-flex flex-column text-start px-3">
                         <strong>Payment Method</strong>
-                        <p className="mb-0">Credit Card / Debit Card</p>
+                        <p className="mb-0">{paymentMethodLabel(order.paymentMethod)}</p>
                     </div>
 
                 </div>

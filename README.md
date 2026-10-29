@@ -1,6 +1,6 @@
 # Spa A'lita – React frontend
 
-Customer website for Spa A'lita: services, shop and gift cards, cart and Stripe checkout, and the customer account area. Built with React 19, TypeScript, Vite, Redux Toolkit (with redux-persist), React Router 7, MUI icons and Bootstrap.
+Customer website for Spa A'lita: services, shop and gift cards, cart and Stripe checkout (card or Klarna), and the customer account area. Built with React 19, TypeScript, Vite, Redux Toolkit (with redux-persist), React Router 7, MUI icons and Bootstrap.
 
 It talks to the Laravel backend (`SpaaLita_Backend`).
 
@@ -24,7 +24,7 @@ npm run dev            # http://localhost:5173
 | ----------------------------- | ------------------------------------------------------------------------------------------- |
 | `VITE_API_BASE_URL`           | Backend API root, e.g. `http://localhost:5000/api/`                                         |
 | `VITE_API_URL`                | Optional. Host serving uploaded images; defaults to `VITE_API_BASE_URL` without `/api`      |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key, from the same Stripe account and mode as the backend's secret key  |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key, from the same Stripe account and mode as the backend's secret key (card and Klarna payments) |
 
 ## Project structure
 
@@ -37,7 +37,8 @@ src/
 │   ├── Services/         ServicesPage + ServiceDetailPage (one page for every service,
 │   │                     configured in ServicesConstants.ts)
 │   ├── Shop/, GiftCard/  Thin wrappers around Component/ProductCatalog
-│   ├── CartAndCheckout/  Cart, Stripe checkout, order received
+│   ├── CartAndCheckout/  Cart, Stripe checkout (PaymentForms: card and Klarna), order received
+│   │                     (also confirms a Klarna payment when Klarna redirects back)
 │   └── MyAccount/        Account area (behind ProtectedRoute)
 ├── Services/             API calls, one file per backend area; api.ts holds the axios instance
 ├── store/                Redux slices: cart (persisted items) and auth (persisted session)
